@@ -1,27 +1,18 @@
-%% Load the raw data from disk
-clear;
-%clc;
+function [results] = calc_bilateral_ripple_coherence(DATA_SRC, REF, EPOCH)
 
-DATA_SRC = 'raw'; % 'rips' or 'raw';
-USE_REF = 1; % 0 or 1
-EPOCH = 'run'; % 'run' or 'sleep'
-FILTER  = 0; % 0 or 1
-
-data = dset_load_ripples(EPOCH, 1);
-
-if FILTER
-    load ~/src/matlab/thesis/filtSixty.mat    
-    disp('Filtering');
-    for i = 1:numel(data)
-       for j = 1:numel(data(i).rips)
-           data(i).rips{j} = filtfilt(filt60, 1, data(i).rips{j}')';
-           data(i).raw{j} = filtfilt(filt60, 1, data(i).raw{j}')';
-       end
-    end
-    disp('Done!');
+if ~any( strcmp(DATA_SRC, {'rips', 'raw'} ) )
+    error('Invalid data src, must be "rips" or "raw"');
 end
 
+if ~any( REF == [0 1] )
+    error('Invalid ref option, must be 0 or 1');
+end
 
+if ~any( strcmp( EPOCH, {'run', 'sleep'}) )
+    error('Invalid epoch, must be run or sleep');
+end
+
+data = dset_load_ripples(EPOCH, 1);
 
 % Prepare the data for analysis
 nAnimal = numel(data);
@@ -31,8 +22,7 @@ nSample = size(data(1).window,2);
 % allocate our variables
 [ripBase, ripCont, ripShuf1]  = deal( zeros(nRipple, nSample) );
 
-
-% Create the real data set
+% Create the REAL data set
 idx = 1;
 for i = 1:nAnimal;
     n = size(data(i).(DATA_SRC){1}, 1);  % number of ripples for this animal
@@ -41,15 +31,15 @@ for i = 1:nAnimal;
     idx = idx + n; 
 end
 
-% Create within animal shuffle data
+% Create WITHIN animal SHUFFLE data
 idx = 1;
 for i = 1:nAnimal
     n = size(data(i).(DATA_SRC){1}, 1); % number of ripples for this animal
-    ripShuf1( idx : idx+n-1 , :) = data(i).(DATA_SRC){3}(randsample(n,n,1),:);
+    ripShuf1( idx : idx+n-1 , :) = data(i).(DATA_SRC){1}(randsample(n,n,1),:);
     idx = idx + n; 
 end
 
-% Create between animal shuffle data
+% Create BETWEEN animal SHUFFLE data
 ripShuf2= ripBase( randsample(nRipple, nRipple, 1), :);
 
 clearvars idx n nSampPerRipple shuffleIndex i
@@ -60,7 +50,6 @@ if matlabpool('size')<1
 else
     sprintf('Matlab pool is already open with size:%d\n', matlabpool('size'));
 end
-
 
 %winIdx = 1 : 601; 
 winIdx = 201:401;
@@ -75,8 +64,8 @@ noverlap = floor(winLen / 4);
 
 fs = data(1).fs;
 
-%coherenceArgs = {[],[],[],fs};
-coherenceArgs = {winLen, noverlap, nfft, fs};
+coherenceArgs = {[],[],[],fs};
+%coherenceArgs = {winLen, noverlap, nfft, fs};
 % compute the Frequency vector was we can't save it in a parfor loop
 %[~, F] = mscohere(ripBase(1,winIdx), ripCont(1,winIdx),[], noverlap, nfft, fs);
 
@@ -99,48 +88,17 @@ end
 dt = toc;
 fprintf('Done! That took %4.4f seconds!\n', dt);
 
-mRipCo = mean( rippleCoherence );
-mRipShCo1 = mean( shuffleCoherence1 );
-mRipShCo2 = mean( shuffleCoherence2 );
+results.rippleCoherence = rippleCoherence;
+results.shuffleCoherence{1} = shuffleCoherence1;
+results.shuffleCoherence{2} = shuffleCoherence2;
+results.F = F;
+results.shuffleType = {'within animal', 'between animals'};
 
-sRipCo = std( rippleCoherence);
-sRipShCo1 = std( shuffleCoherence1 );
-sRipShCo2 = std( shuffleCoherence2 );
+end
+
+
 
 %% - Plot the results
-
-figure('Position', [500 200 400 800], 'name', ['nfft/',num2str(nfft/noverlap)]);
-a = [ subplot(211); subplot(212)];
-p = zeros(4,1);
-l = zeros(4,1);
-
-nS = 2;
-
-[p(1), l(1)] = error_area_plot(F, mRipCo, nS * sRipCo/sqrt(nRipple) , 'Parent', a(1) );
-[p(2), l(2)] = error_area_plot(F, mRipCo, nS * sRipCo/sqrt(nRipple) , 'Parent', a(2) );
-
-[p(3), l(3)] = error_area_plot(F, mRipShCo1, nS * sRipShCo1/sqrt(nRipple) , 'Parent', a(1) );
-[p(4), l(4)] = error_area_plot(F, mRipShCo2, nS * sRipShCo2/sqrt(nRipple) , 'Parent', a(2) );
-
-% set the limits on the axes
-set(a, 'XLim', [0 350], 'YLim', [.1 .75]);
-
-% style the error patches
-set(p, 'LineStyle', 'none', 'FaceColor', [.4 .4 .4]);
-
-%style the center lines
-set(l, 'Color', 'k', 'LineWidth', 2 );
-
-
-title(sprintf('%s %s ref-%d args:%s win:%d', EPOCH, DATA_SRC, USE_REF, cell2str(coherenceArgs), numel(winIdx)) ,'Parent', a(1), 'FontSize', 14);
-
-
-% % move the non shuffle coherence plot to the top
-% uistack([e(1) p(1) ], 'top');
-% uistack([e(2) p(2) ], 'top');
-
-
-
 
 
 
