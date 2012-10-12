@@ -15,7 +15,7 @@ if ~exist(filepath, 'file')
    filepath = fullfile(dset_get_base_dir(animal), filename);
 
    if ~exist(filepath, 'file')
-       warning(strcat('Requested file does not exist:', filepath));
+       %warning(strcat('Requested file does not exist:', filepath));
        filepath = [];
    end
 end

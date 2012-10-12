@@ -16,6 +16,7 @@ function [xcIpsi xcCont] = dset_analyze_xcorr_ripple_band(dset, env)
     if nargin == 1
         [xcIpsi] = xcorr(dset.eeg(baseChan).rippleband, dset.eeg(ipsiChan).rippleband, nLags, 'coeff');
         [xcCont] = xcorr(dset.eeg(baseChan).rippleband, dset.eeg(contChan).rippleband, nLags, 'coeff');
+    
     elseif nargin==2 && env==1
         envBase = abs(hilbert(dset.eeg(baseChan).rippleband));
         envIpsi = abs(hilbert(dset.eeg(ipsiChan).rippleband));

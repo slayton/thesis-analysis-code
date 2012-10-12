@@ -7,6 +7,8 @@ eSleep = dset_list_epochs('sleep');
 
 for i = 1:size(eRun,1)
     dset = dset_load_all(eRun{i,1}, eRun{i,2}, eRun{i,3});
+    dset = dset_add_ref_to_eeg(dset);
+    
     [xcIpsi(:,i) xcCont(:,i)] =  dset_analyze_xcorr_ripple_band(dset,1);
     if ~exist('eeg_fs', 'var')
         eeg_fs = dset.eeg(1).fs;

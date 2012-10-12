@@ -1,23 +1,17 @@
-function [results] = calc_bilateral_ripple_coherence(DATA_SRC, REF, EPOCH)
+function [results] = calc_bilateral_ripple_coherence(ripples, dataSrc)
 
-if ~any( strcmp(DATA_SRC, {'rips', 'raw'} ) )
+if nargin==1
+    dataSrc = 'raw';
+end
+
+if ~any( strcmp(dataSrc, {'rips', 'raw'} ) )
     error('Invalid data src, must be "rips" or "raw"');
 end
 
-if ~any( REF == [0 1] )
-    error('Invalid ref option, must be 0 or 1');
-end
-
-if ~any( strcmp( EPOCH, {'run', 'sleep'}) )
-    error('Invalid epoch, must be run or sleep');
-end
-
-data = dset_load_ripples(EPOCH, 1);
-
 % Prepare the data for analysis
-nAnimal = numel(data);
-nRipple = sum( arrayfun(@(x) size(x.(DATA_SRC){1},1), data, 'UniformOutput', 1) );
-nSample = size(data(1).window,2);
+nAnimal = numel(ripples);
+nRipple = sum( arrayfun(@(x) size(x.(dataSrc){1},1), ripples, 'UniformOutput', 1) );
+nSample = size(ripples(1).window,2);
 
 % allocate our variables
 [ripBase, ripCont, ripShuf1]  = deal( zeros(nRipple, nSample) );
@@ -25,17 +19,17 @@ nSample = size(data(1).window,2);
 % Create the REAL data set
 idx = 1;
 for i = 1:nAnimal;
-    n = size(data(i).(DATA_SRC){1}, 1);  % number of ripples for this animal
-    ripBase( idx : idx+n - 1 , :) = data(i).(DATA_SRC){1};
-    ripCont( idx : idx+n - 1 , :) = data(i).(DATA_SRC){3};
+    n = size(ripples(i).(dataSrc){1}, 1);  % number of ripples for this animal
+    ripBase( idx : idx+n - 1 , :) = ripples(i).(dataSrc){1};
+    ripCont( idx : idx+n - 1 , :) = ripples(i).(dataSrc){3};
     idx = idx + n; 
 end
 
 % Create WITHIN animal SHUFFLE data
 idx = 1;
 for i = 1:nAnimal
-    n = size(data(i).(DATA_SRC){1}, 1); % number of ripples for this animal
-    ripShuf1( idx : idx+n-1 , :) = data(i).(DATA_SRC){1}(randsample(n,n,1),:);
+    n = size(ripples(i).(dataSrc){1}, 1); % number of ripples for this animal
+    ripShuf1( idx : idx+n-1 , :) = ripples(i).(dataSrc){1}(randsample(n,n,1),:);
     idx = idx + n; 
 end
 
@@ -62,7 +56,7 @@ winLen = floor(numel(winIdx) / 4);
 
 noverlap = floor(winLen / 4);
 
-fs = data(1).fs;
+fs = ripples(1).fs;
 
 coherenceArgs = {[],[],[],fs};
 %coherenceArgs = {winLen, noverlap, nfft, fs};

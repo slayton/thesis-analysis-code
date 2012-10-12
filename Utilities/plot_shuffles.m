@@ -48,3 +48,5 @@ for i = 1:nDist;
     line( [stat(i) stat(i)], ylim, 'color', 'r', 'linewidth', 2);
 
 end
+
+set(a,'Xlim', [-.2 .8]);

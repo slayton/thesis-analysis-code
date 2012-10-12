@@ -1,4 +1,4 @@
-function ref = dset_resample_reference(eeg, ref)
+function [ref idx] = dset_resample_reference(eeg, ref)
 
 
 
@@ -12,6 +12,9 @@ newRef = interp1(tsRef, ref.data, tsEeg);
 ref.starttime = eeg(1).starttime;
 ref.fs = eeg(1).fs;
 ref.data = newRef;
-    
+   
+badIdx = isnan(ref.data);
+
+ref.data(badIdx) = 0;
 
 end

@@ -14,8 +14,8 @@ function [pdf, tbins, spike_counts] = reconstruct(ts, te, tc, cells, varargin)
     tbins = get_tbins(ts, te, args.tau, args.percent_overlap);
     spike_counts= zeros(length(cells), length(tbins));
     
-
-    for i=1:length(cells)
+    for i=1:numel(cells)
+        
         spike_counts(i,:) = sortedhist(cells(i).(args.t_var), tbins);
     end
     

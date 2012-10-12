@@ -64,7 +64,9 @@ for j = 1:numel(tetCount)
 end
 
 chans(end+1) = dset_get_ref_channel(animal, day, epoch);
-[dset.eeg dset.ref] = dset_load_eeg(animal, day, epoch, chans);
+[dset.eeg, dset.ref] = dset_load_eeg(animal, day, epoch, chans);
+
+%dset = dset_add_ref_to_eeg(dset, 1);
 
 %old checks - but remove channels that aren't in the specified area
 areaIdx = strcmp(args.structure, {dset.eeg.area});

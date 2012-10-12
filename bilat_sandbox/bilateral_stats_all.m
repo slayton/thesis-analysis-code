@@ -10,7 +10,6 @@ clear run sleep;
 
 dset = dset_load_all(eRun{2,1}, eRun{2,2}, eRun{2,3});
 
-
 %% Compute the XCORR between the two ripple bands
 [run.ripBandXCorr sleep.ripBandXCorr] = dset_compute_bilateral_ripple_band_xcorr;
 [run.ripEventXCorr sleep.ripEventXCorr] = dset_compute_bilateral_ripple_event_xcorr;

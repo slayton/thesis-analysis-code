@@ -1,5 +1,6 @@
 function [ipsiCorr contCorr shuffCorr freq] = dset_analyze_ripple_freq_correlations(dset)
 
+    error('DEPRECATED FUNCTION');
     nShuffle = 500;
     
     baseChan = dset.channels.base;

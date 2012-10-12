@@ -36,7 +36,7 @@ end
 
 filepath = fullfile(baseDir, [animal, dayStr, '-', electrodeStr, '_params.mat']);
 if ~exist(filepath, 'file')
-    disp(strcat('Requested file does not exist:', filepath));
+    %disp(strcat('Requested file does not exist:', filepath));
 end
 
 

@@ -11,6 +11,7 @@ function [dset burstWin, peakTs] = dset_get_ripple_events(dset, varargin)
     winIdx = round( [-.2 .2] *  dset.eeg(1).fs);
     window = [winIdx(1):winIdx(2)];
     
+    
     if ~isfield(dset.eeg(1), 'rippleband')
         dset = dset_filter_eeg_ripple_band(dset);
     end
@@ -52,8 +53,12 @@ function [dset burstWin, peakTs] = dset_get_ripple_events(dset, varargin)
     
     peakTs = interp1(1:nSamp, ts, peakIdx);
     
-    dset.eeg(bc).rips = dset.eeg(bc).rippleband(ripWin);
-    dset.eeg(ic).rips = dset.eeg(ic).rippleband(ripWin);
-    dset.eeg(cc).rips = dset.eeg(cc).rippleband(ripWin);
-   
+    dset.ripples = struct();
+    dset.ripples.rips{bc} = dset.eeg(bc).rippleband(ripWin);
+    %dset.ripples.rips{ic} = dset.eeg(ic).rippleband(ripWin);
+    dset.ripples.rips{cc} = dset.eeg(cc).rippleband(ripWin);
+    dset.ripples.peakTs = peakTs;
+    
+    
+    
 end

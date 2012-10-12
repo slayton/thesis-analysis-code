@@ -1,4 +1,6 @@
-function [peakFreq] = dset_calc_event_peak_freq(data, firstTs, fs, eventWindows, varargin )
+function [peakFreq] = dset_calc_event_mean_freq(data, firstTs, fs, eventWindows, varargin )
+error('DEPRECATED FUNCTION');
+
 args = dset_get_standard_args;
 args = parseArgs(varargin, args);
 

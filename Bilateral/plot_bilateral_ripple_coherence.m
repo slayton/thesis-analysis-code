@@ -1,4 +1,8 @@
-function plot_bilateral_ripple_coherence(data, correct_baseline)
+function f = plot_bilateral_ripple_coherence(data, correct_baseline)
+
+if nargin==1
+    correct_baseline=0;
+end
 
 nShuffle = numel(data.shuffleCoherence);
 nRipple = size(data.rippleCoherence,1);
@@ -13,6 +17,7 @@ offset = 20;
 
 baseRip = 0;
 baseShf = 0;
+
 if correct_baseline == 1
    baseIdx = data.F > 270 & data.F < 500;
    baseRip = mean( meanRipCo( baseIdx ));
@@ -36,8 +41,7 @@ for i = 1:nShuffle
     title(sprintf('Bilat Rip Coherenc vs %s shuffle', data.shuffleType{i}));
     
 end
-baseRip
-baseShf
+
 
 set(p, 'FaceColor', [.7 .7 .7],'edgecolor', 'none');
 set(a, 'Xlim', [0 450], 'YLim', [-.04 .7]);
