@@ -10,30 +10,30 @@ clear run sleep;
 
 dset = dset_load_all(eRun{2,1}, eRun{2,2}, eRun{2,3});
 
-%% Compute the XCORR between the two ripple bands
-[run.ripBandXCorr sleep.ripBandXCorr] = dset_compute_bilateral_ripple_band_xcorr;
-[run.ripEventXCorr sleep.ripEventXCorr] = dset_compute_bilateral_ripple_event_xcorr;
+% %% Compute the XCORR between the two ripple bands
+% [run.ripBandXCorr sleep.ripBandXCorr] = dset_compute_bilateral_ripple_band_xcorr;
+% [run.ripEventXCorr sleep.ripEventXCorr] = dset_compute_bilateral_ripple_event_xcorr;
 
-%% Compute the CORRELATIONS between ripple FREQUENCIES
-
-for i = 1:size(eRun,1)
-    fprintf(' \n ------------ %d of %d ----------- \n', i, size(eRun,1));
-    dset = dset_load_all(eRun{i,1}, eRun{i,2}, eRun{i,3});
-    [run.ripFrSpCorrIpsi(i) run.ripFrSpCorrCont(i) run.ripFrSpCorrShuff{i} run.freqSp(i)] = dset_analyze_ripple_freq_correlations(dset);   
-    [run.ripFrMeanCorrIpsi(i) run.ripFrMeanCorrCont(i) run.ripFrMeanCorrShuff{i} run.freqMean(i)] = dset_calculate_bilateral_mean_ripple_freq_corr(dset);   
-end
+% %% Compute the CORRELATIONS between ripple FREQUENCIES
+% 
+% for i = 1:size(eRun,1)
+%     fprintf(' \n ------------ %d of %d ----------- \n', i, size(eRun,1));
+%     dset = dset_load_all(eRun{i,1}, eRun{i,2}, eRun{i,3});
+%     [run.ripFrSpCorrIpsi(i) run.ripFrSpCorrCont(i) run.ripFrSpCorrShuff{i} run.freqSp(i)] = dset_analyze_ripple_freq_correlations(dset);   
+%     [run.ripFrMeanCorrIpsi(i) run.ripFrMeanCorrCont(i) run.rip!FrMeanCorrShuff{i} run.freqMean(i)] = dset_calculate_bilateral_mean_ripple_freq_corr(dset);   
+% end
+% %%
+% 
+% for i = 1:size(eSleep,1)
+%     fprintf(' \n ------------ %d of %d ----------- \n', i, size(eSleep,1));
+% 
+%     dset = dset_load_all(eSleep{i,1}, eSleep{i,2}, eSleep{i,3});
+%     [sleep.ripFrSpCorrIpsi(i) sleep.ripFrSpCorrCont(i) sleep.ripFrSpCorrShuff{i} sleep.freqSp(i)] = dset_analyze_ripple_freq_correlations(dset);   
+%     [sleep.ripFrMeanCorrIpsi(i) sleep.ripFrMeanCorrCont(i) sleep.ripFrMeanCorrShuff{i} sleep.freqMean(i)] = dset_calculate_bilateral_mean_ripple_freq_corr(dset);   
+% end
 %%
 
-for i = 1:size(eSleep,1)
-    fprintf(' \n ------------ %d of %d ----------- \n', i, size(eSleep,1));
-
-    dset = dset_load_all(eSleep{i,1}, eSleep{i,2}, eSleep{i,3});
-    [sleep.ripFrSpCorrIpsi(i) sleep.ripFrSpCorrCont(i) sleep.ripFrSpCorrShuff{i} sleep.freqSp(i)] = dset_analyze_ripple_freq_correlations(dset);   
-    [sleep.ripFrMeanCorrIpsi(i) sleep.ripFrMeanCorrCont(i) sleep.ripFrMeanCorrShuff{i} sleep.freqMean(i)] = dset_calculate_bilateral_mean_ripple_freq_corr(dset);   
-end
-%%
-
-dset_compute_bilateral_ripple_corr_with_shuffl;
+% dset_compute_bilateral_ripple_corr_with_shuffl;
 
 %% RUN DECODING -----------------------------------------------------------
 %% RUN 

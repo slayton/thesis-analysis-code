@@ -1,10 +1,13 @@
-function plot_shuffles(shuffleDist, stat)
+function a = plot_shuffles(shuffleDist, stat, titles)
 %% PLOT_SHUFFLES - a simple function that plots a histogram shuffle statistics compared the actual stat
 %
 % shuffleDist can be a vector of samples, or a cell array containing
 % vectors of samples
 % stats is a scalar
 
+if nargin==2
+    titles = repmat({' '}, numel(stat), 1);
+end
 
 if ~isvector(shuffleDist)
     error('ShuffleDist must be a vector, or a cell-array vector');
@@ -46,7 +49,7 @@ for i = 1:nDist;
     ylim = get(a(1), 'YLim');
     
     line( [stat(i) stat(i)], ylim, 'color', 'r', 'linewidth', 2);
-
+    title(titles{i});
 end
 
 set(a,'Xlim', [-.2 .8]);

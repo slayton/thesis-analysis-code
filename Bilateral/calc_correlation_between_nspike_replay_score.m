@@ -1,4 +1,3 @@
-
 function results = calc_correlation_between_nspike_replay_score(d, s, r)
 
 %%
@@ -55,7 +54,15 @@ title('right');
 xlabel('number of spikes');
 ylabel('event score');
 
-plot_shuffles({cShuffL, cShuffR}, [cRealL, cRealR])
+a = plot_shuffles({cShuffL, cShuffR}, [cRealL, cRealR]);
+
+xlabel(a(1), 'SpikeNum ReplayScore Correlation');
+xlabel(a(2), 'SpikeNum ReplayScore Correlation');
+ylabel(a(1), 'nEvents');
+ylabel(a(2), 'nEvents');
+title(a(1), 'Left');
+title(a(2), 'Right');
+
 
 
 end

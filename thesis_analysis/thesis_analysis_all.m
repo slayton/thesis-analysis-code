@@ -47,8 +47,10 @@ f = plot_bilateral_ripple_freq_correlations(rippleFreqCorr.sleep); set(f,'name',
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Correlate the number of spikes and the replay score
 d = dset_load_all('Bon', 4, 4');
-[stats replay] = dset_calc_unilateral_replay_stats(d);
-nSpikeReplayScoreCorr = dset_compute_corr_between_nspike_replay_score(dset);
+[stats, replay] = dset_calc_unilateral_replay_stats(d);
+nSpikeReplayScoreCorr = calc_correlation_between_nspike_replay_score(d, stats, replay);
 
+%% Correlate the replay scores between the two hemispheres
+unilatReplayStatsCorr = calc_unilateral_replay_bilateral_correlations(d, replay, stats);
 
 
