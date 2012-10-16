@@ -1,7 +1,6 @@
-function [xcIpsi xcCont] = dset_analyze_xcorr_ripple_band(dset, env)
+function [xcIpsi, xcCont] = dset_analyze_xcorr_ripple_band(dset, env)
     
-    eeg = dset.eeg;
-    if ~isfield(eeg,'rippleband')
+    if ~isfield(dset.eeg,'rippleband')
         dset = dset_filter_eeg_ripple_band(dset);
     end
     
@@ -25,21 +24,6 @@ function [xcIpsi xcCont] = dset_analyze_xcorr_ripple_band(dset, env)
         [xcIpsi] = xcorr(envBase, envIpsi, nLags, 'coeff');
         [xcCont] = xcorr(envBase, envCont, nLags, 'coeff');
     end
-    
-    
-  %  xcIpsi = xcIpsi / max(xcIpsi);
-  %  xcCont = xcCont / max(xcCont);
-% 
-%     figure;
-%     axes;
-%     line(ts, xcIpsi, 'color', 'r');
-%     line(ts, xcIpsi + ipsiBounds(1), 'color', 'r', 'linestyle', '--');
-%     line(ts, xcIpsi + ipsiBounds(2), 'color', 'r', 'linestyle', '--');
-%     
-%     line(ts, xcCont, 'color', 'k');
-%     line(ts, xcCont + contBounds(1), 'color', 'k', 'linestyle', '--');
-%     line(ts, xcCont + contBounds(2), 'color', 'k', 'linestyle', '--');
-%     
     
 end
 

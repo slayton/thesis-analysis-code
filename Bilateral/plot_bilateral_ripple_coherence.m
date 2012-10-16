@@ -10,7 +10,7 @@ nRipple = size(data.rippleCoherence,1);
 meanRipCo = mean( data.rippleCoherence );
 stdRipCo = std( data.rippleCoherence);
 
-nS = 2;
+nS = 3;
 offset = 20;
 [a, f, p, l] = deal([]);
 
@@ -38,14 +38,22 @@ for i = 1:nShuffle
     [p(end+1), l(end+1)] = error_area_plot(data.F, meanRipCo - baseRip, nS * stdRipCo/sqrt(nRipple) , 'Parent', a(i) );
     [p(end+1), l(end+1)] = error_area_plot(data.F, meanShfCo - baseShf, nS * stdShfCo/sqrt(nRipple) , 'Parent', a(i) );
     
-    title(sprintf('Bilat Rip Coherenc vs %s shuffle', data.shuffleType{i}));
+    title(sprintf('Bilat Rip Coherence vs %s shuffle', data.shuffleType{i}));
     
+    legend(l( [1:2] + (i-1)*2), {'Data','Shuffle'});
 end
 
+set(l([1, 3]), 'Color', [1 0 0], 'LineWidth', 2);
+set(l([2, 4]), 'Color', [0 1 0], 'LineWidth', 2);
+set(p([1, 3]), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
+set(p([2, 4]), 'FaceColor', [.7 1 .7], 'edgeColor', 'none');
 
-set(p, 'FaceColor', [.7 .7 .7],'edgecolor', 'none');
 set(a, 'Xlim', [0 450], 'YLim', [-.04 .7]);
-% 
+
+
+
+
+%
 % figure('Position', [500 200 400 800], 'name', ['nfft/',num2str(nfft/noverlap)]);
 % a = [ subplot(211); subplot(212)];
 % p = zeros(4,1);

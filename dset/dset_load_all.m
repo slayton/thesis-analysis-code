@@ -6,7 +6,10 @@ args = parseArgs(varargin, args);
 
     
 %Load the raw clusters, position, and eeg data from the .mat files
+fprintf('Loading CLUSTERS for %s %d-%d\n\t', animal, day, epoch);
 dset.clusters = dset_load_clusters(animal, day, epoch);
+
+fprintf('Loading POSITION for %s %d-%d\n', animal, day, epoch);
 if mod(epoch,2)==0
     dset.position = dset_load_position(animal, day, epoch);
 end
@@ -63,6 +66,7 @@ for j = 1:numel(tetCount)
     end
 end
 
+fprintf('Loading EEG for %s %d-%d\n', animal, day, epoch);
 chans(end+1) = dset_get_ref_channel(animal, day, epoch);
 [dset.eeg, dset.ref] = dset_load_eeg(animal, day, epoch, chans);
 
@@ -107,7 +111,7 @@ else
     dset.channels.ipsi = 2;
     dset.channels.cont = 3;
     
-    
+    fprintf('\tfiltering EEG for ripples\n');
     dset = dset_filter_eeg_ripple_band(dset);
 end
 % calcuate ripple events
@@ -121,7 +125,7 @@ tetId = cell2mat({dset.clusters.tetrode});
 
 lTet = unique( tetId( lIdx));
 rTet = unique( tetId( rIdx));
-
+fprintf('Loading mua for %s %d-%d\n', animal, day, epoch);
 dset.mu = dset_load_mu(animal, day, epoch, 'timewin', dset.epochTime,'left', lTet, 'right', rTet);
 if isfield(dset, 'position')
     dset.mu.bursts = dset_find_mua_bursts(dset.mu, 'pos_struct', dset.position);

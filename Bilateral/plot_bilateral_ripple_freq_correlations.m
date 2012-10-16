@@ -24,7 +24,7 @@ for i = 1:nShuffle
     set(a(end), 'XLim', lims);
     
     p = sum( sh > st) / numel(sh);
-    title( sprintf( 'SPEC %s animal %2.2f', data.spec.shuffleTypes{i}, p) )
+    title( sprintf( 'spec %s animal %2.2f', upper(data.spec.shuffleTypes{i}), p) )
     
     % MEAN
     a(end+1) = subplot (212);
@@ -41,5 +41,5 @@ for i = 1:nShuffle
     set(a(end), 'XLim', lims);
     
     p = sum( sh > st) / numel(sh);
-    title( sprintf( 'MEAN %s animal %2.2f', data.spec.shuffleTypes{i}, p) )    
+    title( sprintf( 'mean %s animal %2.2f',  upper(data.spec.shuffleTypes{i}), p) )    
 end

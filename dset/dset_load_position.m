@@ -42,7 +42,7 @@ if recomputeFlag ~= 0
     linearize_and_save_position(linpos_sl_filepath, position.rawx, position.rawy, pos.cmperpixel, time_smoothKW);
 end
 
-disp(['Loading data from:', linpos_filepath]);
+%disp(['Loading data from:', linpos_filepath]);
 linpos = load(linpos_sl_filepath);
 
 position.linpos = linpos.linpos;

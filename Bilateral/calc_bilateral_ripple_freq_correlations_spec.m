@@ -1,28 +1,20 @@
 function [results, frBase, frCont, frShuf1, frShuf2] = calc_bilateral_ripple_freq_correlations_spec(ripples)
 
-
-if nargin==1
-    dataSrc = 'rips';
-end
-
-if ~any( strcmp(dataSrc, {'rips', 'raw'} ) )
-    error('Invalid data src, must be "rips" or "raw"');
-end
-
 % Prepare the data for analysis
 nAnimal = numel(ripples);
-nRipple = sum( arrayfun(@(x) size(x.(dataSrc){1},1), ripples, 'UniformOutput', 1) );
+nRipple = sum( arrayfun(@(x) size(x.raw{1},1), ripples, 'UniformOutput', 1) );
 
 
 [frBase, frCont, frShuf1]  = deal( nan(nRipple, 1) );
 
 idx = 1;
 for i = 1:nAnimal
-    n = numel( ripples(i).peakFr{1} );
+    n = numel( ripples(i).peakFreq{1} );
     shuffdIdx = randsample(n, n);
     
-    frBase( idx:idx + n - 1 ) = ripples(i).peakFr{1};
-    frCont( idx:idx + n - 1) = ripples(i).peakFr{3};
+    frBase( idx:idx + n - 1 ) = ripples(i).peakFreq{1};
+    frCont( idx:idx + n - 1) = ripples(i).peakFreq{3};
+    
     idx = idx + n;
 end
 
@@ -35,13 +27,16 @@ disp('starting shuffles')
 for sCount = 1:nShuffle
     idx = 1;
     for i = 1:nAnimal
-        n = numel( ripples(i).peakFr{1} );
+        n = numel( ripples(i).peakFreq{1} );
         shuffdIdx = randsample(n, n);
-        frShuf1(idx:idx + n - 1) = ripples(i).peakFr{1}(shuffdIdx, 1);   
+%         frShuf1(idx:idx + n - 1) = ripples(i).peakFreq{1}(shuffdIdx, 1);   
+        frShuf1(idx:idx + n - 1) = ripples(i).peakFreq{3}(shuffdIdx, 1);   
+
         idx = idx + n;
     end
 
-    frShuf2 = frBase( randsample(nRipple, nRipple, 1) );
+%     frShuf2 = frBase( randsample(nRipple, nRipple, 1) );
+    frShuf2 = frCont( randsample(nRipple, nRipple, 1) );
     
     results.shuffleFreqCorr{1}(sCount) = corr2(frBase, frShuf1);
     results.shuffleFreqCorr{2}(sCount) = corr2(frBase, frShuf2);

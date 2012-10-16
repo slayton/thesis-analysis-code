@@ -28,16 +28,7 @@ for ep = eps
         idx = idx+1;
     end
     
-    
-   
-    for i = 2
-        epList{idx,1} = 'Dud';
-        epList{idx,2} = i;
-        epList{idx,3} = ep;
-        idx = idx+1; 
-    end
-    
-    for i = [5, 6, 7]
+    for i = [5]
         epList{idx,1} = 'Fra';
         epList{idx,2} = i;
         epList{idx,3} = ep;

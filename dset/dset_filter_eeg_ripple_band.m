@@ -4,7 +4,7 @@ function dset = dset_filter_eeg_ripple_band(dset, varargin)
     
     data = cell2mat({dset.eeg.data});
     
-    filtfilt(rFilt,1,data);
+    data = filtfilt(rFilt,1,data);
     for i = 1:numel(dset.eeg)
         dset.eeg(i).rippleband = data(:,i);
     end

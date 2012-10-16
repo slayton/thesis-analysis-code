@@ -17,8 +17,8 @@ end
 
 
 score = zeros(size(dset.mu.bursts,1),3,nshuffle);
-
 wb = my_waitbar(0);
+
 
 for i = 1:nshuffle
     for k = 1:3
@@ -42,6 +42,7 @@ for i = 1:nshuffle
 %        [~, ~, stats.score(j,2,i)] = est_line_detect(recon.tbins(tempIdx), recon.pbins(rightIdx), pdf(rightIdx,:));
 %        [~, ~, stats.score(j,3,i)] = est_line_detect(recon.tbins(tempIdx), recon.pbins(sort(outIdx)), pdf(outIdx,:));
    wb = my_waitbar(i/nshuffle, wb);
+
 end
 
 end

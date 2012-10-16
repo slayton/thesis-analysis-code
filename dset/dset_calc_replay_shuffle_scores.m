@@ -1,4 +1,4 @@
-function [shuffleScores shuffleNames] = dset_calc_replay_shuffle_scores(dset, recon, nShuffle, slope, intercept, clIdx, shufflelist, smooth, addpdf)
+function [shuffleScores, shuffleNames] = dset_calc_replay_shuffle_scores(dset, recon, nShuffle, slope, intercept, clIdx, shufflelist, smooth, addpdf)
 if nargin<7 || isempty(shufflelist)
     shufflelist = true(4,1); 
 end

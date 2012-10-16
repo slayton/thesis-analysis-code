@@ -45,7 +45,6 @@ for i = 1:size(dset.mu.bursts,1)
         end
         
         stats.score2(i,j) = compute_line_score(recon.tbins(tempIdx), recon.pbins{j}, recon.pdf{j}(:,tempIdx), slp, int, smooth);
-    
     end
 
 end

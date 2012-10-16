@@ -16,7 +16,7 @@ for i = 1:numel(filepath)
         continue;
     end
     
-    disp(['Loading eeg from files:', filepath{i}]);
+%    disp(['Loading eeg from files:', filepath{i}]);
 
     data = load(filepath{i});
     data = data.eeg{day}{epoch}{electrode(i)};

@@ -1,17 +1,29 @@
-clear; close all; clc;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %               LFP ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load Data
 clear; clc;
 ripples = dset_load_ripples;
+
 %% - XCorr the ripple bands
 rippleXCorr.run = calc_bilateral_ripple_band_xcorr('run');
 rippleXCorr.sleep = calc_bilateral_ripple_band_xcorr('sleep');
 
+%%
+plot_bilateral_ripple_band_xcorr(rippleXCorr.run); 
+plot_bilateral_ripple_band_xcorr(rippleXCorr.sleep);
+
 %% - Bilateral Ripple Coherence
-rippleCoherence.run = calc_bilateral_ripple_coherence(ripples.run, 'raw', 'run');
-rippleCoherence.sleep = calc_bilateral_ripple_coherence(ripples.run, 'raw', 'sleep');
+
+% This statistic is computed as ripSignalBase vs ripSignalCont
+% the shuffles are derived from shuffling the contra-lateral signal.
+% the base signal is always more coherent with itself than it is with a
+% contralateral channel.  So if the two signals are considered to be the
+% same, then a shuffled cont should work like a shuffled base?!?!
+
+
+rippleCoherence.run = calc_bilateral_ripple_coherence(ripples.run);
+rippleCoherence.sleep = calc_bilateral_ripple_coherence(ripples.sleep);
 
 save ~/data/thesis/bilateral_ripple_coherence.mat rippleCoherence;
 
@@ -30,12 +42,21 @@ save ~/data/thesis/bilateral_ripple_frequency_correlation.mat rippleFreqCorr;
 
 f = plot_bilateral_ripple_freq_correlations(rippleFreqCorr.run); set(f,'name', 'RUN');
 f = plot_bilateral_ripple_freq_correlations(rippleFreqCorr.sleep); set(f,'name', 'SLEEP');
-%% - Mean LFP triggered on ripples
 
+%% Bilateral ripple frequency distribution
+plot_bilateral_ripple_freq_distribution(ripples.run); set(gcf,'name','Run');
+plot_bilateral_ripple_freq_distribution(ripples.sleep); set(gcf,'name','Run');
+
+
+%% - Mean LFP triggered on ripples
+meanRipTrigLfp.run = calc_ripple_triggered_mean_lfp(ripples.run);
+meanRipTrigLfp.sleep = calc_ripple_triggered_mean_lfp(ripples.sleep);
+%
+plot_ripple_trig_lfp(meanRipTrigLfp.run); title('RUN');
+plot_ripple_trig_lfp(meanRipTrigLfp.sleep); title('SLEEP');
 
 
 %% - Distribution of Bilateral Ripple Freq Differences
-
 
 
 
@@ -45,12 +66,61 @@ f = plot_bilateral_ripple_freq_correlations(rippleFreqCorr.sleep); set(f,'name',
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %               UNIT AND DECODING ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Correlate the number of spikes and the replay score
-d = dset_load_all('Bon', 4, 4');
-[stats, replay] = dset_calc_unilateral_replay_stats(d);
-nSpikeReplayScoreCorr = calc_correlation_between_nspike_replay_score(d, stats, replay);
+clear;
+
+%% Load Data and compute reconstruction
+%[recon.stats, recon.replay] = dset_calc_replay_with_stats(d);
+
+runReconFiles = dset_get_recon_file_list('run');
+sleepReconFiles = dset_get_recon_file_list('sleep');
+
+%% Correlate the number of spikes and the replay score between hemispheres
+
+[eventCorr.run, eventData.run] = calc_correlation_between_nspike_replay_score('run');
+plot_correlation_between_nspike_replay_score(eventCorr.run, eventData.run);
 
 %% Correlate the replay scores between the two hemispheres
-unilatReplayStatsCorr = calc_unilateral_replay_bilateral_correlations(d, replay, stats);
+%unilatReplayStatsCorr = calc_unilateral_replay_bilateral_correlations(d, recon.replay, recon.stats);
+
+%% Correlate the individual columns of the replay PDFS 
+bilatReplayCorr.run = calc_unilateral_replay_bilateral_pdf_correlation('run');
+plot_unilateral_replay_bilateral_pdf_correlation(bilatReplayCorr.run);
 
 
+
+
+%% Determine whidh UNILATERAL events are significant
+nShuffle = 100;
+[lIdx, rIdx, bIdx] = dset_calc_cl_idx(d);
+smoothPdf = 1;
+shuffles = [0 1 0 0 0];
+[replayShuf.L, shufNames] = dset_calc_replay_shuffle_scores(d, recon.replay.L, nShuffle, recon.stats.L.slope, recon.stats.L.intercept, lIdx, shuffles, smoothPdf, 0);
+[replayShuf.R] = dset_calc_replay_shuffle_scores(d, recon.replay.R, nShuffle, recon.stats.R.slope, recon.stats.R.intercept, rIdx, shuffles, smoothPdf, 0);
+
+pVal.L = dset_calc_replay_significance(recon.stats.L, replayShuf.L, .05);
+pVal.R = dset_calc_replay_significance(recon.stats.R, replayShuf.R, .05);
+
+
+%% NO MORE ANALYSIS UNDER HERE!!!!
+%
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%              DEBUGGING AREA
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%
+rippleCoherence.run = calc_bilateral_ripple_coherence(ripples.run);
+f = plot_bilateral_ripple_coherence(rippleCoherence.run); set(f,'Name','RUN');
+
+
+%% - Mean LFP triggered on ripples
+
+for i = 1:numel(ripples.run)
+    %meanRipTrigLfp.run = calc_ripple_triggered_mean_lfp(ripples.run(i));
+    meanRipTrigLfp.sleep = calc_ripple_triggered_mean_lfp(ripples.sleep(i));
+%
+    %plot_ripple_trig_lfp(meanRipTrigLfp.run); title('RUN');
+    
+    plot_ripple_trig_lfp(meanRipTrigLfp.sleep); title('SLEEP');
+    set(gcf,'Name', [ripples.run(i).description, num2str(i)]);
+end

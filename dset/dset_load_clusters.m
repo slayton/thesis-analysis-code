@@ -9,7 +9,7 @@ filepath = dset_get_spike_file_path(animal, day);
 metapath = dset_get_cellinfo_file_path(animal);
 fieldspath = dset_get_linfields_file_path(animal);
 
-disp(['Loading cells from file:', filepath]);
+%disp(['Loading cells from file:', filepath]);
 
 data = load(filepath);
 data = data.spikes{day}{epoch};
