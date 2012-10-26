@@ -22,6 +22,11 @@ idx = 1;
 for ep = eps
 
     for i = [3:7, 9,10]
+        
+        if i == 4 && ep == 5
+            continue;
+        end
+              
         epList{idx,1} = 'Bon';
         epList{idx,2} = i;
         epList{idx,3} = ep;
@@ -29,10 +34,23 @@ for ep = eps
     end
     
     for i = [5]
+        if ep == 3
+            continue;
+        end
         epList{idx,1} = 'Fra';
         epList{idx,2} = i;
         epList{idx,3} = ep;
         idx = idx+1; 
     end
+  
+    if ep == 3
+        for i = 11:16
+            epList{idx,1} = 'spl11';
+            epList{idx,2} = ['day', num2str(i)];
+            epList{idx,3} = 'sleep2';
+            idx = idx+1;
+        end
+    end
     
 end
+

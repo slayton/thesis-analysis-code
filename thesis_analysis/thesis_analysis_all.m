@@ -41,7 +41,7 @@ rippleFreqCorr.run.mean = calc_bilateral_ripple_freq_correlations_mean(ripples.r
 rippleFreqCorr.sleep.mean = calc_bilateral_ripple_freq_correlations_mean(ripples.sleep);
 
 save ~/data/thesis/bilateral_ripple_frequency_correlation.mat rippleFreqCorr;
-
+%%
 f = plot_bilateral_ripple_freq_correlations(rippleFreqCorr.run); set(f,'name', 'RUN');
 f = plot_bilateral_ripple_freq_correlations(rippleFreqCorr.sleep); set(f,'name', 'SLEEP');
 
@@ -57,6 +57,15 @@ meanRipTrigLfp.sleep = calc_ripple_triggered_mean_lfp(ripples.sleep);
 plot_ripple_trig_lfp(meanRipTrigLfp.run); title('RUN');
 plot_ripple_trig_lfp(meanRipTrigLfp.sleep); title('SLEEP');
 
+%% - Compute the difference in ripple phases between the hemispheres
+ripplePhaseDiff.run = calc_bilateral_ripple_phase_diff(ripples.run);
+ripplePhaseDiff.sleep = calc_bilateral_ripple_phase_diff(ripples.sleep);
+
+nEvent = numel(ripplePhaseDiff.sleep.p1);
+uPts = linspace(-pi, pi, 30);
+uCdf = unifcdf( uPts, -pi, pi);
+[~, p1] = kstest(ripplePhaseDiff.sleep.dPhase, [uPts', uCdf']);
+[~, p2] = chi2gof(ripplePhaseDiff.sleep.dPhase, 'cdf', @(x) unifcdf(x, -pi, pi));
 
 %% - Distribution of Bilateral Ripple Freq Differences
 

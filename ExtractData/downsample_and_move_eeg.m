@@ -1,7 +1,7 @@
 function downsample_and_move_eeg(session_dir)
 % uses fkPreprocessing.process_eeg to down sample and de buffer the eeg
 % files. The files are saved according the fkPreprocessing guidlines which
-% Stuart Layton doesn't use so the files are then moved.
+
 
 mkdir(fullfile(session_dir, 'eeg/'));
 eeg_files_cell = get_dir_names(fullfile(session_dir, 'extracted_data/', '*.eeg'));

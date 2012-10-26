@@ -1,4 +1,4 @@
-function data = dset_calc_ripple_params(dset)
+function [data dset] = dset_calc_ripple_params(dset)
     dset = dset_calc_ripple_times(dset);    
     dset = dset_calc_ripple_spectrum(dset);
     

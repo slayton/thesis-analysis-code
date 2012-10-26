@@ -1,4 +1,4 @@
-function f = define_sources(session_dir)
+function f = define_exp_anatomy(session_dir)
 % A simple GUI to define sources (electrodes) and signals (data collected
 % from those electrodes). 
 % Written 2009 by Stuart Layton

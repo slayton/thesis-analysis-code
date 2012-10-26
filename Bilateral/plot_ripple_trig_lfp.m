@@ -1,10 +1,10 @@
 
-function [p, l] = plot_ripple_trig_lfp(data)
+function [p, l] = plot_ripple_trig_lfp(data, a)
 
-figure();
-
-
-a = axes();
+if nargin == 1 || isempty(a) || ~ishandle(a)
+    figure();
+    a = axes();
+end
 
 
 [p(1), l(1)] = error_area_plot(data.ts, data.meanLfp{1}, data.semLfp{1}, 'Parent', a);

@@ -17,7 +17,6 @@ nFile = numel(dsetFileList);
 
 fprintf('Of %d: Loading: ', nFile);
 
-corrAll = [];
 for iFile = 1:nFile
     fprintf(' %d', iFile);
     
@@ -53,7 +52,7 @@ for iFile = 1:nFile
     end
 
     [replayCorr, maxCorInd] = max(cor);
-
+    
     nCol = sum(validIdx);
 
     shuffleCorr = [];

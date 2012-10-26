@@ -45,16 +45,25 @@ zoom('xon');
     function create_plots()
         %disp('Create Plots');
         for i=1:n_chan
+            if exp.(epoch).eeg.loc{i}(1) == 'l'
+                col = 'r';
+            elseif exp.(epoch).eeg.loc{i}(1) == 'r'
+                col = 'g';
+            else
+                col = 'b';
+            end
+                
             dy = MAX_Y/n_chan;
             a(i) = axes('Units', 'Normalized', 'Position', [0, MAX_Y-(i*dy), MAX_X, dy]);
             %p(i) =  plot(exp.(epoch).eeg_ts(ind), exp.(epoch).eeg(i).data(ind), 'Parent', a(i));
-            p(i) =  line_browser(  exp.(epoch).eeg.data(:,i) ,exp.(epoch).eeg.ts(:), 'axes',a(i));            
+            p(i) =  line_browser(  exp.(epoch).eeg.data(:,i) ,exp.(epoch).eeg.ts(:), 'axes',a(i), 'color', col);            
         end
       
-        set(a, 'XLim', [min(exp.(epoch).eeg.ts(ind)) max(exp.(epoch).eeg.ts(ind))]);
+        set(a, 'XLim', [exp.(epoch).eeg.ts(1) exp.(epoch).eeg.ts(end)]);
         set(a, 'XTick', [], 'YTick', [], 'Box', 'off');
         linkaxes(a);
     end
+
 
     function epoch_changed(varargin)
        epoch = exp.epochs{get(epoch_sel_ui, 'Value')};

@@ -19,6 +19,7 @@ function [C] = col_corr(A, B)
 
 
 % Check the inputs
+
 if ~all(size(A) == size(B))
     error('A and B must be the same size');
 end
@@ -28,5 +29,6 @@ An=bsxfun(@minus,A,mean(A,1));
 Bn=bsxfun(@minus,B,mean(B,1));
 An=bsxfun(@times,An,1./sqrt(sum(An.^2,1)));
 Bn=bsxfun(@times,Bn,1./sqrt(sum(Bn.^2,1)));
+
 C=sum(An.*Bn,1);
 

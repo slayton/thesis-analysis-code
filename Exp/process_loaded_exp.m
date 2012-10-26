@@ -118,7 +118,7 @@ for i=1:numel(args.epochs)
         warning('Calculate Local Ripple Bursts is not implemented');
     end
 %% Load Tetrode Anatomy
-    if ismember('load_tetrode_anatomy', args.operations)
+    if ismember('load_tetrode_anatomy', args.operations) && isfield(exp.(e),'cl')
        disp([e, ': loading tetrode anatomy']);
       
        [tt loc] = load_exp_tt_anatomy(exp.edir);

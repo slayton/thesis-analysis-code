@@ -10,15 +10,24 @@ nSamp = size(ripples(1).raw{1},2);
 idx = 1;
 for i = 1:nAnimal
     n = numel( ripples(i).peakFrM{1} );    
+    cont = ripples(i).raw{3};
+
+    if strfind(ripples(i).description, 'Dud')
+        continue;
+        cont = smoothn(cont, [0 3]);
+    end
+    
+
     lfpBase( idx:idx + n - 1 , :) = ripples(i).raw{1};
-    lfpCont( idx:idx + n - 1 , :) = ripples(i).raw{3};
+    lfpCont( idx:idx + n - 1 , :) = cont;
+    
     idx = idx + n;
 end
 
-results.meanLfp{1} = mean(lfpBase);
+results.meanLfp{1} = nanmean(lfpBase);
 results.semLfp{1} = std(lfpBase) / sqrt( idx );
 
-results.meanLfp{2} = mean(lfpCont);
+results.meanLfp{2} = nanmean(lfpCont);
 results.semLfp{2} = std(lfpBase) / sqrt( idx );
 
 results.ts = ( ( 1:nSamp ) - round( mean( nSamp/2 ) ) ) / ripples(1).fs;

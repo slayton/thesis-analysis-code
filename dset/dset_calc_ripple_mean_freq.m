@@ -10,8 +10,8 @@ function [peakFrM] = dset_calc_ripple_mean_freq(dset)
 %         [~, indB] = findpeaks( data.rip{1}(indRipple,:) );
 %         [~, indC] = findpeaks( data.rip{3}(indRipple,:) );
                 
-        [~, indB] = findpeaks( abs(hilbert( data.rip{1}(indRipple,:) )));
-        [~, indC] = findpeaks( abs(hilbert( data.rip{3}(indRipple,:) )));
+        [~, indB] = findpeaks(  data.rip{1}(indRipple,:) );
+        [~, indC] = findpeaks(  data.rip{3}(indRipple,:) );
     
         peakFrM{1}(indRipple) = dset.eeg(1).fs / mean( diff(indB) );
         peakFrM{3}(indRipple) = dset.eeg(1).fs / mean( diff(indC) );

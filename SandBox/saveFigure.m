@@ -1,6 +1,6 @@
 function saveFigure(figHandle, path, name, varargin)
 
-types = {'fig', 'eps', 'png', 'pdf'};
+types = {'fig', 'eps', 'png', 'pdf', 'svg'};
 
 % check the validity of the inputs
 if isempty(figHandle) || ~ishandle(figHandle) || ~ isa(handle(figHandle), 'figure');
@@ -20,6 +20,10 @@ elseif nargin == 3
 % valid formats
 else
     typesIdx = false(size(types));
+    
+    if numel(varargin)==1 && iscell(varargin{1})
+        varargin = varargin{1};
+    end
     
     for i = 1:numel(varargin)  
         format = varargin{i};
@@ -49,9 +53,15 @@ shohid = get(0,'ShowHiddenHandles');
 set(0, 'ShowHiddenHandles', 'on');
 
 for i = 1:numel(types)
+    
     filename = fullfile(path, [name, '.', types{i}]);
     fprintf('Saving figure to file:%s\n', filename);
-    saveas(figHandle, filename);
+    
+    if strcmp( types{i}, 'svg')
+        plot2svg(filename, figHandle, 'png');
+    else
+        saveas(figHandle, filename);
+    end
 end;
 
 % reset ShowHiddenHandles to what is was before

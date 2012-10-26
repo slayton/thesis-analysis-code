@@ -1,4 +1,4 @@
-function [ripple_times max_times maxPower rips ripPower params ] = find_rip_burst(eeg, fs, first_ts, varargin)
+function [ripple_times, max_times, maxPower, rips, ripPower, rip, params ] = find_rip_burst(eeg, fs, first_ts, varargin)
 %FIND_RIP_BURST finds burst in the ripple band and returns time windows
 %containing those bursts.
 %

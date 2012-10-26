@@ -51,7 +51,12 @@ set(a, 'Units', 'Normalized');
         
         if isempty(aObj)
             for i=1:size(data,2)
-                aObj(i) = line([1],[1], 'Parent', a,'color', args.color(i));
+                if isvector(args.color)
+                    c_tmp = args.color(i);
+                else
+                    c_tmp = args.color(i,:);
+                end
+                aObj(i) = line([1],[1], 'Parent', a,'color', c_tmp);
             end
         end
         
