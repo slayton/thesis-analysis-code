@@ -28,9 +28,6 @@ rippleCoherence.run = calc_bilateral_ripple_coherence(ripples.run);
 rippleCoherence.sleep = calc_bilateral_ripple_coherence(ripples.sleep);
 
 save ~/data/thesis/bilateral_ripple_coherence.mat rippleCoherence;
-%%
-clear;
-load ~/data/thesis/bilateral_ripple_coherence.mat
 
 f = plot_bilateral_ripple_coherence(rippleCoherence.run); set(f,'Name','RUN');
 f = plot_bilateral_ripple_coherence(rippleCoherence.sleep); set(f,'Name', 'SLEEP');
@@ -94,7 +91,7 @@ sleepReconFiles = dset_get_recon_file_list('sleep');
 plot_correlation_between_nspike_replay_score(eventCorr.run, eventData.run);
 
 %% Correlate the replay scores between the two hemispheres
-%unilatReplayStatsCorr = calc_unilateral_replay_bilateral_correlations(d, recon.replay, recon.stats);
+% unilatReplayStatsCorr = calc_unilateral_replay_bilateral_correlations(d, recon.replay, recon.stats);
 
 %% Correlate the individual columns of the replay PDFS 
 bilatReplayCorr.run = calc_unilateral_replay_bilateral_pdf_correlation('run');

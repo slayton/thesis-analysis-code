@@ -6,13 +6,12 @@ args.structures = {'all'};
 args.pbins = [];
 args.directional = 1;
 args.smooth = 0;
+args.shuffle = 0;
 args = parseArgsLite(varargin,args);
 
 for i=1:numel(args.structures)
-    
-
-    
-    [tc ind] = get_exp_tuning_curves(exp, ep, 'structure', args.structures{i}, 'directional', args.directional);
+      
+    [tc ind] = get_exp_tuning_curves(exp, ep, 'structure', args.structures{i}, 'directional', args.directional, 'shuffle', args.shuffle);
    
     [pdf tbins] = reconstruct( args.time_win(1), args.time_win(2), ...
                 tc,exp.(ep).cl(ind), 't_var', 'st', 'tau', args.tau);

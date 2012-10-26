@@ -13,7 +13,7 @@ end
 set(gcf,'Name', 'RUN:Mean LFP');
 
 
-save_bilat_figure('fig2-sup-a', f);
+save_bilat_figure('fig2-sup-a', f, 1);
 %% Mean Rip Trig RIP ALL DSETS
 f = figure('Position', [216 91 1222 911]);
 for i = 1:numel(rips)
@@ -26,7 +26,7 @@ for i = 1:numel(rips)
     disp([num2str(i), ' ', r.description]);   
 end
 set(gcf,'Name', 'RUN:Mean Rip Band');
-save_bilat_figure('fig2-sup-b', f);
+save_bilat_figure('fig2-sup-b', f,1);
 %%
 f = figure('Position', [216 91 1222 911]);
 ax = [];
@@ -45,9 +45,9 @@ end
 set(ax,'Xlim', [150 225], 'YLim', [150 225], 'YDir', 'normal');
 set(gcf,'Name', 'RUN:Bilateral Ripple Mean Freq Distribution');
 
-save_bilat_figure('fig2-sup-c', f);
+save_bilat_figure('fig2-sup-c', f,1);
 f = figure('Name', 'run'); hist(c); xlabel('Bilateral ripple freq corr');
-save_bilat_figure('fig2-sup-d', f);
+save_bilat_figure('fig2-sup-d', f,1);
 
 
 %%

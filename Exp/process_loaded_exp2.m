@@ -1,4 +1,4 @@
-function [exp args] = process_loaded_exp(exp, varargin)
+function [exp args] = process_loaded_exp2(exp, varargin)
 %% EXP = PROCESS_LOADED_EXP(exp, varargin)
 %
 % processes the loaded exp data structure. Processing can be modified by
@@ -17,6 +17,7 @@ args.operations = 1:10;
 
 args.epochs = exp.epochs;
 
+
 args.tc.pos_bw = .1;
 args.tc.smooth_kw = .1;
 args.tc.pos_fs = 1/30;
@@ -27,7 +28,7 @@ args.mu.kw = .001;
 
 args = parseArgsLite(varargin, args);
 
-args.operations = operation_definitions(args.operations);
+args.operations = {'calc_tc', 'load_tetrode_anatomy', 'sort_clusters'};
 
 if any(~ismember(args.epochs, exp.epochs))
     error('invalid epoch specified');
