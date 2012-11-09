@@ -1,7 +1,13 @@
-function f = plot_bilateral_ripple_coherence(data, correct_baseline)
+function f = plot_bilateral_ripple_coherence(data, correct_baseline, ax)
 
 if nargin==1
     correct_baseline=0;
+end
+
+if nargin<2
+    ax = [];
+elseif ~ishandle(ax)
+    ax = [];
 end
 
 nShuffle = numel(data.shuffleCoherence);
@@ -24,8 +30,12 @@ if correct_baseline == 1
 end
 
 for i = 1:nShuffle
-    f(i) = figure('Position',  [500 + i*offset   460 - i*offset   560   420]);
-    a(i) = axes();
+    if isempty(ax)
+        f(i) = figure('Position',  [500 + i*offset   460 - i*offset   560   420]);
+        a(i) = axes();
+    else
+        a(i) = ax;
+    end
 
     meanShfCo = mean( data.shuffleCoherence{i} );
     stdShfCo = std( data.shuffleCoherence{i} );
@@ -43,10 +53,10 @@ for i = 1:nShuffle
     legend(l( [1:2] + (i-1)*2), {'Data','Shuffle'});
 end
 
-set(l([1, 3]), 'Color', [1 0 0], 'LineWidth', 2);
-set(l([2, 4]), 'Color', [0 1 0], 'LineWidth', 2);
-set(p([1, 3]), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
-set(p([2, 4]), 'FaceColor', [.7 1 .7], 'edgeColor', 'none');
+set(l([1:2:end]), 'Color', [1 0 0], 'LineWidth', 2);
+set(l([2:2:end]), 'Color', [0 1 0], 'LineWidth', 2);
+set(p([1:2:end]), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
+set(p([2:2:end]), 'FaceColor', [.7 1 .7], 'edgeColor', 'none');
 
 set(a, 'Xlim', [0 450], 'YLim', [-.04 .7]);
 

@@ -23,7 +23,9 @@ function list = dset_get_recon_file_list(epochList)
         eList = dset_list_epochs(epoch);
         for idxEpoch = 1:size(eList,1);
             [anim, dayN, epochN] = deal(eList{idxEpoch,:});
-            list{end+1,1} = sprintf(filenameTemplate, epoch, anim, dayN, epochN);
+            if isempty( strfind(anim, 'spl') )
+                list{end+1,1} = sprintf(filenameTemplate, epoch, anim, dayN, epochN);
+            end
         end
     end
 

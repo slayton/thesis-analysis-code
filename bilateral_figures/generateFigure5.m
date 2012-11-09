@@ -1,4 +1,4 @@
-function generateFigure4
+function generateFigure5
 %% Load all the data required for plotting!
 open_pool;
 %%
@@ -7,12 +7,13 @@ clear;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           LOAD THE DATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-runEpochs = dset_list_epochs('run');
+sleepEpochs = dset_list_epochs('sleep');
 
-i = 1;
+i = 2;
 % for i = 1:numel(runReconFiles)
     
-    dset = dset_load_all(runEpochs{i,1}, runEpochs{i,2}, runEpochs{i,3});    
+
+    dset = dset_load_all(sleepEpochs{i,1}, sleepEpochs{i,2}, sleepEpochs{i,3});    
 
     lIdx = strcmp({dset.clusters.hemisphere}, 'left');
     rIdx = strcmp({dset.clusters.hemisphere}, 'right');
@@ -27,17 +28,15 @@ i = 1;
     [~, reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
     [~, reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
 
-    clear st rp;
     for iii = 1:2
         [st(iii), rp(iii)] = dset_calc_replay_stats(dset, clIdx{iii}, [], [],1);
     end
-    
+%     
 %     score1 = stats(1).score2;
 %     score2 = stats(2).score2;
 %     [~, trajIdx] = max( max(score1, score2), [], 2);
     
 % get the indecies of the timebins with spikes in both hemispheres
-    
     lSpikeIdx = logical( sum(reconSimp(1).spike_counts) );
     rSpikeIdx = logical( sum(reconSimp(2).spike_counts) );
     
@@ -51,9 +50,6 @@ i = 1;
 
     pdf1 = reconSimp(1).pdf(:, replayIdx);
     pdf2 = reconSimp(2).pdf(:, replayIdx);
-
-    nSpike{1} = sum( rp(1).spike_counts(:, replayIdx));
-    nSpike{2} = sum( rp(2).spike_counts(:, replayIdx));
     
 % Compute the distances between the peaks od the pdfs
     [~, idx1] = max(pdf1);
@@ -76,7 +72,6 @@ i = 1;
     nShuffle = 100;    
     colCorrShuffle = [];
     binDistShuffle = [];
-   
     for i = 1:nShuffle
         randIdx = randsample( size(pdf1,2), size(pdf1,2), 0);
         colCorrShuffle = [ colCorrShuffle, corr_col( pdf1, pdf2(:, randIdx) ) ];
@@ -97,6 +92,7 @@ lags = lags * mean( diff( muTs ) );
 
 
 pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp);
+
     
     
 %% Draw the figure
@@ -107,16 +103,14 @@ pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp)
 
 if exist('fHandle', 'var'), delete( fHandle( ishandle(fHandle) ) ); end
 if exist('axHandle', 'var'), delete( axHandle( ishandle(axHandle) ) ); end
+
 axHandle = [];
 fHandle = figure('Position',  [350 250 650 620], 'Name', dset_get_description_string(dset) );
  
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %      A,B,C - Replay Examples
-% Bon3-2 Examples: [147 159*] 100, 111, 146, 147, 159, 172?!?, 209
-% Bon3-4 Examples: 66, 94, *124*, 147, 159L
-% Bon4-2 Examples: 096, 104-3, 115-1, 120-2, 126, 130
-% Bon5-2 Examples: 093, 102, 115
+% Bon4-3 Examples: 13-1, 13-2, 58-1, *66-1*,  32-1, 125-3
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nAx = 6;
 axHandle(1) = axes('Position', [.0328 .53 .1311 .44]);
@@ -128,8 +122,8 @@ axHandle(6) = axes('Position', [.8193 .53 .1311 .44]);
 
 %e = dset.mu.bursts(124,:);
 
-eIdxList = [159 172 111];
-trajList = [2 1 2];
+eIdxList = [32 58 66];
+trajList = [1 1 1];
 tbins = linspace(-.1, .1, 11);
 for ii = 1:3
     eIdx = eIdxList(ii);
@@ -230,6 +224,8 @@ line(cent, smoothn(h1 ./ sum(h1), 1.5, 'correct', 1), 'color', 'b', 'Parent', ax
 line(cent, smoothn(h2 ./ sum(h2), 1.5, 'correct', 1), 'color', 'k', 'Parent', axHandle(nAx), 'linewidth', 2);
 
 set(axHandle(nAx), 'XLim', [-.5 1]);
+title( sprintf('Corr Diff p<%0.2g %02.g ', pdfComp.kstest_corr, pdfComp.cmtest_corr) ); 
+
 nAx = nAx+1;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -246,50 +242,13 @@ line(cent, smoothn(h1 ./ sum(h1), 2, 'correct', 1), 'color', 'b', 'Parent', axHa
 line(cent, smoothn(h2 ./ sum(h2), 2, 'correct', 1), 'color', 'k', 'Parent', axHandle(nAx), 'linewidth', 2);
 
 set(axHandle(nAx), 'XLim', [0 45]);
+title( sprintf('Corr Diff p<%0.2g %02.g ', pdfComp.kstest_dist, pdfComp.cmtest_dist) ); 
+
 nAx = nAx+1;
-% 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %           Correlation plots by percent cells  BOXPLOT
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% axHandle(nAx) = axes('position', [.0305 .208 .1931 .16]);
-% d1 = pdfComp.highPerCorr; 
-% d2 = pdfComp.lowPerCorr;
-% vals = [d1; d2];
-% cat = [ones(size(d1)); zeros(size(d2))];
-% boxplot(vals, cat, 'Parent', axHandle(nAx));
-% 
-% nAx = nAx+1;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %           Correlation plots by percent cells  E-CDF
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% axHandle(nAx) = axes('position', [.2855 .208 .1931 .16]);
-% ecdf(axHandle(nAx), d1 ); set(get(axHandle(nAx),'Children'), 'Color', 'r'); hold on;
-% ecdf(axHandle(nAx), d2 );
-% 
-% nAx = nAx+1;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %           Distance plots by percent cells  BOXPLOT
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% axHandle(nAx) = axes('position', [.5405 .208 .1931 .16]);
-% 
-% d1 = pdfComp.highPerDist;
-% d2 = pdfComp.lowPerDist;
-% vals = [d1; d2];
-% cat = [ones(size(d1)); zeros(size(d2))];
-% boxplot(vals, cat, 'Parent', axHandle(nAx));
-% 
-% nAx = nAx+1;
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% %           Distance plots by percent cells  ECDF
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% 
-% axHandle(nAx) = axes('position', [.7685 .208 .1931 .16]);
-% ecdf(axHandle(nAx), d1 ); set(get(axHandle(nAx),'Children'), 'Color', 'r'); hold on;
-% ecdf(axHandle(nAx), d2 );
 
 
 %% Save the Figure
- save_bilat_figure('figure4-v2', fHandle);
+ save_bilat_figure('figure5', fHandle);
 
 
 end

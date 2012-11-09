@@ -93,8 +93,8 @@ dset = dset_order_eeg_channels(dset,args);
 %                             LOAD MULTI-UNIT
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-lIdx = strcmp({dset.clusters.hemisphere}, 'left');
-rIdx = strcmp({dset.clusters.hemisphere}, 'right');
+lIdx = strcmp({dset.clusters.hemisphere}, 'left') & strcmp({dset.clusters.area}, 'CA1');
+rIdx = strcmp({dset.clusters.hemisphere}, 'right') & strcmp({dset.clusters.area}, 'CA1');
 tetId = cell2mat({dset.clusters.tetrode});
 
 lTet = unique( tetId( lIdx));

@@ -18,9 +18,9 @@ function list = dset_get_dset_file_list(epochList)
         
         for idxEpoch = 1:size(eList,1);
             [anim, dayN, epochN] = deal(eList{idxEpoch,:});
-
-            list{end+1,1} = sprintf( filenameTemplate, anim, dayN, epochN );
-
+            if isempty( strfind(anim, 'spl') )
+                list{end+1,1} = sprintf( filenameTemplate, anim, dayN, epochN );
+            end
         end
 
     end

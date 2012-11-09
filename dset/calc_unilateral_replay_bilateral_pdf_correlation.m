@@ -1,12 +1,8 @@
 function [results] = calc_unilateral_replay_bilateral_pdf_correlation(epoch)
 
-
-
 if ~any( strcmp({'run', 'sleep'}, epoch) )
     error('invalid epoch');
 end
-
-
 
 reconFileList = dset_get_recon_file_list(epoch);
 dsetFileList = dset_get_dset_file_list(epoch);
@@ -15,31 +11,24 @@ dsetFileList = dset_get_dset_file_list(epoch);
 nFile = numel(dsetFileList);
 [all.nSpike, all.perSpike, all.score] = deal( {[],[]} );
 
-fprintf('Of %d: Loading: ', nFile);
+fprintf('%d Total.  Loading: ', nFile);
 
 for iFile = 1:nFile
-    fprintf(' %d', iFile);
+    fprintf('\b%d', iFile);
     
     dataIn1 = load(dsetFileList{iFile});
     dataIn2 = load(reconFileList{iFile});
     d = dataIn1.d;
     recon = dataIn2.recon;
     clear dataIn1 dataIn2;
-    
-
-%     [~, mIdxL] = max(recon.stats{1}.score2, [], 2);
-%     [~, mIdxR] = max(recon.stats{2}.score2, [], 2);
-% 
-%     idx = mIdxL;
-
+   
     cor = [];
 
     nSpikeL = sum( recon.replay{1}.spike_counts);
     nSpikeR = sum( recon.replay{2}.spike_counts);
     
     validIdx = nSpikeL > 0 & nSpikeR > 0 & recon.replay{1}.replayIdx' & recon.replay{2}.replayIdx';
-    
-
+   
     nShuffle = 250;
 
     for iPdf = 1:numel(recon.replay{1}.pdf)
