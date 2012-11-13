@@ -3,7 +3,7 @@ open_pool;
 %% Load Data for the figure
 % dset = dset_load_all('spl11', 'day15', 'run');
 nargin
-if nargin==0 
+if ~exist('e', 'var') && nargin==0 
     e = exp_load('/data/spl11/day15', 'epochs', 'run', 'data_types', {'clusters', 'pos'});
     e = process_loaded_exp2(e);
 end
@@ -28,6 +28,7 @@ colCorr = corr_col(smPdf1, smPdf2);
 
 binDist = abs(idx1 - idx2);
 confMat = confmat(idx1, idx2);
+confMat = normalize(confMat);
 
 % colCorr = compute_recon_corr(pdf1Run, pdf2Run);
 nShuffle = 250;
@@ -52,10 +53,8 @@ for iShuffle = 1:nShuffle
 
 end    
     
-confMat = normalize(confMat);
-confMat(:,:,2) = confMat;
-confMat(:,:,3) = confMat(:,:,1);
-confMat = 1 - confMat;
+
+
 
 %% Draw the figure
 
@@ -65,72 +64,106 @@ if exist('ax', 'var'), delete( ax( ishandle(ax) ) ); end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %      A - Bilateral Reconstruction
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-f = figure('Position',  [190 75 550 920]);
-ax(1) = axes('Position', [.0745 .74 .8127 .1991]);
-fig3_example_run_recon( pdf1Run, pdf2Run,[] , ax(1))
-set(ax(1), 'XLim', [181 437], 'XTick', []);
-%set(ax(1));
-title('Reconstruction of Run Segments');
+xlim = [119 432];
+close all; nAx = 0;  f = figure('Position',  [190 75 550 675]);
+colormap( 1 - repmat(linspace(0, 1, 20)', [1,3]) );
 
-ax(6) = axes('Position', [.0766 .4657 .3663 .2179]);
-fig3_example_run_recon( pdf1, pdf2, runRecon(1).tbins, ax(6));
-set(ax(6),'Xlim', [4473.6 4482.9]);
-title('Example Lap');
+
+nAx = nAx+1; ax(nAx) = axes('Position', [.051 .7875 .9182 .1991]);
+imagesc( pdf1Run(:, xlim(1):xlim(2)), 'Parent', ax(nAx))
+%%fig3_example_run_recon( pdf1Run, pdf2Run,[] , ax(1))
+
+nAx = nAx+1; ax(nAx) = axes('Position', [.051 .5845 .9182 .1991]);
+imagesc( pdf2Run(:, xlim(1):xlim(2)), 'Parent', ax(nAx))
+
+set(ax(1:nAx), 'XTick', [], 'YDir', 'normal');
+%set(ax(1));
+%title('Reconstruction of Run Segments');
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       B - Confusion Matrix   B2 - color bar
+%      B - Single Lap Example
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ax(2) = axes('Position', [.5185 .4646 .3663 .2179]);
-imagesc((1:31)/10, (1:31)/10, confMat, 'Parent', ax(2));
-set(ax(2), 'Ydir', 'normal');
+xlim = [4473.6 4482.9];
+idx = runRecon(1).tbins >= xlim(1) & runRecon(1).tbins <= xlim(2);
+nAx = nAx+1; ax(nAx) = axes('Position', [.071 .285 .18 .2660]);
+imagesc(runRecon(1).tbins(idx), [], pdf1(:, idx), 'Parent', ax(nAx));
+
+nAx = nAx+1; ax(nAx) = axes('Position', [.255 .285 .18 .2660]);
+imagesc(runRecon(1).tbins(idx), [], pdf2(:, idx), 'Parent', ax(nAx));
+
+set( ax([nAx-1, nAx]),'Xlim', [4473.6 4482.9], 'Ydir', 'normal');
+set(ax(nAx), 'Ytick', []);
+title('Example Lap', 'Position', [4478.5-5 32 0]);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       C - Confusion Matrix  & color bar
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+nAx = nAx+1;  ax(nAx) = axes('Position', [.53 .285 .3309 .2660]);
+imagesc((1:31)/10, (1:31)/10, confMat, 'Parent', ax(nAx));
+set(ax(nAx), 'Ydir', 'normal');
 title('Confusion Matrix','Position', [1.6 3.1 1.01]);
 
-ax(3) = axes('Position', [.8968 .4646 .03 .2179]);
+nAx = nAx+1;  ax(nAx) = axes('Position', [.8768 .285 .03 .2660]);
 scaleImg = 1 - repmat(linspace(0, 1, 20)', [1,1,3]);
-image(1, linspace(0,1,20), scaleImg, 'Parent', ax(3));
-set(ax(3), 'YDir', 'normal', 'yaxislocation', 'right', 'XTick', [], 'XLim', [.5 1.5]);
+image(1, linspace(0,1,20), scaleImg, 'Parent', ax(nAx));
+set(ax(nAx), 'YDir', 'normal', 'yaxislocation', 'right', 'XTick', [], 'XLim', [.5 1.5]);
 
+%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       C - Distribution of Column Correlations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ax(4) = axes('Position', [.0766 .2511 .3663 .15]);
-bins = -3:.1:1;
-[occ, cent] = hist(colCorr, bins); 
-occ = occ./sum(occ);
-bar(cent, occ, 1,'Parent', ax(4));
-set(ax(4),'XLim', [-1.05 1.1], 'XTick', [-1:.5:1]);
-title('PDF Correlation', 'Position', [0 1 1]); 
+ax(nAx) = axes('Position', [.071 .05 .3663 .15]);
+bins = -1:.05:1;
+[occCorr, cent] = hist(colCorr, bins); 
+[occShuf, cent] = hist(colCorrShuff, bins);
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       D - Distance between the modes of the two pdfs
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ax(5) = axes('Position', [.5185 .2511 .3663 .15]);
-[occ, cent] = hist(binDist, 0:31);
-occ = occ./sum(occ);
-bar(cent/10,occ, 1,'Parent', ax(5)); 
-set(ax(5), 'XLim', [-.1 3]);
-title('\Delta pos of Pdf mode', 'Position', [1.5 1 1]);
+occCorr = occCorr./sum(occCorr);
+occShuf = occShuf./sum(occShuf);
+
+occCorrSm = smoothn(occCorr, 2, 'correct', 1);
+occShufSm = smoothn(occShuf, 2, 'correct', 1);
+
+bar(cent, occCorrSm, 1, 'FaceColor', 'r',  'Parent', ax(nAx));hold on;
+bar(cent, occShufSm, 1, 'FaceColor', 'g',  'Parent', ax(nAx)); 
+
+% line(cent, occCorr, 'Color', 'r', 'LineWidth', 2, 'Parent', ax(nAx));
+% line(cent, occShuf,'Color', 'g',  'LineWidth', 2, 'Parent', ax(nAx));
+
+set(ax(nAx),'XLim', [-1 1.025], 'XTick', [-1:.5:1], 'YLim', [0 .30]);
+title('PDF Correlation', 'Position', [0 .3 1]); 
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %       D - Distance between the modes of the two pdfs
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ax(nAx) = axes('Position', [.5185 .2511 .3663 .15]);
+% [occ, cent] = hist(binDist, 0:31);
+% occ = occ./sum(occ);
+% bar(cent/10,occ, 1,'Parent', ax(5)); 
+% set(ax(5), 'XLim', [-.1 3]);
+% title('\Delta pos of Pdf mode', 'Position', [1.5 1 1]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       E - Example shuffle of correlations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ax(7) = axes('Position', [.0766 .0641 .3663 .1305]); % axes 6 is up in the recon
-bins = -3:.1:1;
-[occ, cent] = hist(colCorrShuff, bins);
-occ = occ./sum(occ);
-bar(cent, occ, 1,'Parent', ax(7));
-set(ax(7),'XLim', [-1.05 1.1], 'XTick', [-1:.5:1]);
-title('Shuff PDF Correlation', 'Position', [0 1 1]); 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       F - Shuffle of distances
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-ax(8) = axes('Position', [.5185 .0641 .3663 .1305]); % axes 6 is up in the recon
-
-[occ, cent] = hist(binDistShuff, 0:31); 
-occ = occ./sum(occ);
-bar(cent/10,occ, 1,'Parent', ax(8));
-set(ax(8), 'XLim', [-.1 3]);
-title('\Delta pos of Shuff Pdf mode', 'Position', [1.5 .1 1]);
+%%
+% ax(nAx) = axes('Position', [.0766 .0641 .3663 .1305]); % axes 6 is up in the recon
+% bins = -3:.1:1;
+% [occ, cent] = hist(colCorrShuff, bins);
+% occ = occ./sum(occ);
+% bar(cent, occ, 1,'Parent', ax(7));
+% set(ax(nAx),'XLim', [-1.05 1.1], 'XTick', [-1:.5:1]);
+% title('Shuff PDF Correlation', 'Position', [0 1 1]); 
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %       F - Shuffle of distances
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ax(8) = axes('Position', [.5185 .0641 .3663 .1305]); % axes 6 is up in the recon
+% 
+% [occ, cent] = hist(binDistShuff, 0:31); 
+% occ = occ./sum(occ);
+% bar(cent/10,occ, 1,'Parent', ax(8));
+% set(ax(8), 'XLim', [-.1 3]);
+% title('\Delta pos of Shuff Pdf mode', 'Position', [1.5 .1 1]);
 
 %% Save the Figure
 save_bilat_figure('figure3', f);

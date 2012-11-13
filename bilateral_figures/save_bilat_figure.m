@@ -6,15 +6,19 @@ if nargin==2
 elseif nargin==3 && ~isempty(sup) && sup==1
     saveDir = '/data/bilateral/figures/sup';
 end
+date = datestr(now, 'yyyymmdd');
 
 oldDir = fullfile(saveDir, 'old_figures');
 if ~exist(oldDir, 'dir')
     mkdir(oldDir);
 end
-cmd = ['mv ', fullfile(saveDir,[figName, '*']), ' ', oldDir];
+if ~exist( fullfile(oldDir, date));
+    mkdir( fullfile(oldDir, date));
+end
+cmd = ['mv ', fullfile(saveDir,[figName, '*']), ' ', fullfile(oldDir, date)];
 system(cmd);
 
-figName = [figName,'__', datestr(now, 'yyyymmdd'),'_'];
+%figName = [figName,'', datestr(now, 'yyyymmdd'),'_'];
 
 set(gcf,'InvertHardcopy', 'off');
 

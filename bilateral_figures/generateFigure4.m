@@ -148,15 +148,16 @@ set(axHandle(1:nAx), 'YTick', [])
 %       C - Bilateral Multi-unit xcorr
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nAx = nAx + 1;
-axHandle(nAx) = axes('Position', [.0305 .1226 .2685 .2767]);
+axHandle(nAx) = axes('Position', [.0395 .1226 .2685 .2767]);
 area(lags, muXc, 0);
 set(axHandle(nAx), 'XLim', [-.25 .25], 'YLim', [.15 .75]);
+title('Bilat MUA XCorr');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       D - Distribution of Column Correlations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nAx = nAx+1;
-axHandle(nAx) = axes('Position', [.3622 .1226 .2685 .2767]);
+axHandle(nAx) = axes('Position', [.3712 .1226 .2685 .2767]);
 bins = -1:.025:1;
 
 [~, pCorr1] = kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
@@ -165,88 +166,66 @@ bins = -1:.025:1;
 [occRealCorr, cent] = hist(replayCorr, bins); 
 [occShufCorr]       = hist(colCorrShuffle, bins);
 
-occRealCorr = smoothn(occRealCorr, 3, 'correct', 1);
-occShufCorr = smoothn(occShufCorr, 3, 'correct', 1);
-
 occRealCorr  = occRealCorr./sum(occRealCorr);
 occShufCorr  = occShufCorr./sum(occShufCorr);
 
-line(cent, occRealCorr, 'color', 'r','LineWidth', 2, 'parent', axHandle(nAx));
-line(cent, occShufCorr, 'color', 'g','LineWidth', 2, 'parent', axHandle(nAx));
+occRealCorrSm = smoothn(occRealCorr, 3, 'correct', 1);
+occShufCorrSm = smoothn(occShufCorr, 3, 'correct', 1);
 
-set(axHandle(nAx),'XLim', [-1.05 1.1], 'XTick', [-1:.5:1]);
-title( sprintf('PDF Correlation p<%0.2g %02.g ', pCorr1, pCorr2) ); 
+fill( [-1 -1 1 1], [0 1 1 0],  'w', 'edgecolor', 'none', 'parent', axHandle(nAx));
+p = [];
+p(1) = patch( [cent 1], [occRealCorrSm 0], 'r', 'parent', axHandle(nAx)); hold on;
+p(2) = patch( [cent 1], [occShufCorrSm 0], 'g', 'parent', axHandle(nAx));
+set(p,'FaceAlpha', .4);
+
+set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'color', 'w', 'Ylim', [0 .045]);
+title( sprintf('PDF Corr, p<%0.2g', pCorr1) ); 
 nAx = nAx+1;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       E - Distance between the modes of the two pdfs
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axHandle(nAx) = axes('Position', [.6905 .1226 .2685 .2767]);
-
-[~, pDist1] = kstest2(binDist, binDistShuffle, .05, 'larger');
-[~, pDist2] = cmtest2(binDist, binDistShuffle);
-
-[occRealDist, cent] = hist(binDist, 0:31);
-[occShufDist] = hist(binDistShuffle, 0:31);
-
-occRealDist = interp1(cent, occRealDist, 0:.25:31);
-occShufDist = interp1(cent, occShufDist, 0:.25:31);
-cent = 0:.25:31;
-
-occRealDist = smoothn(occRealDist, 2, 'correct', 1);
-occShufDist = smoothn(occShufDist, 2, 'correct', 1);
-
-occRealDist  = occRealDist./sum(occRealDist);
-occShufDist  = occShufDist./sum(occShufDist);
-
-line(cent/10, occRealDist, 'color', 'r','LineWidth', 2, 'parent', axHandle(nAx));
-line(cent/10, occShufDist, 'color', 'g','LineWidth', 2, 'parent', axHandle(nAx));
-
-set(axHandle(nAx), 'XLim', [-.1 3]);
-title( sprintf('\\Delta pos p<%0.2g %02.g ', pDist1, pDist2) );
-
-nAx = nAx+1;
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%                   Shift the axes up
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-set(axHandle,'Units', 'pixels');
-set(gcf,'Position', [467 159 650 934]);
-for i = 1:numel(axHandle)
-   set(axHandle(i), 'Position', get(axHandle(i), 'Position') + [0 300 0 0]);
-end
-set(axHandle,'Units', 'normal');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           Distribution of Correlations by Percent Cells active
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axHandle(nAx) = axes('position', [.1653 .1478 .2685 .1837]);
-d1 = pdfComp.highPerCorr; 
-d2 = pdfComp.lowPerCorr;
+axHandle(nAx) = axes('position', [.6972 .1226 .2685 .2767]);
+distHigh = pdfComp.highPerCorr; 
+distLow = pdfComp.lowPerCorr;
 bins = [-5:.05:1];
-[h1, cent] = hist(d1, bins);
-[h2, ~] = hist(d2, bins);
+[occHigh, cent] = hist(distHigh, bins);
+[occLow, ~] = hist(distLow, bins);
 
-line(cent, smoothn(h1 ./ sum(h1), 1.5, 'correct', 1), 'color', 'b', 'Parent', axHandle(nAx), 'linewidth', 2);
-line(cent, smoothn(h2 ./ sum(h2), 1.5, 'correct', 1), 'color', 'k', 'Parent', axHandle(nAx), 'linewidth', 2);
+occHigh = occHigh ./ sum(occHigh);
+occLow = occLow ./ sum(occLow);
 
-set(axHandle(nAx), 'XLim', [-.5 1]);
+occHighSm = smoothn(occHigh, 2.5, 'correct', 1);
+occLowSm = smoothn(occLow, 2.5, 'correct', 1);
+
+p = [];
+p(1) = patch( [cent 1], [occHighSm 0], 'b', 'Parent', axHandle(nAx));
+p(2) = patch( [cent 1], [occLowSm 0],  'k', 'Parent', axHandle(nAx));
+
+set(p,'FaceAlpha', .4);
+
+set(axHandle(nAx), 'XLim', [-1 1]);
+
+title( sprintf('Mean Evt Corr, p<%0.2g', pdfComp.kstest_corr) ); 
+
 nAx = nAx+1;
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%           Distribution of Distances by Percent Cells active
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axHandle(nAx) = axes('position', [.5622 .1478 .2685 .1837]);
-d1 = pdfComp.highPerDist; 
-d2 = pdfComp.lowPerDist;
-bins = [0:45];
-[h1, cent] = hist(d1, bins);
-[h2, ~] = hist(d2, bins);
-
-line(cent, smoothn(h1 ./ sum(h1), 2, 'correct', 1), 'color', 'b', 'Parent', axHandle(nAx), 'linewidth', 2);
-line(cent, smoothn(h2 ./ sum(h2), 2, 'correct', 1), 'color', 'k', 'Parent', axHandle(nAx), 'linewidth', 2);
-
-set(axHandle(nAx), 'XLim', [0 45]);
-nAx = nAx+1;
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %           Distribution of Distances by Percent Cells active
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% axHandle(nAx) = axes('position', [.5622 .1478 .2685 .1837]);
+% d1 = pdfComp.highPerDist; 
+% d2 = pdfComp.lowPerDist;
+% bins = [0:45];
+% [h1, cent] = hist(d1, bins);
+% [h2, ~] = hist(d2, bins);
+% 
+% line(cent, smoothn(h1 ./ sum(h1), 2, 'correct', 1), 'color', 'b', 'Parent', axHandle(nAx), 'linewidth', 2);
+% line(cent, smoothn(h2 ./ sum(h2), 2, 'correct', 1), 'color', 'k', 'Parent', axHandle(nAx), 'linewidth', 2);
+% 
+% set(axHandle(nAx), 'XLim', [0 45]);
+% title( sprintf('Corr Diff p<%0.2g %02.g ', pdfComp.kstest_dist, pdfComp.cmtest_dist) ); 
+% nAx = nAx+1;
 % 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % %           Correlation plots by percent cells  BOXPLOT

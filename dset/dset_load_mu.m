@@ -1,4 +1,4 @@
-function [mu p] = dset_load_mu(animal, day, epoch, varargin)
+function [mu, p, leftCounts, rightcounts] = dset_load_mu(animal, day, epoch, varargin)
 % DSET_LOAD_MU - loads the gross unsorted firing rate for a set of electrodes
 
 args = dset_get_standard_args;

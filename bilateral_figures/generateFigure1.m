@@ -1,10 +1,10 @@
 function generateFigure1
 open_pool;
-clear;
+
 %% Load Data for Panels A, B
 
 % For ripple detection code see fig1_sandbox.m
-
+clear;
 fname = '/data/misc/spl11_d14_sleep_rip_burst.mat';
 data = load(fname);
 b = data.b;
@@ -22,11 +22,12 @@ ripples = dset_load_ripples;
 
 data = load('/data/thesis/bilateral_ripple_coherence.mat');
 ripCohere = data.rippleCoherence;
-ripCohere.sleep.shuffleCoherence = ripCohere.sleep.shuffleCoherence(1);
+ripCohere.run.shuffleCoherence = ripCohere.run.shuffleCoherence(1);
+
 clear data;
 
-ripPhaseSleep = calc_bilateral_ripple_phase_diff(ripples.sleep);
-ripFreqSleep = calc_bilateral_ripple_freq_distribution(ripples.sleep);
+ripPhaseRun = calc_bilateral_ripple_phase_diff(ripples.run);
+ripFreqRun = calc_bilateral_ripple_freq_distribution(ripples.run);
 
 %% Setup Figure
 % close all;
@@ -85,8 +86,8 @@ set(axF1(2), 'Xlim', xlim, 'YLim', [800 pOffset*6 + 800*1.5], 'Ytick', [],'XTick
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 axF1(3) = axes('Position', [.05 .27 .35 .19], 'Color', 'k');
 
-%rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.sleep([3 15 5 17 18 6]));
-rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.sleep(10:13));
+%rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.run([3 15 5 17 18 6]));
+rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.run([2 10]));
 
 % error_area_plot(rTrigLfp.ts, rTrigLfp.meanLfp{1}, 'Color', [1 0 0 ], 'Parent', axF1(3));
 line(rTrigLfp.ts, rTrigLfp.meanLfp{1}, 'Color', [1 0 0 ], 'Parent', axF1(3)); 
@@ -105,9 +106,9 @@ set(t,'Position', [0 460, 1]);
 axF1(4) = axes('Position', [.55 .25 .35 .19]);
 
 bins = -(pi) : pi/8 : (pi + pi/8);
-% [T,R] = rose(ripPhaseSleep.dPhase, bins);
+% [T,R] = rose(ripPhaseRun.dPhase, bins);
 
-rose2(ripPhaseSleep.dPhase, bins, 'Parent', axF1(4));
+rose2(ripPhaseRun.dPhase, bins, 'Parent', axF1(4));
 title('Ripple Phase difference distribution');
 % set(axF1(4), 'XLim', [-1.05 1.05] * pi , 'XTick', -pi:pi/2:pi);
 % set(axF1(4), 'XTickLabel', {'-pi','-pi/2',  '0', 'pi/2', 'pi'});
@@ -117,11 +118,11 @@ title('Ripple Phase difference distribution');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 axF1(5) = axes('Position', [.05 .025 .35 .19]);
 
-bins = 150:3:225;
-occ = hist3([ripFreqSleep.base, ripFreqSleep.cont], {bins, bins});
+freqBins = 150:3:225;
+bilatFreqDistRun = hist3([ripFreqRun.base, ripFreqRun.cont], {freqBins, freqBins});
 %occ = smoothn(occ,1);
 
-imagesc(bins, bins, occ, 'Parent', axF1(5));
+imagesc(freqBins, freqBins, bilatFreqDistRun, 'Parent', axF1(5));
 
 set(axF1(5),'Xlim', [150 225], 'YLim', [150 225], 'YDir', 'normal');
 t = title('Bilateral Ripple Mean Freq Dist', 'Parent', axF1(5));
@@ -132,14 +133,14 @@ set(t,'Position', [187.5 225, 1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 axF1(6) = axes('Position', [.55 .025 .35 .19]);
 
-F = ripCohere.sleep.F;
-mCoData = mean(ripCohere.sleep.rippleCoherence);
-sCoData = std(ripCohere.sleep.rippleCoherence);
-n = size(ripCohere.sleep.rippleCoherence,1);
+F = ripCohere.run.F;
+mCoData = mean(ripCohere.run.rippleCoherence);
+sCoData = std(ripCohere.run.rippleCoherence);
+n = size(ripCohere.run.rippleCoherence,1);
 nStd = 3;
 
-mCoShuf = mean(ripCohere.sleep.shuffleCoherence{1});
-sCoShuf = std(ripCohere.sleep.shuffleCoherence{1});
+mCoShuf = mean(ripCohere.run.shuffleCoherence{1});
+sCoShuf = std(ripCohere.run.shuffleCoherence{1});
 
 [p(1), l(1)] = error_area_plot(F, mCoData, nStd * sCoData / sqrt(n), 'Parent', axF1(6));
 [p(2), l(2)] = error_area_plot(F, mCoShuf, nStd * sCoShuf / sqrt(n), 'Parent', axF1(6));
