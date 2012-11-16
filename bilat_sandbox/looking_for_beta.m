@@ -16,7 +16,7 @@ set(get(ar(2), 'Children'), 'FaceAlpha', .5);
 %%
 
 
-idx = (376:751);
+idx = fliplr(1:362);
 x = 0:(numel(idx)-1);
 
 ySlp = meanMuaSleep(idx);
@@ -38,7 +38,7 @@ pSlp = polyfit(x, zSlp,1);
 pRun = polyfit(x(1:nReg), zRun(1:nReg),1);
 
 ySlpHat = exp( x*pSlp(1) + pSlp(2) );
-ySlpHat = ySlpHat / max(ySlpHat);
+%ySlpHat = ySlpHat / max(ySlpHat);
 
 yRunHat = exp( x*pRun(1) + pRun(2) );
 yRunHat = yRunHat / max(yRunHat);
@@ -48,8 +48,6 @@ yRunDiff = yRun - yRunHat;
 
 [~, peakLocsSlp] = findpeaks( ySlpDiff );
 [~, peakLocsRun] = findpeaks( yRunDiff );
-
-
 
 peakTsSlp = peakLocsSlp / Fs;
 peakTsRun = peakLocsRun / Fs;
