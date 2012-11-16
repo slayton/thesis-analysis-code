@@ -103,6 +103,7 @@ for i = 1:3
         dset.eeg(i).hemisphere = 'right';
     end
     dset.eeg(i).tet = 'Unknown';
+    
 end
 dset.ref.fs = dset.eeg(1).fs;
 dset.ref.starttime = dset.eeg(1).starttime;
@@ -120,7 +121,64 @@ dset.description.animal = anim;
 dset.description.day = day;
 dset.description.epoch = epoch;
     
- 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                        CONVERT  MULTI-UNIT ACTIVITY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+[tt loc] = load_exp_tt_anatomy(edir);
+
+anat = unique(loc);
+muDt = 1/200;
+tbins = dset_calc_timestamps(dset.eeg(1).starttime, numel(dset.eeg(1).data), dset.eeg(1).fs);
+tbins = tbins(1):muDt:(tbins(end)-muDt);
+
+disp('Loading Multiunit!');
+for a = 1:numel(anat)
+    
+    ind = ismember(loc,anat(a));
+    %disp(['loading multi-unit rate from: ', anat{a}]);
+    wave = load_exp_mu(edir, epoch, 'ignore_tetrode', tt(~ind));
+
+    wave = histc(wave,tbins);
+    dset.mu.ts = tbins;
+
+    if ~isempty(wave)
+        %wave( wave>(mean(wave)+10*std(wave)))=mean(wave);
+        dset.mu.(anat{a}) = wave;
+    else
+        dset.mu.(anat{a}) = nan;
+    end
+    dset.mu.timestamps = tbins;
+    dset.mu.Fs = muDt^-1;
+    
+end
+
+if isfield(dset.mu, 'lCA1')
+    dset.mu.rateL = dset.mu.lCA1;
+    dset.mu = rmfield(dset.mu, 'lCA1');
+end
+
+if isfield(dset.mu, 'rCA1')
+    dset.mu.rateR = dset.mu.rCA1;
+    dset.mu = rmfield(dset.mu, 'rCA1');
+end
+
+if isfield(dset.mu, 'rCA3')
+    dset.mu = rmfield(dset.mu, 'rCA3');
+end
+if isfield(dset.mu, 'lCA3')
+    dset.mu = rmfield(dset.mu, 'lCA3');
+end
+
+args = dset_get_standard_args;
+args = args.multiunit;
+
+dset.mu.rateL = smoothn(dset.mu.rateL, args.smooth_dt, args.dt);
+dset.mu.rateR = smoothn(dset.mu.rateR, args.smooth_dt, args.dt);
+dset.mu.rate = dset.mu.rateL + dset.mu.rateR;
+dset.mu.bursts = dset_find_mua_bursts(dset.mu, 'filter_on_velocity', 0);
+
+
+
     
     
     

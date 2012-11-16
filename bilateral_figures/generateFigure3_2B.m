@@ -6,26 +6,27 @@ open_pool;
 %           Load Sleep Data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear;
-%%%%% SLEEP %%%%%
-sleepEpochs = dset_list_epochs('sleep');
-% runEpochs = dset_list_epochs('run');
-ripples = dset_load_ripples;
-ripples = ripples.sleep(2);
-
-dset = dset_load_all(sleepEpochs{2,1}, sleepEpochs{2,2}, sleepEpochs{2,3});    
-% dsetR = dset_load_all(runEpochs{1,1}, runEpochs{1,2}, runEpochs{1,3});    
-%%
-Fs = dset.eeg(1).fs;
-nSamp = round( .25 * Fs );
-win = [-nSamp:nSamp];
-
-ts = dset_calc_timestamps(dset.eeg(1).starttime, numel(dset.eeg(1).data), dset.eeg(1).fs);
-muRate = interp1(dset.mu.timestamps, dset.mu.rate, ts);
-muRate(isnan(muRate))=0;
-
-ripWin = bsxfun(@plus, win, ripples.peakIdx);
-mua = muRate(ripWin);
-meanMuaSleep = mean(mua);
+% %%%%% SLEEP %%%%%
+% sleepEpochs = dset_list_epochs('sleep');
+% % runEpochs = dset_list_epochs('run');
+% ripples = dset_load_ripples;
+% ripples = ripples.sleep(2);
+% 
+% dset = dset_load_all(sleepEpochs{2,1}, sleepEpochs{2,2}, sleepEpochs{2,3});    
+% % dsetR = dset_load_all(runEpochs{1,1}, runEpochs{1,2}, runEpochs{1,3});    
+% %%
+% Fs = dset.eeg(1).fs;
+% nSamp = round( .25 * Fs );
+% win = [-nSamp:nSamp];
+% 
+% ts = dset_calc_timestamps(dset.eeg(1).starttime, numel(dset.eeg(1).data), dset.eeg(1).fs);
+% muRate = interp1(dset.mu.timestamps, dset.mu.rate, ts);
+% muRate(isnan(muRate))=0;
+% 
+% ripWin = bsxfun(@plus, win, ripples.peakIdx);
+% mua = muRate(ripWin);
+% meanMuaSleep = mean(mua);
+looking_for_beta_load_data;
 %% XCORR EEG and MUA
 % ts = dset_calc_timestamps(dset.eeg(1).starttime, numel(dset.eeg(1).data), dset.eeg(1).fs);
 % muRate = interp1(dset.mu.timestamps, dset.mu.rate, ts);
@@ -47,11 +48,16 @@ meanMuaSleep = mean(mua);
 f = figure;
 a = axes;
 
-bar(1000 * win / ripples.Fs, meanMua, 1);
+line(1000 * win/ Fs, meanMuaRun, 'color', [1 0 0], 'linewidth', 2);
+line(1000 * win / Fs, meanMuaSleep, 'Color', [0 0 1], 'linewidth', 2);
+
+line([0 0], get(gca,'Ylim'));
 set(gca,'XLim', [-250 250]);
+line([0 0], get(gca,'Ylim'), 'Color', 'k');
+set(gca,'YTick', []);
 xlabel('Time (ms)');
 ylabel('Multiunit Rate');
-set(gca,'YTick', []);
+
 title('RipTrig Average MUA');
 
 %%

@@ -31,11 +31,7 @@ i = 2;
     for iii = 1:2
         [st(iii), rp(iii)] = dset_calc_replay_stats(dset, clIdx{iii}, [], [],1);
     end
-%     
-%     score1 = stats(1).score2;
-%     score2 = stats(2).score2;
-%     [~, trajIdx] = max( max(score1, score2), [], 2);
-    
+
 % get the indecies of the timebins with spikes in both hemispheres
     lSpikeIdx = logical( sum(reconSimp(1).spike_counts) );
     rSpikeIdx = logical( sum(reconSimp(2).spike_counts) );

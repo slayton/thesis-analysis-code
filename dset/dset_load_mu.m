@@ -39,8 +39,8 @@ for i = 1:numel(args.electrodes)
     data = load(filepath);
     data = data.filedata;
     
-    chanIdx = find(strcmp(data.paramnames, args.param_str));
-    timeIdx = find(strcmp(data.paramnames, 'Time'));
+    chanIdx = strcmp(data.paramnames, args.param_str);
+    timeIdx = strcmp(data.paramnames, 'Time');
     
     % threshold the spikes
     idx = data.params(:,chanIdx)>args.threshold;
