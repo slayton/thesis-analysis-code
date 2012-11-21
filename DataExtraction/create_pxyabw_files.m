@@ -14,9 +14,9 @@ function create_pxyabw_files(edir, tt_f)
         px1_file = fullfile(edir, file(1:3), [file(1:3), '.pxyabw']);
         px2_file = fullfile(edir, file(4:6), [file(4:6), '.pxyabw']);
         
-        cmd = ['spikeparms2 ', t1, ' -tetrode -parms ', parms, ' -pos ', pos_file, ' -o ', px1_file];
+        cmd = ['/home/slayton/bin/mwsoft/spikeparms2 ', t1, ' -tetrode -parms ', parms, ' -pos ', pos_file, ' -o ', px1_file];
         system(cmd);
-        cmd = ['spikeparms2 ', t2, ' -tetrode -parms ', parms, ' -pos ', pos_file, ' -o ', px2_file];
+        cmd = ['/home/slayton/bin/mwsoft/spikeparms2 ', t2, ' -tetrode -parms ', parms, ' -pos ', pos_file, ' -o ', px2_file];
         system(cmd);
     end
     

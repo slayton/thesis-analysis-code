@@ -35,7 +35,7 @@ function create_exp_pxyabw_files(edir,  varargin)
         px_file = fullfile(edir, file, [file, '.pxyabw']);
 
         
-        cmd = ['spikeparms2 ',bin, tt, ' -tetrode -parms ', parms, ' -pos ', pos_file, ' -o ', px_file];
+        cmd = ['/home/slayton/bin/mwsoft/spikeparms2 ',bin, tt, ' -tetrode -parms ', parms, ' -pos ', pos_file, ' -o ', px_file];
         disp(cmd);
         system(cmd);
         

@@ -1,27 +1,30 @@
-function a = line_browser(data, ts, varargin)
+function a = line_browser(timestamps, data, varargin)
 % line_browser(data, ts, varargin), returns handles to line objects that
 % are plotted dynamically
 
 args.color = 'b';
-args.axes = [];
+args.parent = [];
 args.offset = 0;
 args = parseArgsLite(varargin, args);
-a = axescheck(args.axes);
+a = axescheck(args.parent);
 
-if isempty(a)
+if isempty(a) 
     figure();
     a = axes();
     disp('No Axes specified, creating them');
 end
 
-if nargin == 1 || isempty(ts)
+if nargin == 1
+    data = ts;
     timestamps = 1:length(data);
-else
-    timestamps = ts;
 end
 
-if size(data,1)>1 && numel(args.color)==1
+if ismatrix(data) && size(data,1)>1 && numel(args.color)==1
     args.color = repmat(args.color, size(data,1),1);
+end
+
+if isvector(data) && size(data,2)>size(data,1)
+    data = data';
 end
 
 if args.offset~=0

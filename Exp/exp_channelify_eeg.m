@@ -28,17 +28,20 @@ for i = 1:numel(eeg_files)
     cmd = ['adextract -eslen80 ', eeg_files{i}, ' -c -o ', out_file];
     if ~exist(out_file, 'file')
         disp(strcat('Executing Command: ', cmd));
-        system(cmd);     
+ %       system(cmd);     
     end
-    in_file = out_file;
+    in_file = fullfile(edir, out_file);
     
     % create two eeg files for the epoch, a full sample rate file and a
     % downsampled file
     
 
     out_file = ['eeg', num2str(i), '_',ep,'_', num2str(fs), 'Hz.dat'];
+    out_file = fullfile(edir, out_file);
+    disp(strcat('Writing file:', out_file));
     if ~exist(out_file, 'file')
         disp(strcat('Writing file:', out_file));
+		disp(in_file)
         debuffer_eeg_file(in_file, out_file, 'epoch', epochTimes, 'fs', fs);
     end
 
@@ -84,10 +87,16 @@ for i = 1:numel(eeg_files)
     timestamps = data.timestamp;
     for j=1:size(waves,2)
         data = double(waves(:,j));
-        hemisphere = hemi{j};
-        area = areas{j};
-        label = labels{j};
-        outfile = fullfile(edir, 'eeg', [label, '.',ep, '.', num2str(fs), 'Hz.mat']);
+		if isempty(hemi)
+			hemisphere = 'right';
+			label = '';
+			area = '';
+		else
+        	hemisphere = hemi{j};
+    	    area = areas{j};
+	        label = labels{j};
+		end
+        outfile = fullfile(edir,  [ep, '.', num2str(fs), 'Hz.mat']);
         disp(['Saving: ', outfile,'!']);
         save(outfile, 'data', 'timestamps','fs', 'area', 'hemisphere', 'label');
     end

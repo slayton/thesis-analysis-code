@@ -113,8 +113,32 @@ switch band
         
         eval(s);   
         
-    case 'spindle'
+    case 'spindle1'
+         %Filter order is the the first even integer > Fs
+        s = 'N = ceil(Fs); N = N + mod(N,2); ';
         
+        switch method
+            case 'win'
+                s = [s 'b = fir1( N, 2.*[6 16]./Fs );'];
+            
+            otherwise
+                error('Invalid method')
+        end
+        
+        eval(s);
+    
+    case 'spindle2'
+         %Filter order is the the first even integer > Fs
+         s = 'N = ceil(Fs./4); N = N + mod(N,2); ';
+        
+        switch method
+            case 'win'
+                s = [s 'b = fir1( N, 2.*[10 20]./Fs );'];
+            otherwise
+                error('Invalid method')
+        end
+        
+        eval(s);
     case 'gamma'
         
         if nargin<3 || isempty(method)

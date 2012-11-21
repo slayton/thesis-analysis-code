@@ -39,7 +39,8 @@ for i=1:numel(args.epochs)
 
 %% Calculate Place fields for each cluster
     if ismember('calc_tc', args.operations);
-        if isfield(exp.(e),'pos') && isfield(exp.(e),'cl')
+        if isfield(exp.(e),'pos') && isfield(exp.(e),'cl') && ~isempty( fieldnames(exp.(e).cl))
+           
             disp([10, e, ': computing place fields']);
 
             cl = exp.(e).cl;
@@ -118,7 +119,7 @@ for i=1:numel(args.epochs)
         warning('Calculate Local Ripple Bursts is not implemented');
     end
 %% Load Tetrode Anatomy
-    if ismember('load_tetrode_anatomy', args.operations) && isfield(exp.(e),'cl')
+    if ismember('load_tetrode_anatomy', args.operations) && isfield(exp.(e),'cl') && ~isempty(fieldnames(exp.(e).cl))
        disp([e, ': loading tetrode anatomy']);
       
        [tt loc] = load_exp_tt_anatomy(exp.edir);

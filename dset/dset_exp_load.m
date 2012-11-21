@@ -65,20 +65,23 @@ dset.epochTime = e.(epoch).et;
 
 if isfield(e.(epoch), 'cl')
     clE = e.(epoch).cl;
-    clD = struct(size(clE));
+    clD = repmat([], size(clE) );
 
-    for i = 1:numel(clE)
-        c.st = clE(i).st;
-        [~, c.day] = fileparts(edir);
-        c.epoch = epoch;
-        c.tetrode = num2str(c.tt(2:end));
-        c.area = clE(i).loc(2:end);
-        if clE(i).loc(1)=='l'
-            c.hemisphere = 'left';
-        elseif clE(i).loc(2)=='r'
-            c.hemisphere = 'right';   
+    disp('step');
+    if ~isempty(fieldnames(clE))
+        for i = 1:numel(clE)
+            c.st = clE(i).st;
+            [~, c.day] = fileparts(edir);
+            c.epoch = epoch;
+            c.tetrode = num2str(c.tt(2:end));
+            c.area = clE(i).loc(2:end);
+            if clE(i).loc(1)=='l'
+                c.hemisphere = 'left';
+            elseif clE(i).loc(2)=='r'
+                c.hemisphere = 'right';   
+            end
+            clD(i) = c;
         end
-        clD(i) = c;
     end
     dset.cl = clD;
 end
@@ -86,10 +89,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                        CONVERT  EEG
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-
 ch = exp_get_preferred_eeg_channels(edir);
 eeg = e.(epoch).eeg;
 fs = 1.000 / mean(diff(eeg.ts));
+
 
 for i = 1:3
     
@@ -155,15 +158,19 @@ end
 if isfield(dset.mu, 'lCA1')
     dset.mu.rateL = dset.mu.lCA1;
     dset.mu = rmfield(dset.mu, 'lCA1');
+else
+    dset.mu.rateL = zeros(size(tbins));
 end
 
 if isfield(dset.mu, 'rCA1')
     dset.mu.rateR = dset.mu.rCA1;
     dset.mu = rmfield(dset.mu, 'rCA1');
+else
+    dset.mu.rateL = zeros(size(tbins));
 end
 
 if isfield(dset.mu, 'rCA3')
-    dset.mu = rmfield(dset.mu, 'rCA3');
+    dset.mu = rmfield(dset.mu, 'rCA3');   
 end
 if isfield(dset.mu, 'lCA3')
     dset.mu = rmfield(dset.mu, 'lCA3');

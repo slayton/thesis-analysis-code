@@ -78,12 +78,12 @@ function epoch_data = load_exp_epoch(edir, ep, et, args)
     end
     
     if ismember('eeg', args.data_types)
-        disp([10,'Loading eeg for epoch: ', ep]);        
+        disp([10,'Loading  for epoch: ', ep]);        
         epoch_data.eeg = load_exp_eeg(edir, ep,...
             'ignore_eeg_file', args.ignore_eeg_file, ...
             'ignore_eeg_channel', args.ignore_eeg_channel);
     end
-%       
+       
 %     if ismember('mu', args.data_types)
 %         disp(['     Loading multi unit for epoch: ', ep]);        
 %         epoch_data.mu.st = load_exp_mu(edir, ep, 'ignore_tetrode_mu', args.ignore_tetrode_mu);

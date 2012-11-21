@@ -41,19 +41,22 @@ function tt_f = extract_tetrode_files(edir)
     disp('Extracting Tetrodes');
     for f = tt_f
         file = f{1};
-        t1 = [fullfile(edir, file(1:3), file(1:3)), '.tt'];
-        t2 = [fullfile(edir, file(4:6), file(4:6)), '.tt'];
-        ffile = fullfile(edir,  file);
-        mkdir(fullfile(edir, file(1:3)));
-        mkdir(fullfile(edir, file(4:6)));
+        if numel(file)>3
+            
+            t1 = [fullfile(edir, file(1:3), file(1:3)), '.tt'];
+            t2 = [fullfile(edir, file(4:6), file(4:6)), '.tt'];
+            ffile = fullfile(edir,  file);
+            mkdir(fullfile(edir, file(1:3)));
+            mkdir(fullfile(edir, file(4:6)));
         
-        cmd = ['adextract -eslen80 -t -probe 0 ', ffile, ' -o ', t1];
+        cmd =['/home/slayton/bin/mwsoft/adextract -eslen80 -t -probe 0 ', ffile, ' -o ', t1];
         system(cmd);
-        cmd = ['adextract -eslen80 -t -probe 1 ', ffile, ' -o ', t2];
+        cmd =['/home/slayton/bin/mwsoft/adextract -eslen80 -t -probe 1 ', ffile, ' -o ', t2];
         system(cmd);
              
-        cmd = ['mv ', fullfile(edir, file), ' ', fullfile(edir, 'raw', file)];
-        system(cmd);  
+            cmd = ['mv ', fullfile(edir, file), ' ', fullfile(edir, 'raw', file)];
+            system(cmd);  
+        end
     end
 end
 
@@ -68,10 +71,10 @@ function extract_pos_file(edir)
         pos_file = fullfile(edir, [file(1:end-4), '.pos']);
         p_file   = fullfile(edir, 'position.p');
     
-        cmd = ['adextract -eslen80 ', ffile, ' -p -o ', pos_file];
+        cmd =['/home/slayton/bin/mwsoft/adextract -eslen80 ', ffile, ' -p -o ', pos_file];
         system(cmd);
     
-        cmd = ['posextract ', pos_file, ' -o ', p_file];
+        cmd =['/home/slayton/bin/mwsoft/posextract ', pos_file, ' -o ', p_file];
         system(cmd);
     
         cmd = ['mv ', ffile, ' ', fullfile(edir, 'raw', file)];
@@ -90,7 +93,7 @@ function extract_eeg_files(edir)
         ffile = fullfile(edir, file);
         eeg_file = fullfile(edir, [file(1:4), '.buf']);
         
-        cmd = ['adextract -eslen80 ', ffile, ' -c -o ', eeg_file];
+        cmd =['/home/slayton/bin/mwsoft/adextract -eslen80 ', ffile, ' -c -o ', eeg_file];
         system(cmd);
      
         cmd = ['mv ', ffile, ' ', fullfile(edir, 'raw', file)];

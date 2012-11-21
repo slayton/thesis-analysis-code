@@ -5,6 +5,9 @@ function f = define_exp_eeg_anatomy(edir)
 f = figure('Position', [800 480 281 500], 'Name', 'Define Eeg Anatomy', 'NumberTitle', 'off');
 
 eeg_files = dir(fullfile(edir, '*.eeg'));
+if isempty(eeg_files)
+    eeg_files = dir( fullfile( edir, '*.buf') );
+end
 ch = {};
 for i=1:numel(eeg_files)
     for j=1:8
@@ -36,6 +39,9 @@ save_btn = uicontrol('style', 'pushbutton', 'String', 'Save', 'Units', 'Normaliz
 quit_btn = uicontrol('style', 'pushbutton', 'String', 'Quit', 'Units', 'Normalized',...
     'Position', [.8 .015 .18 .05], 'CallBack', @quit_fn);
 
+if exist(fullfile(edir, 'eeg_anatomy.mat'))
+    load_fn();
+end
 
 saved = 0;
 

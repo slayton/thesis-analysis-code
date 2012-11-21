@@ -20,6 +20,8 @@ ripWin = -750:750;
 ripTrigMuaAll = [];
 
 
+eps = 2;
+%eps = 1:size(eList,1);
 if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exist('fs','var') || ...
  isempty(muRate) || isempty(eeg) || isempty(ts) || isempty(fs)
     disp('Multi-unit and eeg not loaded yet, loading now');
@@ -28,7 +30,7 @@ if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exis
     ts = {};
     fs = [];
     
-    for iEpoch = 2%1:numel(ripples)
+    for iEpoch = eps%1:numel(ripples)
         
         dset = dset_load_all(eList{iEpoch,1}, eList{iEpoch,2}, eList{iEpoch,3});
         eegTmp = dset.eeg(1);
@@ -54,7 +56,7 @@ setIdxTrip= {};
 setidxSing = {};
 setWinTrip = {};
 setWinSing = {};
-for iEpoch = 2%:numel(ripples)
+for iEpoch = eps%:numel(ripples)
     
    if isempty(muRate{iEpoch})
         continue;
