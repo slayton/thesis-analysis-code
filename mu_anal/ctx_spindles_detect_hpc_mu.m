@@ -38,7 +38,7 @@ clear eegFileName
 % - Filter RSC channels in the spindle band (10-20 hz)
 rscChan = 1;
 rscEeg = eegData(:,rscChan);
-s1Filt = getfilter(eegFs, 'spindle1', 'win');
+s1Filt = getfilter(eegFs, 'spindle', 'win');
 % s2Filt = getfilter(fs, 'spindle2', 'win');
 
 disp('Filtering RSC EEG for Spindles');
@@ -51,7 +51,8 @@ rscPow = rscSpinBand .^2;
 tholdEnv = 3 * std(rscEnv);
 tholdPow = 3 * std(rscPow);
 
-isSpindleEnv = bsxfun(@gt, rscPow, tholdPow);
+isSpindlePow = bsxfun(@gt, rscPow, tholdPow);
+% isSpindleEnv = bsxfun(@gt, rscEnv, tholdEnv);
 
 % - Load the multi-unit data
 
@@ -80,68 +81,119 @@ if ~exist('mu', 'var')
 
     muRate = mu.rate;
     muTs = mu.timestamps;
-    muFs = mean(diff(muTs));
+    muFs = 1/mean(diff(muTs));
     muBursts = mu.bursts;
     clear d;
     
 end
+
+spindles = logical2seg(eegTs, isSpindlePow);
+isi = [Inf; diff(spindles(:,1))];
+
 %%
-spindles = logical2seg(eegTs, isSpindleEnv);
-isi = [nan; diff(spindles(:,1))];
-dtThresh = [1 .25];
+
+dtThresh = [1 .15 1];
+
 setIdx.trip = [];
 setIdx.sing = [];
 
 tmpSetIdx3 = nan(size(isi));
 tmpSetIdx1 = nan(size(isi));
 
-for j = 1:numel(isi)-4
+N = 3;
+for j = 1:numel(isi)-N
+    
     if isi(j) > dtThresh(1)
-        if isi(j+1) < dtThresh(2)
-            if isi(j+2) < dtThresh(2)
-                    tmpSetIdx3(j) = j;
-
-            end
-        else
+        
+        if all( isi( j+1 : j+N) < dtThresh(2) )
+           
+            tmpSetIdx3(j) = j;  
+        
+        elseif isi(j+1) > dtThresh(1)
+            
             tmpSetIdx1(j) = j;
+            
         end
+        
     end
 end
+
+
 tripSpindleIdx = tmpSetIdx3( isfinite(tmpSetIdx3));
 soloSpindleIdx = tmpSetIdx1( isfinite(tmpSetIdx1));
 
-fprintf('N Trip:%d N Solo:%d\n', numel(tripSpindleIdx), numel(soloSpindleIdx));
+nTrip = numel(tripSpindleIdx);
+nSolo = numel(soloSpindleIdx);
+
+nRand = max(nTrip, nSolo);
+randSpindleIdx = randsample(numel(isi), nRand);
+
+
+fprintf('N Trip:%d N Solo:%d\n',nTrip, nSolo);
 
 % convert the spindle event ts from eeg ts to mu ts
 eegTripSpindleTs = spindles(tripSpindleIdx,1);
 eegSoloSpindleTs = spindles(soloSpindleIdx,1);
+% eegRandSpindleTs = spindles(randSpindleIdx,1);
 
 muTripSpindTs = interp1(muTs, muTs, eegTripSpindleTs,'nearest');
 muSoloSpindTs = interp1(muTs, muTs, eegSoloSpindleTs,'nearest');
+% muRandSpindTs = interp1(muTs, muTs, eegRandSpindleTs,'nearest');
+
 
 muTripSpindIdx = interp1(muTs, 1:numel(muTs), muTripSpindTs);
 muSoloSpindIdx = interp1(muTs, 1:numel(muTs), muSoloSpindTs);
+% muRandSpindIdx = interp1(muTs, 1:numel(muTs), muRandSpindTs);
 
 
-winLen = .5;
-winLenSamp = winLen /muFs;
-winSamps = [-winLenSamp:winLenSamp];
-winTime = muFs *  winSamps;
+win = [-.5 1];
+winSamps = win * muFs;
+winSamps = [winSamps(1):winSamps(2)];
+winTime =   winSamps / muFs;
 
-winSampsTrip = bsxfun(@plus,  winSamps, muTripSpindIdx);
-winSampsSolo = bsxfun(@plus,  winSamps, muSoloSpindIdx);
-
+winSampsTrip = bsxfun(  @plus, winSamps, muTripSpindIdx );
+winSampsSolo = bsxfun(  @plus, winSamps, muSoloSpindIdx );
+% winSampsRand1 = bsxfun( @plus, winSamps, muRandSpindIdx );
 
 muRateTrip = muRate(winSampsTrip);
 muRateSolo = muRate(winSampsSolo);
+% muRateRand1 = muRate(winSampsRand1);
 
+close all; figH = figure('Position', [340 630 1000 350]);
+axH = axes('NextPlot', 'add', 'Position', [.066 .198 .9 .723]);
+[p, l] = deal([]);
 
-close all; figH = figure;
-axH = axes;
+nTrip = numel(muTripSpindIdx);
+nSolo = numel(muSoloSpindIdx);
+% nRand = size(winSampsRand1,2);
 
-plot(winTime, mean(muRateTrip), 'r'); hold on;
-plot(winTime, mean(muRateSolo), 'b');
+nStd = 1.96;
+%[p(3), l(3)] = error_area_plot(winTime * 1000, mean(muRateRand1), nStd * std(muRateRand1) / sqrt(nRand), 'Parent', axH);
+[p(1), l(1)] = error_area_plot(winTime * 1000, mean(muRateTrip), nStd * std(muRateTrip) / sqrt(nTrip), 'Parent', axH);
+[p(2), l(2)] = error_area_plot(winTime * 1000, mean(muRateSolo), nStd * std(muRateTrip) / sqrt(nSolo), 'Parent', axH);
+
+set(p,'FaceAlpha', .4, 'EdgeColor', 'none');
+set(p(1), 'FaceColor', [1 0 0]); set(l(1), 'Color', [1 0 0], 'linewidth', 2);
+set(p(2), 'FaceColor', [0 1 0]); set(l(2), 'Color', [0 1 0], 'linewidth', 2);
+
+legend([l(1), l(2)], {'Trip', 'Solo'}, 'Location', 'northwest');
+
+ylabel('Rate (hz)');
+xlabel('Time (ms)')
+
+%%
+close all; figH = figure('Position', [340 630 1000 350]);
+axH = axes('NextPlot', 'add', 'Position', [.066 .198 .9 .723]);
+
+plot(winTime * 1000, mean(muRateRand1), 'c', 'linewidth', 2);
+plot(winTime * 1000, mean(muRateTrip), 'r', 'linewidth', 2);
+plot(winTime * 1000, mean(muRateSolo), 'b', 'linewidth', 2);
+
 legend({'Trip', 'Solo'}, 'Location', 'northwest');
+ylabel('Rate (hz)');
+xlabel('Time (ms)')
+
+%%
 
 
 
@@ -209,9 +261,9 @@ tholdEnv = 3 * std(rscEnv);
 tholdPow = 3 * std(rscPow);
 
 isSpindlePow = bsxfun(@gt, rscEnv, tholdEnv);
-isSpindleEnv = bsxfun(@gt, rscPow, tholdPow);
+isSpindlePow = bsxfun(@gt, rscPow, tholdPow);
 
-spindles = logical2seg(eegTs, isSpindleEnv);
+spindles = logical2seg(eegTs, isSpindlePow);
 
 % - Load the multi-unit data
 

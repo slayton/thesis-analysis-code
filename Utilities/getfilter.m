@@ -113,13 +113,13 @@ switch band
         
         eval(s);   
         
-    case 'spindle1'
+    case 'spindle'
          %Filter order is the the first even integer > Fs
         s = 'N = ceil(Fs); N = N + mod(N,2); ';
         
         switch method
             case 'win'
-                s = [s 'b = fir1( N, 2.*[6 16]./Fs );'];
+                s = [s 'b = fir1( N, 2.*[8 16]./Fs );'];
             
             otherwise
                 error('Invalid method')
@@ -193,6 +193,8 @@ switch band
                     error('Invalid method')
             end
 
-            eval(s);       
+            eval(s);      
+    otherwise
+        error('Invalid Band specified');
 
 end

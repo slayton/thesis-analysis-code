@@ -5,7 +5,7 @@ function a = line_browser(timestamps, data, varargin)
 args.color = 'b';
 args.parent = [];
 args.offset = 0;
-args = parseArgsLite(varargin, args);
+args = parseArgs(varargin, args);
 a = axescheck(args.parent);
 
 if isempty(a) 
@@ -46,7 +46,7 @@ set(a, 'Units', 'Normalized');
        
         if ~ishandle(a) | ~ishandle(aObj) %#ok
             delete(xlim_listener);
-            if ~ishandle(aObj)
+            if ishandle(aObj)
                 delete(aObj);
             end
             return
@@ -94,7 +94,9 @@ set(a, 'Units', 'Normalized');
 
     function destroy()
        %disp('object getting destroyed');
-       delete(xlim_listener)
+       if ishandle(xlim_listener)
+        delete(xlim_listener)
+       end
        delete(dest_listener)
         
     end

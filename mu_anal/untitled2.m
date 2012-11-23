@@ -1,5 +1,32 @@
 
+eegWin = round( [-.5 1] * eegFs );
+eegWin = eegWin(1):eegWin(2);
 
+tmpTrip = tripSindleIdx;
+tmpSolo = soloSpindleIdx;
+
+tmpTrip = tmpTrip( tmpTrip > 250 );
+tmpSolo = tmpSolo( tmpSolo> 250);
+
+eegTripSamp = bsxfun(@plus, tripSpindleIdx, eegWin);
+eegSoloSamp = bsxfun(@plus, tmpSolo, eegWin);
+
+
+spinBandTrip = isSpindlePow(eegTripSamp);
+spinBandSolo = isSpindlePow(eegSoloSamp);
+
+figure;
+axes('NextPlot', 'add');
+
+plot(eegWin * 1000/eegFs, smoothn( mean(spinBandTrip), 3 ), 'r')
+plot(eegWin * 1000/eegFs, smoothn( mean(spinBandSolo), 3 ), 'g')
+%%
+figure;
+subplot(211);
+imagesc(spinBandTrip);
+subplot(212);
+imagesc(spinBandSolo);
+%%
 figure;
 line_browser(muRate', muTs);
 
