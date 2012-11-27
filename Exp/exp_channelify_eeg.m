@@ -24,7 +24,7 @@ end
 for i = 1:numel(eeg_files)
    
     % Extract files from AD files
-    out_file = ['eeg', num2str(i), '_all.buf'];
+    out_file = ['eeg', num2str(i), '.buf'];
     cmd = ['adextract -eslen80 ', eeg_files{i}, ' -c -o ', out_file];
     if ~exist(out_file, 'file')
         disp(strcat('Executing Command: ', cmd));

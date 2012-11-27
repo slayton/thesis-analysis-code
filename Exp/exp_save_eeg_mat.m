@@ -15,7 +15,6 @@ function exp_save_eeg_mat(edir)
         end
     end
     
-    
     clearvars -except outFile edir newFs;
         
     % Load the unbuffered data into memory
@@ -29,7 +28,7 @@ function exp_save_eeg_mat(edir)
     [en et] = load_epochs(edir);
         
     for i = 1:numel(en)
-        if ~any( strcmp( {'sleep1', 'run', 'sleep2', 'run1', 'run2', 'sleep3', 'sleep4'}, en{i}) )
+        if ~any( strcmp( {'sleep', 'sleep1', 'run', 'sleep2', 'run1', 'run2', 'sleep3', 'sleep4'}, en{i}) )
             fprintf( 'Skipping epoch:%s\n', en{i} );
             continue;
         end

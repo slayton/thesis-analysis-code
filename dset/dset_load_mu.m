@@ -57,9 +57,11 @@ for i = 1:numel(args.electrodes)
     end
 end
 
-mu.rate = spikeCounts;
-mu.rateL = leftCounts;
-mu.rateR = rightCounts;
+mu.fs = 1/args.dt;
+
+mu.rate = spikeCounts * mu.fs;
+mu.rateL = leftCounts * mu.fs;
+mu.rateR = rightCounts * mu.fs;
 if args.smooth == 1
     mu.rate = smoothn(mu.rate, args.smooth_dt, args.dt);
 end
@@ -67,6 +69,5 @@ end
 %mu.rate = spikeCounts ./ args.dt;
 
 mu.timestamps = tbins;
-mu.fs = 1/args.dt;
 
 

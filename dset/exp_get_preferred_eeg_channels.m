@@ -3,7 +3,7 @@ function chans = exp_get_preferred_eeg_channels(eDir)
 [rem, day] = fileparts(eDir);
 [~, ani] = fileparts(rem);
 
-id = [ani,'-',day]
+id = [ani,'-',day];
 
 
 switch id
@@ -21,6 +21,8 @@ switch id
         chans = [11 12 3];    
     case 'gh-rsc1-day18'
         chans = [14 15 16];
+    case 'sg-rat2-day01'
+        chans = [10 11 7];
 end
 
 end

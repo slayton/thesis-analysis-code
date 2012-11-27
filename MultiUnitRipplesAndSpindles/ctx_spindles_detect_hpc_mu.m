@@ -1,17 +1,29 @@
 %%
 clear;
-animal = 'gh-rsc1';
-day = 'day18';
+%animal = 'gh-rsc1';
+%day = 'day18';
+animal = 'gh-rsc1'; % 'gh-rsc1' or  'sg-rat2'
+day = 'day18'; % 'day18' or 'day01'
+epType = 'sleep3'; % 'sleep3 or sleep2'
+CTX = 'RSC'; % 'RSC' or 'PFC'
+
+% 
+% animal = 'sg-rat2';
+% day = 'day01';
+% epType = 'sleep2';
+% CTX = 'PFC';
+
+
+eegFileName = ['EEG_',CTX,'_250HZ_', upper(epType), '.mat'];
+
 edir = fullfile('/data', animal, day);
-eegFileName = 'EEG_RSC_250HZ_SLEEP3.mat';
-epType = 'sleep3';
 
 if ~exist(fullfile(edir, eegFileName), 'file')
     disp('Loading raw eeg');
     
     e = load_exp_eeg(edir, epType);
     [~, anat] = load_exp_eeg_anatomy(edir);
-    chanIdx = strcmp(anat, 'RSC');
+    chanIdx = strcmp(anat, CTX);
     e.data = e.data(:, chanIdx);
     e.loc = e.loc(chanIdx);
     e.ch = e.ch(chanIdx);
@@ -37,7 +49,7 @@ eegCtx = eegData(:,eegChan);
 s1Filt = getfilter(eegFs, 'spindle', 'win');
 % s2Filt = getfilter(fs, 'spindle2', 'win');
 
-disp('Filtering RSC EEG for Spindles');
+disp('Filtering Cortical Lfp for Spindles');
 eegSpinBand = filtfilt(s1Filt, 1, eegCtx);
 %rscSpin2 = filtfilt(s2Filt, 1, data);
 
@@ -60,13 +72,13 @@ TRIG_ON = 'MEAN'; % must be START END MEAN PEAK
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-muFileName = 'MU_SLEEP3.mat';
+muFileName = ['MU_SLEEP', epType(end), '.mat'];
 muFileName = fullfile(edir, muFileName);
 
 if ~exist('mu', 'var')
     if ~exist(muFileName, 'file')
         disp('Multiunit file not yet created, loading now')
-        d = dset_load_all('gh-rsc1', 'day18', epType);
+        d = dset_load_all(animal, day, epType);
         mu = d.mu;
         clear d;
         disp('Saving multi-unit file!');
@@ -91,33 +103,12 @@ binarySpindles = eegSpinPower > tholdPower;
 isi = [Inf; diff(spindleEvents(:,1))];
 
 %%
-dtThresh = [.25 .15 .15];
+% dtThresh = [.25 .15 .15]; % <-- GH Parameteres
 
-setIdx.trip = [];
-setIdx.sing = [];
+dtThresh = [.25 .25 .25];
 
-tmpSetIdx3 = nan(size(isi));
-tmpSetIdx1 = nan(size(isi));
+[multiSpinIdx,singleSpinIdx]  = filter_event_sets(spindleEvents(:,1), 4, dtThresh);
 
-N = 4;
-for j = 1:numel(isi)-N
-    
-    if isi(j) > dtThresh(1)
-        
-        if all( isi( j+1 : j+N) < dtThresh(2) )
-            
-            tmpSetIdx3(j) = j;
-            
-        elseif isi(j+1) > dtThresh(3)*N
-            
-            tmpSetIdx1(j) = j;
-            
-        end
-        
-    end
-end
-multiSpinIdx = tmpSetIdx3( isfinite(tmpSetIdx3));
-singleSpinIdx = tmpSetIdx1( isfinite(tmpSetIdx1));
 
 nMulti = nnz(multiSpinIdx);
 nSingle = nnz( singleSpinIdx);
@@ -131,30 +122,30 @@ singleTimes = spindleEvents(singleSpinIdx,1);
 % [multiSpMean, multiSpAll, ts] = meanTriggeredSignal(multiTimes, eegTs, binarySpindles, [-.5 1]);
 % [singleSpMean, singleSpAll, ts] = meanTriggeredSignal(singleTimes, eegTs, binarySpindles, [-.5 1]);
 
-[~, multiSpinEnv, ts1] = meanTriggeredSignal(multiTimes, eegTs, eegSpinEnvelope, [-.5 1]);
-[~, singleSpinEnv] = meanTriggeredSignal(singleTimes, eegTs, eegSpinEnvelope, [-.5 1]);
+[mMultiSpin, sMultiSpin, ts1] = meanTriggeredSignal(multiTimes, eegTs, eegSpinEnvelope, [-.5 1]);
+[mSingleSpin, sSingleSpin] = meanTriggeredSignal(singleTimes, eegTs, eegSpinEnvelope, [-.5 1]);
 
-mMultiSpin = mean( multiSpinEnv);
-sMultiSpin = std( multiSpinEnv);
+% mMultiSpin = mean( multiSpinEnv);
+% sMultiSpin = std( multiSpinEnv);
+% 
+% mSingleSpin = mean(singleSpinEnv);
+% sSingleSpin = std(singleSpinEnv);
 
-mSingleSpin = mean(singleSpinEnv);
-sSingleSpin = std(singleSpinEnv);
+[mMultiMu, sMultiMu, ts2] = meanTriggeredSignal(multiTimes, muTs, muRate * muFs, [-.5 1]);
+[mSingleMu, sSingleMu] = meanTriggeredSignal(singleTimes, muTs, muRate * muFs, [-.5 1]);
 
-[~, multiMuRate, ts2] = meanTriggeredSignal(multiTimes, muTs, muRate, [-.5 1]);
-[~, singleMuRate] = meanTriggeredSignal(singleTimes, muTs, muRate, [-.5 1]);
-
-mMultiMu = mean( multiMuRate);
-sMultiMu = std( multiMuRate);
-
-mSingleMu = mean(singleMuRate);
-sSingleMu = std(singleMuRate);
+% mMultiMu = mean( multiMuRate);
+% sMultiMu = std( multiMuRate);
+% 
+% mSingleMu = mean(singleMuRate);
+% sSingleMu = std(singleMuRate);
 nStd = 1.96;
 
 close all;
-figure('Position', [350 700 900 800]);
+figH = figure('Position', [350 700 900 800]);
 
-axH(1) = subplot(211); 
-axH(2) = subplot(212); 
+axH(1) = subplot(211); xlabel('Time (ms)'); ylabel('Envelope');
+axH(2) = subplot(212); xlabel('Time (ms)'); ylabel('HPC MU Rate (hz)');
 
 set(axH,'NextPlot', 'add');
 
@@ -168,15 +159,19 @@ set(axH,'NextPlot', 'add');
 [p(3), l(3)] = error_area_plot(ts2 * 1000, mMultiMu, nStd * sMultiMu / sqrt(nMulti), 'Parent', axH(2));
 [p(4), l(4)] = error_area_plot(ts2 * 1000, mSingleMu, nStd * sSingleMu / sqrt(nSingle), 'Parent', axH(2));
 
+title(axH(1), [CTX, ' CTX Spindle Triggered Spindle Band Envelope']);
+title(axH(2), [CTX, ' CTX Spindle Triggered HPC MultiUnit']);
+legend(axH(1), [l(1), l(2)], 'Triplets', 'Singlets');
 
 set(p,'EdgeColor', 'none');
 set(p(1:2:3), 'FaceColor','r'); set(l(1:2:3), 'Color', 'r');
 set(p(2:2:4), 'FaceColor','g'); set(l(2:2:4), 'Color', 'g');
 set(p,'FaceAlpha', .4);
+
 %% - Save the Figure;
 tmpAnimal = animal;
 tmpAnimal(tmpAnimal~='-') = '_';
-strName = sprintf('%s_%s_SpinTrig_ctxSpin_hpcMU', animal,epType );
+strName = sprintf('%s_%s_mean_%s_SPIN_trig_HPC_MUA', animal,epType, CTX);
 saveFigure(figH, '/data/ripple_burst_dynamics/', strName, 'png', 'svg', 'fig');
 
 

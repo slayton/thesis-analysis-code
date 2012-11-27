@@ -1,4 +1,4 @@
-function a = line_browser(timestamps, data, varargin)
+function lineHandle = line_browser(timestamps, data, varargin)
 % line_browser(data, ts, varargin), returns handles to line objects that
 % are plotted dynamically
 
@@ -36,7 +36,7 @@ end
 xlim_listener = addlistener(a, 'XLim', 'PostSet', @(src,e) refresh);
 dest_listener = addlistener(a, 'ObjectBeingDestroyed', @(src, e) destroy);
 
-aObj = [];
+lineHandle = [];
 
 set(a, 'Units', 'Pixels', 'XLim', [min(timestamps) max(timestamps)]);
 set(a, 'Units', 'Normalized');
@@ -44,22 +44,22 @@ set(a, 'Units', 'Normalized');
 
     function refresh()
        
-        if ~ishandle(a) | ~ishandle(aObj) %#ok
+        if ~ishandle(a) | ~ishandle(lineHandle) %#ok
             delete(xlim_listener);
-            if ishandle(aObj)
-                delete(aObj);
+            if ishandle(lineHandle)
+                delete(lineHandle);
             end
             return
         end
         
-        if isempty(aObj)
+        if isempty(lineHandle)
             for i=1:size(data,2)
                 if isvector(args.color)
                     c_tmp = args.color(i);
                 else
                     c_tmp = args.color(i,:);
                 end
-                aObj(i) = line([1],[1], 'Parent', a,'color', c_tmp);
+                lineHandle(i) = line([1],[1], 'Parent', a,'color', c_tmp);
             end
         end
         
@@ -70,7 +70,7 @@ set(a, 'Units', 'Normalized');
 
     function refresh_plot(wave, times)        
         for i=1:size(data,2)
-            set(aObj(i), 'XData', times, 'YData', wave(:,i));
+            set(lineHandle(i), 'XData', times, 'YData', wave(:,i));
         end
     end
 

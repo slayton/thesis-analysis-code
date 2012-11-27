@@ -119,7 +119,7 @@ switch band
         
         switch method
             case 'win'
-                s = [s 'b = fir1( N, 2.*[8 16]./Fs );'];
+                s = [s 'b = fir1( N, 2.*[9 16]./Fs );'];
             
             otherwise
                 error('Invalid method')

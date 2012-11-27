@@ -11,6 +11,11 @@ elseif strfind(animal, 'gh-rsc')
     dset = dset_exp_load(edir, epoch);
     
     return;
+elseif strfind(animal, 'sg-rat2')
+    edir = fullfile('/data/', animal, day);
+    dset = dset_exp_load(edir, epoch);
+    
+    return;
 end
 
 args = dset_get_standard_args();

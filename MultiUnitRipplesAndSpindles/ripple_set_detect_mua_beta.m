@@ -36,120 +36,79 @@ if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exis
         eegTmp = dset.eeg(1);
         mu = dset.mu;
         clear dset;
+        
+        eeg = eegTmp.data;
+        eegFs = eegTmp.fs;
         eegTs = dset_calc_timestamps(eegTmp.starttime, numel(eegTmp.data), eegTmp.fs);
+       
         if ~isfield(mu, 'rate')
-            muRate{iEpoch} = interp1(mu.timestamps, mu.rateL + mu.rateR, eegTs);
+            muRate{iEpoch} = mu.rateL + mu.rateR;
         else
-            muRate{iEpoch} = interp1(mu.timestamps, mu.rate, eegTs);
+            muRate{iEpoch} = mu.rate;
         end
-
-        fs = eegTmp.fs;
-        ts{iEpoch} = eegTs;
-        eeg{iEpoch} = eegTmp.data;
+        muTs = mu.timestamps;
+        muFs = mu.fs;
+    
     end
 end
 %%
 muRateAll = [];
-dtThresh = [250 250]; % in milliseconds
-dIdxThresh = dtThresh * Fs/1000;
-setIdxTrip= {};
-setidxSing = {};
+dtThresh = [.25 .25 .25]; 
+win = [-.25 .5];
+tripletTs= {};
+singletTs = {};
 setWinTrip = {};
 setWinSing = {};
+
 for iEpoch = eps%:numel(ripples)
     
    if isempty(muRate{iEpoch})
         continue;
     end
     
-    ripIdx = ripples(iEpoch).peakIdx;
-    iri = [nan; diff(ripIdx)];
+    ripTs = eegTs( ripples(iEpoch).peakIdx );
     
-    tmpSetIdx1 = iri * nan;
-    tmpSetIdx2 = iri * nan;
+    [tripletSet, singletSet] = filter_event_sets(ripTs, 3, dtThresh);
 
-    for j = 1:numel(iri)-3
-        if iri(j) > dIdxThresh(1)
-            if iri(j+1) < dIdxThresh(2)
-                if iri(j+2) < dIdxThresh(2)
-                    tmpSetIdx1(j) = j;
-                end
-            else
-                tmpSetIdx2(j) = j;
-            end
-        end
-    end
-    
-    setIdxTrip{iEpoch} = tmpSetIdx1(~isnan(tmpSetIdx1));
-    setIdxSing{iEpoch} = tmpSetIdx2(~isnan(tmpSetIdx2));
-    setWinTrip{iEpoch} = bsxfun(@plus, ripIdx( setIdxTrip{iEpoch}), ripWin);
-    setWinSing{iEpoch} = bsxfun(@plus, ripIdx( setIdxSing{iEpoch}), ripWin);
-    
-    mua = muRate{iEpoch}(setWinTrip{iEpoch});
-    
-    if isempty(muRateAll)
-        muRateAll = mua;
-    else
-        muRateAll = [muRateAll; mua];
-    end
-    
-    meanMua = smoothn( mean(mua), 2);
-    
-    meanMua = 10 * meanMua/max(meanMua);
-    
-    [~, pkIdx] = findpeaks(meanMua, 'MINPEAKDISTANCE', 10);
-    
-    dPeaks = [nan diff(pkIdx)];
-    dPeakTime = dPeaks /fs;
-    peakFreq = dPeakTime .^ -1;
-    pkTs = ripWin(pkIdx) * 1000/fs;
-    valIdx = pkTs>-50 & pkTs < 400;
-    
-    figure('Position', [400 400 950 300],'Name', ripples(iEpoch).description, 'NumberTitle', 'off');
-    axes('Position', [.05 .1 .9 .75]);
+    tripletTs{iEpoch} = ripTs(tripletSet);
+    singletTs{iEpoch} = ripTs(singletSet);
+   
+    [mRip3Mu, sRip3Mu, ts] = meanTriggeredSignal(tripletTs{iEpoch}, muTs, muRate{iEpoch}, win);
+    [mRip1Mu, sRip1Mu, ~ ] = meanTriggeredSignal(singletTs{iEpoch}, muTs, muRate{iEpoch}, win);
 
-    for i = 1:numel(pkIdx)      
-        if i>1 && pkTs(i) > 0 && pkTs(i)<400
-            text(mean(pkTs([i-1 i])), 10, sprintf('%s:%2.1f', '\Deltat', 1000*dPeakTime(i)), 'horizontalalignment', 'center');
-        end
-        if pkTs(i) > -50 && pkTs(i)<400
-            line([pkTs(i) pkTs(i)], [0 10], 'color', [.4 .4 .4]);
-        end
-    end
-    line(ripWin * 1000/Fs, meanMua);
     
-    title(sprintf('%s nEvent:%d', ripples(iEpoch).description, nnz(setIdxTrip{iEpoch})));
-    set(gca,'YLim', [0 11]);
+    nTriplet = numel(tripletSet);
+    nSinglet = numel(singletSet);
+    
+    
+    peakTs = detect_peaks(ts, mRip3Mu, [-.1 .4]);
+    
+    nStd = 1.96;
+    close all;
+    figH = figure('Position', [250 625 1000 300]);
+    ax = axes();
+
+    [p(1), l(1)] = error_area_plot(ts, mRip1Mu, nStd * sRip1Mu / sqrt(nSinglet), 'Parent', ax);
+    [p(2), l(2)] = error_area_plot(ts, mRip3Mu, nStd * sRip3Mu / sqrt(nTriplet), 'Parent', ax);
+    yLim = minmax( get(p(2), 'YData')' );
+    
+    set(p(1), 'FaceColor','r', 'EdgeColor','none');
+    set(p(2), 'FaceColor','g', 'EdgeColor', 'none');
+    set(l(1), 'Color', [.5 0 0], 'linewidth', 2);
+    set(l(2), 'Color', [0 .5 0], 'linewidth', 2);
+    set(gca,'XLim', win, 'YLim', yLim);
+    
+    dPeakTs = diff(peakTs);
+    
+    for i = 1:numel(peakTs) 
+        if i ~= numel(peakTs)
+           text( mean(peakTs([i, i+1])), yLim(2)*.9, sprintf('%s:%2.1f', '\Deltat', 1000*dPeakTs(i)), 'horizontalalignment', 'center', 'FontWeight', 'bold');
+        end
+        line( [1 1] * peakTs(i), yLim, 'color', [.4 .4 .4], 'linestyle', '--');
+    end
+        
     
 end
-
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Plot the Ripple Triggered Multi-unit rate
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-meanMuRate = smoothn( mean( muRateAll), 2);
-
-[~, pkIdx] = findpeaks(meanMuRate, 'MINPEAKDISTANCE', 10);
-dPeaks = [nan diff(pkIdx)];
-dPeakTime = dPeaks /fs;
-peakFreq = dPeakTime .^ -1;
-pkTs = ripWin(pkIdx) * 1000/fs;
-
-close all
-axes('Position', [.05 .05 .9 .85]);
-for i = 1:numel(pkIdx)      
-    if i>1 && pkTs(i) > 0 && pkTs(i)<400
-        text(mean(pkTs([i-1 i])), 10, sprintf('%s:%2.1f', '\Deltat', 1000*dPeakTime(i)), 'horizontalalignment', 'center');
-    end
-    if pkTs(i) > -50 && pkTs(i)<400
-        line([pkTs(i) pkTs(i)], [0 10], 'color', [.4 .4 .4]);
-    end
-end
-line(ripWin * 1000/Fs, meanMuRate)
-
-fprintf('Freqs:');
-fprintf('%2.2f ', peakFreq);
-fprintf('\n');
 
 %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %   Compute the Pre/Post burst LFP Spectrum 
