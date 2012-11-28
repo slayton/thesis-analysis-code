@@ -85,18 +85,18 @@ function eeg = load_exp_eeg(edir, ep, varargin)
 % end
 % 
 
-doneFile = fullfile(edir, [ep, '.1500hz.eeg.mat']);
+doneFile = fullfile(edir, [ep, '.1500hz.mat']);
 tmp = load(doneFile);
 
 ch = cell(16,1);
-for i = 1:16
+for i = 1:size(tmp.eeg,1)
     ch{i} = sprintf('eeg%d.ch%d', ceil(i/8), mod(i,8)+1);
 end
 
 eeg.data = double(tmp.eeg');
 eeg.ts = tmp.ts';
 eeg.fs =  1.0000 / mean(diff(eeg.ts));
-eeg.loc = repmat({'not specified'}, 16, 1);
+eeg.loc = repmat({'not specified'}, size(eeg.data,1), 1);
 eeg.file = doneFile;
 eeg.ch = ch;
 

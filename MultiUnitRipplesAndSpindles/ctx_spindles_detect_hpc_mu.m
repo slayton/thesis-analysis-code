@@ -2,16 +2,16 @@
 clear;
 %animal = 'gh-rsc1';
 %day = 'day18';
-animal = 'gh-rsc1'; % 'gh-rsc1' or  'sg-rat2'
-day = 'day18'; % 'day18' or 'day01'
-epType = 'sleep3'; % 'sleep3 or sleep2'
-CTX = 'RSC'; % 'RSC' or 'PFC'
+% animal = 'gh-rsc1'; % 'gh-rsc1' or  'sg-rat2'
+% day = 'day18'; % 'day18' or 'day01'
+% epType = 'sleep3'; % 'sleep3 or sleep2'
+% CTX = 'RSC'; % 'RSC' or 'PFC'
 
-% 
-% animal = 'sg-rat2';
-% day = 'day01';
-% epType = 'sleep2';
-% CTX = 'PFC';
+
+animal = 'sg-rat2';
+day = 'day01';
+epType = 'sleep2';
+CTX = 'PFC';
 
 
 eegFileName = ['EEG_',CTX,'_250HZ_', upper(epType), '.mat'];
