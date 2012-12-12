@@ -91,7 +91,7 @@ function extract_eeg_files(edir)
     for f = eeg_f
         file = f{1};
         ffile = fullfile(edir, file);
-        eeg_file = fullfile(edir, [file(1:4), '.buf']);
+        eeg_file = fullfile(edir, [file(1:4), '_all.buf']);
         
         cmd =['/home/slayton/bin/mwsoft/adextract -eslen80 ', ffile, ' -c -o ', eeg_file];
         system(cmd);

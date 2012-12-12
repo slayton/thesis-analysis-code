@@ -62,6 +62,7 @@ mu.fs = 1/args.dt;
 mu.rate = spikeCounts * mu.fs;
 mu.rateL = leftCounts * mu.fs;
 mu.rateR = rightCounts * mu.fs;
+
 if args.smooth == 1
     mu.rate = smoothn(mu.rate, args.smooth_dt, args.dt);
 end

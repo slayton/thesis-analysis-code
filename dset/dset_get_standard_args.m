@@ -24,7 +24,7 @@ args.clusters.base_firing_rate = .05;
 args.multiunit.threshold = 100;
 args.multiunit.param_str = 'Max height change';
 args.multiunit.timewin = [0 0];
-args.multiunit.dt = .001;
+args.multiunit.dt = .005;
 args.multiunit.load_time_from_position = 1;
 args.multiunit.spike_samp_rate = 10000;
 args.multiunit.smooth = 1;
@@ -37,7 +37,7 @@ args.multiunit.right = [];
 %MultiUnit Bursts args
 args.mua_burst.velocity_threshold = 7;
 args.mua_burst.high_threshold = 4;
-args.mua_burst.low_threshold = 0;
+args.mua_burst.low_threshold = .5;
 args.mua_burst.pos_struct = [];
 args.mua_burst.filter_on_velocity = 1;
 args.mua_burst.min_burst_len = .01;

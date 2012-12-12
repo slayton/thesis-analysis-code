@@ -19,6 +19,7 @@ function [dset, peakIdx] = dset_calc_ripple_times(dset, varargin)
     
     % Get envelope of signal and find bursts
     ripHilbert = abs( hilbert( ripLfp ));
+    
     high_seg = logical2seg( ind, ripHilbert>=args.high_thold * std(ripHilbert) );
     low_seg = logical2seg( ind, ripHilbert>=args.low_thold * std(ripHilbert) );
     
@@ -35,7 +36,7 @@ function [dset, peakIdx] = dset_calc_ripple_times(dset, varargin)
     [~, peakIdx] = arrayfun(findMaxEnvFunc, ripWin(:,1), ripWin(:,2) );
     
     % correct peakIdx offset
-    peakIdx = peakIdx + ripWin(:,1);
+    peakIdx = peakIdx + ripWin(:,1) - 1;
     
     % remove peaks that are within 500 samples of the beginning or the end
     % of the experiment

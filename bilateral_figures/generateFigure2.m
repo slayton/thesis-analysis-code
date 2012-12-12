@@ -85,14 +85,14 @@ axF2(4) = axes('Position', [.55 .065 .35 .38]);
 F = ripCohere.sleep.F;
 mCoData = mean(ripCohere.sleep.rippleCoherence);
 sCoData = std(ripCohere.sleep.rippleCoherence);
-n = size(ripCohere.sleep.rippleCoherence,1);
+nSleep = size(ripCohere.sleep.rippleCoherence,1);
 nStd = 3;
 
 mCoShuf = mean( ripCohere.sleep.shuffleCoherence{1} );
 sCoShuf = std( ripCohere.sleep.shuffleCoherence{1} );
 
-[p(1), l(1)] = error_area_plot(F, mCoData, nStd * sCoData / sqrt(n), 'Parent', axF2(4));
-[p(2), l(2)] = error_area_plot(F, mCoShuf, nStd * sCoShuf / sqrt(n), 'Parent', axF2(4));
+[p(1), l(1)] = error_area_plot(F, mCoData, nStd * sCoData / sqrt(nSleep), 'Parent', axF2(4));
+[p(2), l(2)] = error_area_plot(F, mCoShuf, nStd * sCoShuf / sqrt(nSleep), 'Parent', axF2(4));
 set(l(1), 'Color', [1 0 0], 'LineWidth', 1.5);
 set(l(2), 'Color', [0 1 0], 'LineWidth', 1.5);
 
@@ -144,6 +144,11 @@ end
 p(1) = patch(el(1).x, el(1).y, [1 .5 .5]);
 p(2) = patch(el(2).x, el(2).y, [.5 .5 1]);
 
+set(ax2E,'Units','Pixels');
+axPos = get(ax2E,'Position');
+set(ax2E,'Position', axPos([1 2 4 4]));
+set(ax2E,'Units', 'normal', 'XLim', [150 225], 'YLim', [150 225]);
+
 set(p(1), 'EdgeColor', [.7 0 0]);
 set(p(2), 'EdgeColor', [0 0 .7]);
 xlabel('Source Ripple Freq (Hz)');
@@ -154,34 +159,23 @@ ylabel('Test Ripple Freq (Hz)');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
 fig2F = figure;
-ax2F = plotyy(1,1,1,1);
+ax2F = axes();
+set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400); 
 
 F = ripCohere.sleep.F;
+
 mCoSleep = mean(ripCohere.sleep.rippleCoherence);
 mCoRun = mean(ripCohere.run.rippleCoherence);
 
 sCoSleep = std(ripCohere.sleep.rippleCoherence);
 sCoRun = std(ripCohere.run.rippleCoherence);
 
-n = size(ripCohere.sleep.rippleCoherence,1);
-nStd = 3;
+nRun = size(ripCohere.sleep.rippleCoherence,1);
+nSleep = size(ripCohere.sleep.rippleCoherence,1);
+nStd = 1.96;
 
-[p(1), l(1)] = error_area_plot(F, mCoSleep, nStd * sCoSleep / sqrt(n), 'Parent', ax2F(1));
-[p(2), l(2)] = error_area_plot(F, mCoRun, nStd * sCoRun / sqrt(n), 'Parent', ax2F(1));
-
-% set(l(1), 'Color', [1 0 0], 'LineWidth', 1.5);
-% set(l(2), 'Color', [0 0 1], 'LineWidth', 1.5);
-
-delete(l(1:2));
-
-set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400); 
-
-set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
-set(p(2), 'FaceColor', [.7 .7 1], 'edgecolor', 'none');
-uistack(p(2), 'top')
-
-rError = (nStd * sCoRun)/sqrt(n);
-sError = (nStd * sCoSleep)/sqrt(n);
+rError = (nStd * sCoRun)/sqrt(nRun);
+sError = (nStd * sCoSleep)/sqrt(nSleep);
 
 rCorr{1} = mCoRun + rError;
 rCorr{2} = mCoRun - rError;
@@ -190,24 +184,103 @@ sCorr{1} = mCoSleep + sError;
 sCorr{2} = mCoSleep - sError;
 
 
-X = [F; flipud(F)];
-Y = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
+X1 = [F; flipud(F)];
+Y1 = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
 
-p(3) = patch(X,Y, [ .5 .7 .7] ,'Parent', ax2F(2));
-set(p(3),'edgecolor', 'none')
+mCoSleepSh = mean(ripCohere.sleep.shuffleCoherence{1});
+mCoRunSh = mean(ripCohere.run.shuffleCoherence{1});
+
+sCoSleepSh = std(ripCohere.sleep.shuffleCoherence{1});
+sCoRunSh = std(ripCohere.run.shuffleCoherence{1});
+
+nRun = size(ripCohere.sleep.shuffleCoherence{1},1);
+nSleep = size(ripCohere.sleep.shuffleCoherence{1},1);
+nStd = 1.96;
+
+rError = (nStd * sCoRunSh)/sqrt(nRun);
+sError = (nStd * sCoSleepSh)/sqrt(nSleep);
+
+rCorr{1} = mCoRunSh + rError;
+rCorr{2} = mCoRunSh - rError;
+
+sCorr{1} = mCoSleepSh + sError;
+sCorr{2} = mCoSleepSh - sError;
+
+
+X2 = [F; flipud(F)];
+Y2 = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
+    
+    
+   
+p(1) = patch(X1,Y1, [ .5 .7 .7] ,'Parent', ax2F);
+p(2) = patch(X2,Y2, [ .7 .5 .7] ,'Parent', ax2F);
+
+set(p,'edgecolor', 'none');
 
 %line(F, mCoSleep./mCoRun, 'Color', [0 0 0 ], 'Parent', ax2F(2), 'linewidth', 1.5);
 
 set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400, 'YColor', 'k');
-set(ax2F(1),'YLim', [.15 .5], 'YTick', [0:.1:.5], 'box', 'off');
-set(ax2F(2), 'Ylim', [.9 2.1]);
+set(ax2F, 'Ylim', [.9 2.1]);
 
-uistack(ax2F(1),'top');
-set(ax2F(2),'Color', 'w');
-set(ax2F(1),'Color', 'none');
-ylabel(ax2F(1), 'Ripple Coherence');
-ylabel(ax2F(2), 'Sleep to Run Ratio');
-xlabel(ax2F(1), 'Frequency Hz');
+ylabel('Ratio');
+xlabel(ax2F, 'Frequency Hz');
+
+% fig2F = figure;
+% ax2F = plotyy(1,1,1,1);
+% 
+% F = ripCohere.sleep.F;
+% mCoSleep = mean(ripCohere.sleep.rippleCoherence);
+% mCoRun = mean(ripCohere.run.rippleCoherence);
+% 
+% sCoSleep = std(ripCohere.sleep.rippleCoherence);
+% sCoRun = std(ripCohere.run.rippleCoherence);
+% 
+% n = size(ripCohere.sleep.rippleCoherence,1);
+% nStd = 3;
+% 
+% [p(1), l(1)] = error_area_plot(F, mCoSleep, nStd * sCoSleep / sqrt(n), 'Parent', ax2F(1));
+% [p(2), l(2)] = error_area_plot(F, mCoRun, nStd * sCoRun / sqrt(n), 'Parent', ax2F(1));
+% 
+% % set(l(1), 'Color', [1 0 0], 'LineWidth', 1.5);
+% % set(l(2), 'Color', [0 0 1], 'LineWidth', 1.5);
+% 
+% delete(l(1:2));
+% 
+% set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400); 
+% 
+% set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
+% set(p(2), 'FaceColor', [.7 .7 1], 'edgecolor', 'none');
+% uistack(p(2), 'top')
+% 
+% rError = (nStd * sCoRun)/sqrt(n);
+% sError = (nStd * sCoSleep)/sqrt(n);
+% 
+% rCorr{1} = mCoRun + rError;
+% rCorr{2} = mCoRun - rError;
+% 
+% sCorr{1} = mCoSleep + sError;
+% sCorr{2} = mCoSleep - sError;
+% 
+% 
+% X = [F; flipud(F)];
+% Y = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
+% 
+% p(3) = patch(X,Y, [ .5 .7 .7] ,'Parent', ax2F(2));
+% set(p(3),'edgecolor', 'none')
+% 
+% %line(F, mCoSleep./mCoRun, 'Color', [0 0 0 ], 'Parent', ax2F(2), 'linewidth', 1.5);
+% 
+% set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400, 'YColor', 'k');
+% set(ax2F(1),'YLim', [.15 .5], 'YTick', [0:.1:.5], 'box', 'off');
+% set(ax2F(2), 'Ylim', [.9 2.1]);
+% 
+% uistack(ax2F(1),'top');
+% set(ax2F(2),'Color', 'w');
+% set(ax2F(1),'Color', 'none');
+% ylabel(ax2F(1), 'Ripple Coherence');
+% ylabel(ax2F(2), 'Sleep to Run Ratio');
+% xlabel(ax2F(1), 'Frequency Hz');
+
 %%
 
 %% Save the figure

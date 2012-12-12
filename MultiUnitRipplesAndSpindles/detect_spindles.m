@@ -1,41 +1,73 @@
-function [events, params] = detect_spindles(ts, x, varargin)
+function [events, firstPeakTs, allPeakTs, params, x, spindleEnvelope, smoothedEnvelope] = detect_spindles(ts, x, varargin)
 
+% Check the inputs
 timestampCheck(ts);
 Fs = 1 / (ts(2) - ts(1));
+ind = 1:numel(ts);
 
-args.band = [8 16];
+% construct the input arguments
+args.band = [7 15];
 args.tholdStd = 1.5;
-args.eventLen = [.5 3];
-parseArgs(varargin, args);
+args.eventLen = [.5 2];
+args.time_windows = [-inf inf];
 
+args = parseArgs(varargin, args);
+
+% filter the input signal in the spindle band
 b = make_spindle_filter(Fs, args.band);
-x = filtfilt(b, 1, x);
+spindleBand = filtfilt(b, 1, x);
 
-env = abs(hilbert(x));
-
+% compute the envelope and smooth it
+spindleEnvelope = abs(hilbert(spindleBand));
 k = make_smoothing_kernel(Fs);
-smoothEnv = conv(env, k, 'same');
+smoothedEnvelope = conv(spindleEnvelope, k, 'same');
 
-thold = mean(smoothEnv) + args.tholdStd * std(smoothEnv);
+% set samples outside of the desired time_windows to nan
+validSample = seg2binary(args.time_windows, ts);
+windowedEnvelope = smoothedEnvelope;
+windowedEnvelope(~validSample) = nan;
 
-detector = smoothEnv > thold;
+% Compute the threshold and detect times when the smooth envelope crosses it
+thold = nanmean(windowedEnvelope) + args.tholdStd * nanstd(windowedEnvelope);
+detector = windowedEnvelope > thold;
 detector = [diff(detector); nan];
 
-tsStart = ts(  detector == 1 );
-tsEnd = ts( detector == -1);
+% get the first and last indecies of the events that cross the threshold
+tsStart = ind(  detector == 1 );
+tsEnd = ind( detector == -1);
 
+%construct events, and compute the duration
 events = [tsStart(:), tsEnd(:)];
-
 duration = diff(events,[],2);
+%divide by Fs to convert from samples to timestamps
+duration = duration / Fs;
 
+%Filter the events on duration
 validIdx = duration> args.eventLen(1)  & duration< args.eventLen(2);
-
 events = events(validIdx,:);
+
+% find the FIRST peak of the spindle oscillation within the spindle window
+getFirstPeak = @(x,y) findpeaks( spindleBand(x:y), 'NPEAKS', 1 );
+[~, peakIdx] = arrayfun(getFirstPeak, events(:,1), events(:,2) );
+peakIdx = peakIdx + events(:,1) - 1;
+
+% find ALL of the peaks of the spindle oscillation within the spindle window
+getAllPeaks = @(x,y) findpeaks( spindleBand(x:y) );
+[~, allPeaks] = arrayfun(getAllPeaks, events(:,1), events(:,2), 'UniformOutput', 0);
+for i = 1:numel(allPeaks)
+    allPeaks{i} = allPeaks{i} + events(i,1) -1;
+end
+allPeaks = cellfun(@transpose, allPeaks, 'UniformOutput', 0);
+allPeaks = [allPeaks{:}];
+allPeakTs = ts(allPeaks);
+
+
+
+events = ts(events);
+firstPeakTs = ts(peakIdx);
 
 params.bandpass_filter = b;
 params.smoothing_kernel = k;
-params.env = env;
-params.filtered = x;
 params.threshold = thold;
 
 end

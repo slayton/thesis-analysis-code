@@ -1,7 +1,8 @@
-clear
 
 
 %%
+clear
+
 if ~exist('allRipples','var')
     allRipples = dset_load_ripples;
 end
@@ -20,7 +21,7 @@ ripWin = -750:750;
 ripTrigMuaAll = [];
 
 
-eps = 2;
+eps = 3;
 %eps = 1:size(eList,1);
 if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exist('fs','var') || ...
  isempty(muRate) || isempty(eeg) || isempty(ts) || isempty(fs)
@@ -33,6 +34,7 @@ if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exis
     for iEpoch = eps%1:numel(ripples)
         
         dset = dset_load_all(eList{iEpoch,1}, eList{iEpoch,2}, eList{iEpoch,3});
+        %dset = dset_load_all('gh-rsc1', 'day18', 'sleep3');
         eegTmp = dset.eeg(1);
         mu = dset.mu;
         clear dset;
@@ -47,13 +49,19 @@ if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exis
             muRate{iEpoch} = mu.rate;
         end
         muTs = mu.timestamps;
-        muFs = mu.fs;
+        if isfield(mu,'Fs')
+            muFs = mu.Fs;
+        else
+            muFs = mu.fs;
+        end
+        
     
     end
 end
+
 %%
 muRateAll = [];
-dtThresh = [.25 .25 .25]; 
+dtThresh = [1 .25 .25]; 
 win = [-.25 .5];
 tripletTs= {};
 singletTs = {};
@@ -66,16 +74,21 @@ for iEpoch = eps%:numel(ripples)
         continue;
     end
     
-    ripTs = eegTs( ripples(iEpoch).peakIdx );
+    ripTs1 = detect_ripples(eegTs, eeg);
+    ripTs = eegTs(ripples(iEpoch).peakIdx);
+       
+    numel(filter_event_sets(ripTs1, 3, dtThresh))
+    numel(filter_event_sets(ripTs, 3, dtThresh))
     
-    [tripletSet, singletSet] = filter_event_sets(ripTs, 3, dtThresh);
+    [tripletSet, singletSet] = filter_event_sets(ripTs1, 3, dtThresh);
 
     tripletTs{iEpoch} = ripTs(tripletSet);
     singletTs{iEpoch} = ripTs(singletSet);
    
+    fprintf('Triplets:%d Singlets:%d\n', numel(tripletSet), numel(singletSet));
+   
     [mRip3Mu, sRip3Mu, ts] = meanTriggeredSignal(tripletTs{iEpoch}, muTs, muRate{iEpoch}, win);
     [mRip1Mu, sRip1Mu, ~ ] = meanTriggeredSignal(singletTs{iEpoch}, muTs, muRate{iEpoch}, win);
-
     
     nTriplet = numel(tripletSet);
     nSinglet = numel(singletSet);
@@ -84,12 +97,13 @@ for iEpoch = eps%:numel(ripples)
     peakTs = detect_peaks(ts, mRip3Mu, [-.1 .4]);
     
     nStd = 1.96;
-    close all;
+%     close all;
     figH = figure('Position', [250 625 1000 300]);
     ax = axes();
 
     [p(1), l(1)] = error_area_plot(ts, mRip1Mu, nStd * sRip1Mu / sqrt(nSinglet), 'Parent', ax);
     [p(2), l(2)] = error_area_plot(ts, mRip3Mu, nStd * sRip3Mu / sqrt(nTriplet), 'Parent', ax);
+    
     yLim = minmax( get(p(2), 'YData')' );
     
     set(p(1), 'FaceColor','r', 'EdgeColor','none');

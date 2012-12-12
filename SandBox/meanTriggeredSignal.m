@@ -9,7 +9,6 @@ if nargin<1
     error('Must provide atleast 2 arguments');
 end
 if nargin==2
-    disp('woops');
     wave = ts;
     ts = 1:numel(wave);
     win = 100;

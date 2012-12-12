@@ -9,7 +9,7 @@ clear;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 runEpochs = dset_list_epochs('run');
 
-i = 1;
+i = 2;
 % for i = 1:numel(runReconFiles)
     
     dset = dset_load_all(runEpochs{i,1}, runEpochs{i,2}, runEpochs{i,3});    
@@ -24,8 +24,8 @@ i = 1;
         clIdx{1} = rIdx;
         clIdx{2} = lIdx;
     end
-    [~, reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
-    [~, reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
+    [statSimp(1), reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
+    [statSimp(2), reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
 
     clear st rp;
     for iii = 1:2
@@ -56,18 +56,18 @@ i = 1;
     nSpike{2} = sum( rp(2).spike_counts(:, replayIdx));
     
 % Compute the distances between the peaks od the pdfs
-    [~, idx1] = max(pdf1);
-    [~, idx2] = max(pdf2);
+%     [~, idx1] = max(pdf1);
+%     [~, idx2] = max(pdf2);
     %binDist = abs(idx1 - idx2);
-    binDist = calc_posidx_distance(idx1, idx2, dset.clusters(1).pf_edges);
+%     binDist = calc_posidx_distance(idx1, idx2, dset.clusters(1).pf_edges);
     
-    %compute the confusion matrix
-    confMat = confmat(idx1, idx2);
-    confMat(:, sum(confMat)==0) = 1;
-    confMat = normalize(confMat);
-    confMat(:,:,2) = confMat;
-    confMat(:,:,3) = confMat(:,:,1);
-    confMat = 1 - confMat;
+%     %compute the confusion matrix
+%     confMat = confmat(idx1, idx2);
+%     confMat(:, sum(confMat)==0) = 1;
+%     confMat = normalize(confMat);
+%     confMat(:,:,2) = confMat;
+%     confMat(:,:,3) = confMat(:,:,1);
+%     confMat = 1 - confMat;
     
     % Compute the correlations between the pdfs
     replayCorr = corr_col(pdf1, pdf2);  
@@ -75,12 +75,12 @@ i = 1;
 % Compute the shuffle distributions
     nShuffle = 100;    
     colCorrShuffle = [];
-    binDistShuffle = [];
+%     binDistShuffle = [];
    
     for i = 1:nShuffle
-        randIdx = randsample( size(pdf1,2), size(pdf1,2), 0);
+        randIdx = randsample( size(pdf1,2), size(pdf1,2),0);
         colCorrShuffle = [ colCorrShuffle, corr_col( pdf1, pdf2(:, randIdx) ) ];
-        binDistShuffle = [ binDistShuffle, calc_posidx_distance(idx1, idx2(randIdx), dset.clusters(1).pf_edges);];
+%         binDistShuffle = [ binDistShuffle, calc_posidx_distance(idx1, idx2(randIdx), dset.clusters(1).pf_edges);];
     end
     
 % compute the bilateral multi-unit xcorr
@@ -96,7 +96,7 @@ muBurstIdx = logical( sum( cell2mat(muBurstIdx'), 2) );
 lags = lags * mean( diff( muTs ) );
 
 
-pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp);
+pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(st);
     
     
 %% Draw the figure
@@ -128,7 +128,7 @@ axHandle(6) = axes('Position', [.8193 .53 .1311 .44]);
 
 %e = dset.mu.bursts(124,:);
 
-eIdxList = [159 172 111];
+eIdxList = [159 172 111]-50;
 trajList = [2 1 2];
 tbins = linspace(-.1, .1, 11);
 for ii = 1:3
@@ -160,8 +160,8 @@ nAx = nAx+1;
 axHandle(nAx) = axes('Position', [.3712 .1226 .2685 .2767]);
 bins = -1:.025:1;
 
-[~, pCorr1] = kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
-[~, pCorr2] = cmtest2(replayCorr, colCorrShuffle);
+[~, pCorr1] = pdfComp.pVal; %kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
+%[~, pCorr2] = cmtest2(replayCorr, colCorrShuffle);
 
 [occRealCorr, cent] = hist(replayCorr, bins); 
 [occShufCorr]       = hist(colCorrShuffle, bins);

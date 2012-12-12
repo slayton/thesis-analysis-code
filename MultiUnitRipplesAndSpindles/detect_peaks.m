@@ -11,7 +11,7 @@ if nargin > 2
 end
 
 
-[~, pkIdx] = findpeaks(x, 'MINPEAKDISTANCE', 10);
+[~, pkIdx] = findpeaks(x, 'MINPEAKDISTANCE', 3);
 peakTs = ts(pkIdx);
 
 end

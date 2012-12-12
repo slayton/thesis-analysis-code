@@ -26,18 +26,20 @@ fig3_2A = figure('Position', [650 50  700 200]);
 ax3_2A = axes('Position', [.13 .3 .775 .63]);
 
 xlim = [5850.3 5850.85];
-plotIdx = ts >= xlim(1) & ts <= xlim(2);
+plotIdx = find(ts >= xlim(1) & ts <= xlim(2));
 muRateSm = smoothn(muRate, 6);
 
-b = bar(ts(plotIdx), muRateSm(plotIdx), 1,'c'); 
-l = line(ts(plotIdx), 3*eeg(1).data(plotIdx) + 10000, 'Color', 'w');
+X = [ts(plotIdx(1)), ts(plotIdx), ts(plotIdx(end))];
+Y = [0, muRateSm(plotIdx), 0];
+p = patch(X, Y, 'b'); 
+l = line(ts(plotIdx), 3*eeg(1).data(plotIdx) + 10000, 'Color', 'k');
 
-set(ax3_2A, 'Xlim', xlim, 'YLim', [0 13500], 'Color', 'k', 'YTick', []);
+set(ax3_2A, 'Xlim', xlim, 'YTick', []);
 xlabel('Time (s)');
 
 
 %%
-save_bilat_figure('figure3-2A', fig3_2A);
+save_bilat_figure('figure3-2A2', fig3_2A);
 
 
 end

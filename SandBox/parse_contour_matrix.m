@@ -16,7 +16,6 @@ nPts = arrayfun( @(x) size(x.x, 2), cont);
 [~, idx] = sort(nPts, 2, 'descend');
 
 cont = cont(idx);
-ipad
 end
 
 

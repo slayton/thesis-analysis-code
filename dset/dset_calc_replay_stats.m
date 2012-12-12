@@ -22,6 +22,7 @@ if nargin<3
     intercept = [];
 end
 
+
 if nargin<6
     trajType = 'individual';
 end
@@ -35,27 +36,44 @@ for i = 1:size(dset.mu.bursts,1)
     tempIdx = recon.tbins >= dset.mu.bursts(i,1) & recon.tbins <= dset.mu.bursts(i,2);
     recon.replayIdx = recon.replayIdx | tempIdx;
     
-    if iscell(recon.pdf)
-        for j = 1:3
+    if ~iscell(recon.pdf)
+        pdfVar = {recon.pdf};
+        pbinVar = {recon.pbins};
+    else
+        pdfVar = recon.pdf;
+        pbinVar = recon.pbins;
+    end
+        
+        for j = 1:numel(pdfVar)
 
+            stats.pdf{i,j} = pdfVar{j}(:,tempIdx);
+            stats.percentCells(i) = nnz( sum( recon.spike_counts(:, tempIdx), 2) ) / nCell;
+                
             if isempty(slope) || isempty(intercept)
-                stats.pdf{i,j} = recon.pdf{j}(:,tempIdx);
-                stats.percentCells(i) = nnz( sum( recon.spike_counts(:, tempIdx), 2) ) / nCell;
-                [slp, int, ~]  = est_line_detect(recon.tbins(tempIdx), recon.pbins{j}, recon.pdf{j}(:,tempIdx));
-                stats.slope(i,j) = slp;
-                stats.intercept(i,j) = int;
-
+       
+                if nnz(tempIdx)
+                    
+                    [slp, int, ~]  = est_line_detect(recon.tbins(tempIdx), pbinVar{j}, pdfVar{j}(:,tempIdx));
+                    stats.slope(i,j) = slp;
+                    stats.intercept(i,j) = int;
+                else
+                    stats.slope(i,j) = nan;
+                    stats.intercept(i,j) = nan;
+                end
+                
             else
-                slp = slope(i,j);
-                int = intercept(i,j);
+                if numel(slope)>1
+                    slp = slope(i,j);
+                    int = intercept(i,j);
+                end
 
             end
-
-            stats.score2(i,j) = compute_line_score(recon.tbins(tempIdx), recon.pbins{j}, recon.pdf{j}(:,tempIdx), slp, int, smooth);
+            
+            if numel(slope)>1
+                stats.score2(i,j) = compute_line_score(recon.tbins(tempIdx), pbinVar{j}, pdfVar{j}(:,tempIdx), slp, int, smooth);
+            end
         end
-    else
-        stats = [];
-    end
+    
 
 end
 

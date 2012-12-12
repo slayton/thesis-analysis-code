@@ -15,7 +15,7 @@ if isempty(a)
 end
 
 if nargin == 1
-    data = ts;
+    data = timestamps;
     timestamps = 1:length(data);
 end
 

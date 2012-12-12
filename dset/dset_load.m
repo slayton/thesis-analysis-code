@@ -1,5 +1,6 @@
 function dset = dset_load(animal, day, epochs, varagin)
 
+error('Not Implemented');
 default_operations = [];
 
 args.epochs = {'no epoch specified'};

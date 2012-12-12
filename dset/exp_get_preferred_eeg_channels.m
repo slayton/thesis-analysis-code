@@ -20,7 +20,7 @@ switch id
     case 'spl11-day16'
         chans = [11 12 3];    
     case 'gh-rsc1-day18'
-        chans = [14 15 16];
+        chans = [9 14 15];
     case 'sg-rat2-day01'
         chans = [10 11 7];
 end

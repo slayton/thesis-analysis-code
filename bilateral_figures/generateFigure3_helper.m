@@ -113,9 +113,10 @@ set(ax(nAx), 'YDir', 'normal', 'yaxislocation', 'right', 'XTick', [], 'XLim', [.
 %       C - Distribution of Column Correlations
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ax(nAx) = axes('Position', [.071 .05 .3663 .15]);
-bins = -1:.05:1;
+bins = -1:.025:1;
 [occCorr, cent] = hist(colCorr, bins); 
 [occShuf, cent] = hist(colCorrShuff, bins);
+
 
 occCorr = occCorr./sum(occCorr);
 occShuf = occShuf./sum(occShuf);
@@ -123,8 +124,11 @@ occShuf = occShuf./sum(occShuf);
 occCorrSm = smoothn(occCorr, 2, 'correct', 1);
 occShufSm = smoothn(occShuf, 2, 'correct', 1);
 
-bar(cent, occCorrSm, 1, 'FaceColor', 'r',  'Parent', ax(nAx));hold on;
-bar(cent, occShufSm, 1, 'FaceColor', 'g',  'Parent', ax(nAx)); 
+occCorr = occCorr./sum(occCorr);
+occShuf = occShuf./sum(occShuf);
+
+patch([cent 1], [occCorrSm 0], 1, 'FaceColor', 'r',  'Parent', ax(nAx));hold on;
+patch([cent 1], [occShufSm 0], 1, 'FaceColor', 'g',  'Parent', ax(nAx)); 
 
 % line(cent, occCorr, 'Color', 'r', 'LineWidth', 2, 'Parent', ax(nAx));
 % line(cent, occShuf,'Color', 'g',  'LineWidth', 2, 'Parent', ax(nAx));
