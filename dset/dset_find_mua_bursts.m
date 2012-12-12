@@ -27,6 +27,7 @@ low_seg =  logical2seg(mu.timestamps, mu.rate >= lowThreshold);
 [b, n] = inseg(low_seg, high_seg);
 
 bursts = low_seg(logical(n), :);
+
 bursts = bursts(diff(bursts,1,2)>args.min_burst_len, :);
 
 end
