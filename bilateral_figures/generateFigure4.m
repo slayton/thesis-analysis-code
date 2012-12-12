@@ -9,7 +9,7 @@ clear;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 runEpochs = dset_list_epochs('run');
 
-i = 2;
+i = 1;
 % for i = 1:numel(runReconFiles)
     
     dset = dset_load_all(runEpochs{i,1}, runEpochs{i,2}, runEpochs{i,3});    
@@ -95,8 +95,9 @@ muBurstIdx = logical( sum( cell2mat(muBurstIdx'), 2) );
 [muXc, lags] = xcorr(dset.mu.rateL .* muBurstIdx, dset.mu.rateR .* muBurstIdx, ceil(xcWin/muDt), 'coeff');
 lags = lags * mean( diff( muTs ) );
 
-
-pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(st);
+%%
+pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp);
+%pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active_simple(reconSimp);
     
     
 %% Draw the figure
@@ -104,9 +105,8 @@ pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(st);
 %           Draw the figure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+close all;
 
-if exist('fHandle', 'var'), delete( fHandle( ishandle(fHandle) ) ); end
-if exist('axHandle', 'var'), delete( axHandle( ishandle(axHandle) ) ); end
 axHandle = [];
 fHandle = figure('Position',  [350 250 650 620], 'Name', dset_get_description_string(dset) );
  
@@ -128,7 +128,7 @@ axHandle(6) = axes('Position', [.8193 .53 .1311 .44]);
 
 %e = dset.mu.bursts(124,:);
 
-eIdxList = [159 172 111]-50;
+eIdxList = [159 172 111];
 trajList = [2 1 2];
 tbins = linspace(-.1, .1, 11);
 for ii = 1:3
@@ -160,17 +160,19 @@ nAx = nAx+1;
 axHandle(nAx) = axes('Position', [.3712 .1226 .2685 .2767]);
 bins = -1:.025:1;
 
-[~, pCorr1] = pdfComp.pVal; %kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
+[~, pCorr1] = kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
 %[~, pCorr2] = cmtest2(replayCorr, colCorrShuffle);
 
 [occRealCorr, cent] = hist(replayCorr, bins); 
 [occShufCorr]       = hist(colCorrShuffle, bins);
 
-occRealCorr  = occRealCorr./sum(occRealCorr);
-occShufCorr  = occShufCorr./sum(occShufCorr);
 
 occRealCorrSm = smoothn(occRealCorr, 3, 'correct', 1);
 occShufCorrSm = smoothn(occShufCorr, 3, 'correct', 1);
+
+
+occRealCorrSm  = occRealCorrSm./sum(occRealCorrSm);
+occShufCorrSm  = occShufCorrSm./sum(occShufCorrSm);
 
 fill( [-1 -1 1 1], [0 1 1 0],  'w', 'edgecolor', 'none', 'parent', axHandle(nAx));
 p = [];
@@ -178,7 +180,7 @@ p(1) = patch( [cent 1], [occRealCorrSm 0], 'r', 'parent', axHandle(nAx)); hold o
 p(2) = patch( [cent 1], [occShufCorrSm 0], 'g', 'parent', axHandle(nAx));
 set(p,'FaceAlpha', .4);
 
-set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'color', 'w', 'Ylim', [0 .045]);
+set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'YLim', [0 .075]);
 title( sprintf('PDF Corr, p<%0.2g', pCorr1) ); 
 nAx = nAx+1;
 
@@ -206,7 +208,7 @@ set(p,'FaceAlpha', .4);
 
 set(axHandle(nAx), 'XLim', [-1 1]);
 
-title( sprintf('Mean Evt Corr, p<%0.2g', pdfComp.kstest_corr) ); 
+title( sprintf('Mean Evt Corr, p<%0.2g', pdfComp.pVal) ); 
 
 nAx = nAx+1;
 
