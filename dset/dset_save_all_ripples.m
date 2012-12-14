@@ -8,7 +8,7 @@ for eNumber = 1:numel(epochsToAnalyze)
     epoch = epochsToAnalyze{eNumber};
     epochList = dset_list_epochs(epoch);
     
-    for i = 1:size(epochList,1);
+    parfor i = 1:size(epochList,1);
         d = dset_load_all(epochList{i,1},epochList{i,2}, epochList{i,3});
         
         if add_ref == 1
@@ -19,9 +19,9 @@ for eNumber = 1:numel(epochsToAnalyze)
         fprintf('\tComputing ripple parameters\n');
         rp = dset_calc_ripple_params(d);
         rp.description = dset_get_description_string(d);
-        data.(epoch)(i) = rp;
+        epData(i) = rp;
     end
-    
+    data.(epoch) = epData;
 end
 
 if add_ref == 0

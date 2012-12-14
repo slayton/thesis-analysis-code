@@ -7,7 +7,7 @@ function dset = dset_calc_ripple_spectrum(dset)
     
     window = bsxfun(@plus, windowTemplate, dset.ripples.peakIdx);
 
-    for chanIdx = 1:2:numel(dset.eeg)
+    for chanIdx = 1:numel(dset.eeg)
         dset.ripples.raw{chanIdx} = dset.eeg(chanIdx).data(window);
         dset.ripples.rip{chanIdx} = dset.eeg(chanIdx).rippleband(window);
     end
@@ -16,7 +16,7 @@ function dset = dset_calc_ripple_spectrum(dset)
     
     nFreq = numel(f);
     
-    for ii = 1:2:numel(dset.ripples.rip)
+    for ii = 1:numel(dset.ripples.rip)
         
         r = dset.ripples.raw{ii};
         nRip = size(r,1);

@@ -7,13 +7,14 @@ nRipple = sum( arrayfun(@(x) size(x.raw{1},1), ripples, 'UniformOutput', 1) );
 nSample = size(ripples(1).window,2);
 
 % allocate our variables
-[ripBase, ripCont, ripShuf1]  = deal( zeros(nRipple, nSample) );
+[ripBase, ripIpsi, ripCont, ripShuf1]  = deal( zeros(nRipple, nSample) );
 
 % Create the REAL data set
 idx = 1;
 for i = 1:nAnimal;
     n = size(ripples(i).raw{1}, 1);  % number of ripples for this animal
     ripBase( idx : idx+n - 1 , :) = ripples(i).raw{1};
+    ripIpsi( idx : idx+n - 1 , :) = ripples(i).raw{2};
     ripCont( idx : idx+n - 1 , :) = ripples(i).raw{3};
     idx = idx + n; 
 end
@@ -22,12 +23,11 @@ end
 idx = 1;
 for i = 1:nAnimal
     n = size(ripples(i).raw{1}, 1); % number of ripples for this animal
-    ripShuf1( idx : idx+n-1 , :) = ripples(i).raw{3}(randsample(n,n,1),:);
+    ripShuf1( idx : idx+n-1 , :) = ripples(i).raw{2}(randsample(n,n,1),:);
+    ripShuf2( idx : idx+n-1 , :) = ripples(i).raw{3}(randsample(n,n,1),:);
+
     idx = idx + n; 
 end
-
-% Create BETWEEN animal SHUFFLE data
-ripShuf2= ripCont( randsample(nRipple, nRipple, 1), :);
 
 clearvars idx n nSampPerRipple shuffleIndex i
 %%
@@ -56,10 +56,8 @@ coherenceArgs = {[],[],[],fs};
 % compute the Frequency vector was we can't save it in a parfor loop
 %[~, F] = mscohere(ripBase(1,winIdx), ripCont(1,winIdx),[], noverlap, nfft, fs);
 
-
-disp(coherenceArgs)
 [coTemp, F] = mscohere(ripBase(1,winIdx), ripCont(1,winIdx),coherenceArgs{:});
-[rippleCoherence, shuffleCoherence1, shuffleCoherence2] =  deal( zeros(nRipple, size(coTemp,1) ) );
+[cohereIpsi, cohereCont, shuffleIpsi, shuffleCont] =  deal( zeros(nRipple, size(coTemp,1) ) );
 
 % Calculate the Correlations
 
@@ -69,18 +67,26 @@ parfor i = 1:nRipple
 %     rippleCoherence(i,:)   = mscohere(ripBase(i,winIdx), ripCont(i,winIdx),[], noverlap, nfft, fs);
 %     shuffleCoherence1(i,:) = mscohere(ripBase(i,winIdx), ripShuf1(i,winIdx),[], noverlap, nfft, fs);
 %     shuffleCoherence2(i,:) = mscohere(ripBase(i,winIdx), ripShuf2(i,winIdx),[], noverlap, nfft, fs);
-    rippleCoherence(i,:)   = mscohere(ripBase(i,winIdx), ripCont(i,winIdx), coherenceArgs{:});
-    shuffleCoherence1(i,:) = mscohere(ripBase(i,winIdx), ripShuf1(i,winIdx), coherenceArgs{:});
-    shuffleCoherence2(i,:) = mscohere(ripBase(i,winIdx), ripShuf2(i,winIdx), coherenceArgs{:});
+    cohereCont(i,:)   = mscohere(ripBase(i,winIdx), ripCont(i,winIdx), coherenceArgs{:});
+    cohereIpsi(i,:)   = mscohere(ripBase(i,winIdx), ripIpsi(i,winIdx), coherenceArgs{:});
+    shuffleIpsi(i,:) = mscohere(ripBase(i,winIdx), ripShuf1(i,winIdx), coherenceArgs{:});
+    shuffleCont(i,:) = mscohere(ripBase(i,winIdx), ripShuf2(i,winIdx), coherenceArgs{:});
 end
 dt = toc;
 fprintf('Done! That took %4.4f seconds!\n', dt);
+% 
+% results.rippleCoherence{1} = cohereIpsi;
+% results.rippleCoherence{2} = cohereCont;
+% results.shuffleCoherence{1} = shuffleIpsi;
+% results.shuffleCoherence{2} = shuffleCont;
 
-results.rippleCoherence = rippleCoherence;
-results.shuffleCoherence{1} = shuffleCoherence1;
-results.shuffleCoherence{2} = shuffleCoherence2;
+results.cohereIpsi = cohereIpsi;
+results.cohereCont = cohereCont;
+results.shuffleIpsi = shuffleIpsi;
+results.shuffleCont = shuffleCont;
+
 results.F = F;
-results.shuffleType = {'within animal', 'between animals'};
+results.shuffleType = {'ipsilateral', 'contralateral'};
 
 end
 

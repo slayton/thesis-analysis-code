@@ -178,9 +178,8 @@ fill( [-1 -1 1 1], [0 1 1 0],  'w', 'edgecolor', 'none', 'parent', axHandle(nAx)
 p = [];
 p(1) = patch( [cent 1], [occRealCorrSm 0], 'r', 'parent', axHandle(nAx)); hold on;
 p(2) = patch( [cent 1], [occShufCorrSm 0], 'g', 'parent', axHandle(nAx));
-set(p,'FaceAlpha', .4);
 
-set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'YLim', [0 .075]);
+set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'YLim', [0 .05]);
 title( sprintf('PDF Corr, p<%0.2g', pCorr1) ); 
 nAx = nAx+1;
 
@@ -204,7 +203,6 @@ p = [];
 p(1) = patch( [cent 1], [occHighSm 0], 'b', 'Parent', axHandle(nAx));
 p(2) = patch( [cent 1], [occLowSm 0],  'k', 'Parent', axHandle(nAx));
 
-set(p,'FaceAlpha', .4);
 
 set(axHandle(nAx), 'XLim', [-1 1]);
 

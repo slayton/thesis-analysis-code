@@ -4,7 +4,7 @@ function [results] = calc_bilateral_ripple_phase_diff(ripples)
     nAnimal = numel(ripples);
     nRipple = sum( arrayfun(@(x) size(x.raw{1},1), ripples, 'UniformOutput', 1) );
 
-    [phase1, phase2] = deal( zeros( nRipple,1 ) );
+    phase = zeros( nRipple,3 );
     
     curIdx = 1;
     for iAnimal = 1:nAnimal
@@ -12,30 +12,41 @@ function [results] = calc_bilateral_ripple_phase_diff(ripples)
         r = ripples(iAnimal);
         peakIdx = find(r.window==0) - 1; % correction for bad peak indexing!?!
         nRip = numel(r.peakIdx);
-        
-        h1 = hilbert(r.rip{1}')';
-        h2 = hilbert(r.rip{3}')';
+     
+        for i = 1:numel(r.rip)
+            if isempty(r.rip{i})
+                continue;
+            end
+            
+            hil = hilbert(r.rip{i}')';
+            
+%             h3 = hilbert(r.rip{3}')';
 
         % unwrap the phases so we can compute a clean difference in angles
-        p1 = unwrap( angle(h1) );
-        p2 = unwrap( angle(h2) );
+            phs = unwrap( angle(hil) );
+%         p3 = unwrap( angle(h3) );
         
-        p1 = p1(:, peakIdx);
-        p2 = p2(:, peakIdx);
-
-        phase1(curIdx:(curIdx+nRip-1)) = p1;
-        phase2(curIdx:(curIdx+nRip-1)) = p2;
+            phs = phs(:, peakIdx);
+     
+    
+            phase(curIdx:(curIdx+nRip-1), i) = phs;
+%         phase3(curIdx:(curIdx+nRip-1)) = p3;
         
+        
+        end
         curIdx = curIdx + nRip;
-        
         
     end
     
-    dPhase = phase1 - phase2;
+    dPhase = phase(:,1) - phase(:,3);
+    dPhaseIpsi = phase(:,1) - phase(:,2);
+    dPhaseCont = dPhase;
      
     % mod by 2pi to bring it with that valid range of [-pi pi]
-    results.dPhase  = mod(dPhase, 2*pi)-pi;
-    results.p1      = mod(phase1, 2*pi)-pi;
-    results.p2      = mod(phase2, 2*pi)-pi;
+    %results.dPhase  = mod(dPhase, 2*pi)-pi;
+    results.dPhaseIpsi = dPhaseIpsi;
+    results.dPhaseCont = dPhaseCont;
+    results.phase   =  phase;
+    
        
 end

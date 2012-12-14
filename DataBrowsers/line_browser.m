@@ -37,6 +37,7 @@ xlim_listener = addlistener(a, 'XLim', 'PostSet', @(src,e) refresh);
 dest_listener = addlistener(a, 'ObjectBeingDestroyed', @(src, e) destroy);
 
 lineHandle = [];
+size(timestamps)
 
 set(a, 'Units', 'Pixels', 'XLim', [min(timestamps) max(timestamps)]);
 set(a, 'Units', 'Normalized');

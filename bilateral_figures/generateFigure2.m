@@ -14,8 +14,8 @@ ripFreqRun = calc_bilateral_ripple_freq_distribution(ripples.run);
 
 data = load('/data/thesis/bilateral_ripple_coherence.mat');
 ripCohere = data.rippleCoherence;
-ripCohere.sleep.shuffleCoherence = ripCohere.sleep.shuffleCoherence(1);
-ripCohere.run.shuffleCoherence = ripCohere.run.shuffleCoherence(1);
+% ripCohere.sleep.shuffleCoherence = ripCohere.sleep.shuffleCoherence(1);
+% ripCohere.run.shuffleCoherence = ripCohere.run.shuffleCoherence(1);
 
 clear data;
 
@@ -33,7 +33,7 @@ f2Handle = figure('Position', [650 50  581 492], 'NumberTitle','off','Name', 'Bi
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       A - Ripple Peak Triggered LFP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axF2(1) = axes('Position', [.055 .57 .35 .38], 'Color', 'k');
+axF2(1) = axes('Position', [.055 .57 .35 .38]);
 
 
 % rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.sleep());
@@ -42,6 +42,9 @@ rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.sleep([10:13]));
 % error_area_plot(rTrigLfp.ts, rTrigLfp.meanLfp{1}, 'Color', [1 0 0 ], 'Parent', axF2(3));
 line(rTrigLfp.ts, rTrigLfp.meanLfp{1}, 'Color', [1 0 0 ], 'Parent', axF2(1)); 
 line(rTrigLfp.ts, rTrigLfp.meanLfp{2}, 'Color', [0 1 0 ], 'Parent', axF2(1));
+line(rTrigLfp.ts, rTrigLfp.meanLfp{3}, 'Color', [0 0 1 ], 'Parent', axF2(1)); 
+
+
 set(axF2(1),'XLim', [-.075 .075], 'YTick', []);
 t = title('Bon4 Rip trig LFP');
 set(t,'Position', [0 200, 1]);
@@ -52,9 +55,12 @@ set(t,'Position', [0 200, 1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 axF2(2) = axes('Position', [.55 .55 .35 .38]);
 
-freqBins = -(pi) : pi/8 : (pi + pi/8);
+bins = -(pi) : pi/8 : (pi + pi/8);
 
-rose2(ripPhaseSleep.dPhase, freqBins, 'Parent', axF2(2));
+rose2(ripPhaseSleep.dPhaseIpsi, bins, [], 'r', 'Parent', axF2(2)); hold on;
+rose2(ripPhaseSleep.dPhaseCont, bins, 'Parent', axF2(2));
+
+
 title('Ripple Phase difference distribution', 'Parent', axF2(2));
 
 % set(axF2(4), 'XLim', [-1.05 1.05] * pi , 'XTick', -pi:pi/2:pi);
@@ -82,24 +88,43 @@ set(t,'Position', [187.5 225, 1]);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 axF2(4) = axes('Position', [.55 .065 .35 .38]);
 
-F = ripCohere.sleep.F;
-mCoData = mean(ripCohere.sleep.rippleCoherence);
-sCoData = std(ripCohere.sleep.rippleCoherence);
-nSleep = size(ripCohere.sleep.rippleCoherence,1);
+F = ripCohere.run.F;
+mCoCont = mean(ripCohere.sleep.cohereCont);
+sCoCont = std(ripCohere.sleep.cohereCont);
+
+mCoIpsi = mean(ripCohere.sleep.cohereIpsi);
+sCoIpsi = std(ripCohere.sleep.cohereIpsi);
+
+n = size(ripCohere.sleep.cohereIpsi,1);
 nStd = 3;
 
-mCoShuf = mean( ripCohere.sleep.shuffleCoherence{1} );
-sCoShuf = std( ripCohere.sleep.shuffleCoherence{1} );
+mShufCont = mean(ripCohere.sleep.shuffleCont);
+sShufCont= std(ripCohere.sleep.shuffleCont);
 
-[p(1), l(1)] = error_area_plot(F, mCoData, nStd * sCoData / sqrt(nSleep), 'Parent', axF2(4));
-[p(2), l(2)] = error_area_plot(F, mCoShuf, nStd * sCoShuf / sqrt(nSleep), 'Parent', axF2(4));
-set(l(1), 'Color', [1 0 0], 'LineWidth', 1.5);
-set(l(2), 'Color', [0 1 0], 'LineWidth', 1.5);
+mShufIpsi = mean(ripCohere.sleep.shuffleIpsi);
+sShufIpsi= std(ripCohere.sleep.shuffleIpsi);
 
-set(p(1), 'FaceColor', [1 0 0], 'edgecolor', 'none', 'facealpha', .3);
-set(p(2), 'FaceColor', [0 1 0], 'edgecolor', 'none', 'facealpha', .3);
-set(axF2(4),'Xlim', [0 400], 'XTick', 0:100:400);
-t = title('Bilateral Ripple Coherence', 'Parent', axF2(4));
+
+[p(1), l(1)] = error_area_plot(F, mCoCont, nStd * sCoCont / sqrt(n), 'Parent',axF2(4));
+% [p(2), l(2)] = error_area_plot(F, mCoIpsi, nStd * sCoIpsi / sqrt(n), 'Parent', axF2(4));
+[p(3), l(3)] = error_area_plot(F, mShufCont, nStd * sShufCont / sqrt(n), 'Parent', axF2(4));
+% [p(4), l(4)] = error_area_plot(F, mShufIpsi, nStd * sShufIpsi / sqrt(n), 'Parent', axF2(4));
+
+set(l(1), 'Color', [1 0 0], 'LineWidth', 2);
+% set(l(2), 'Color', [0 1 0], 'LineWidth', 2);
+
+
+set(l(3), 'Color', [0 1 1], 'LineWidth', 2);
+% set(l(4), 'Color', [1 0 1], 'LineWidth', 2);
+
+set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
+% set(p(2), 'FaceColor', [.7 1 .7], 'edgecolor', 'none');
+
+set(p(3), 'FaceColor', [.7 1 1], 'edgecolor', 'none');
+% set(p(4), 'FaceColor', [1 .7 1], 'edgecolor', 'none');
+
+
+set(axF2(4),'Xlim', [0 400], 'XTick', [0:100:400]);t = title('Bilateral Ripple Coherence', 'Parent', axF2(4));
 set(t,'Position', [200 .5 1]);
 
 

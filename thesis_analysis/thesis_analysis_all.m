@@ -2,7 +2,7 @@
 %               LFP ANALYSIS
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Load Data
-clear; clc;
+ clc;
 ripples = dset_load_ripples;
 
 %% - XCorr the ripple bands
