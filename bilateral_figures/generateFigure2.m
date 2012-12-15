@@ -1,6 +1,6 @@
 function generateFigure2
 %% Load all the data required for plotting!
-open_pool;
+% open_pool;
 %%
 clear;
 
@@ -189,14 +189,14 @@ set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400);
 
 F = ripCohere.sleep.F;
 
-mCoSleep = mean(ripCohere.sleep.rippleCoherence);
-mCoRun = mean(ripCohere.run.rippleCoherence);
+mCoSleep = mean(ripCohere.sleep.cohereCont);
+mCoRun = mean(ripCohere.run.cohereCont);
 
-sCoSleep = std(ripCohere.sleep.rippleCoherence);
-sCoRun = std(ripCohere.run.rippleCoherence);
+sCoSleep = std(ripCohere.sleep.cohereCont);
+sCoRun = std(ripCohere.run.cohereCont);
 
-nRun = size(ripCohere.sleep.rippleCoherence,1);
-nSleep = size(ripCohere.sleep.rippleCoherence,1);
+nRun = size(ripCohere.sleep.cohereCont,1);
+nSleep = size(ripCohere.sleep.cohereCont,1);
 nStd = 1.96;
 
 rError = (nStd * sCoRun)/sqrt(nRun);
@@ -212,14 +212,14 @@ sCorr{2} = mCoSleep - sError;
 X1 = [F; flipud(F)];
 Y1 = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
 
-mCoSleepSh = mean(ripCohere.sleep.shuffleCoherence{1});
-mCoRunSh = mean(ripCohere.run.shuffleCoherence{1});
+mCoSleepSh = mean(ripCohere.sleep.shuffleCont);
+mCoRunSh = mean(ripCohere.run.shuffleCont});
 
-sCoSleepSh = std(ripCohere.sleep.shuffleCoherence{1});
-sCoRunSh = std(ripCohere.run.shuffleCoherence{1});
+sCoSleepSh = std(ripCohere.sleep.shuffleCont);
+sCoRunSh = std(ripCohere.run.shuffleCont);
 
-nRun = size(ripCohere.sleep.shuffleCoherence{1},1);
-nSleep = size(ripCohere.sleep.shuffleCoherence{1},1);
+nRun = size(ripCohere.sleep.shuffleCont,1);
+nSleep = size(ripCohere.sleep.shuffleCont,1);
 nStd = 1.96;
 
 rError = (nStd * sCoRunSh)/sqrt(nRun);
