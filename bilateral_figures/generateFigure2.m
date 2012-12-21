@@ -72,11 +72,26 @@ title('Ripple Phase difference distribution', 'Parent', axF2(2));
 axF2(3) = axes('Position', [.055 .065 .35 .38]);
 
 freqBins = 150:3:225;
-bilatFreqDistSleep = hist3([ripFreqSleep.base, ripFreqSleep.cont], {freqBins, freqBins});
-bilatFreqDistRun = hist3([ripFreqRun.base, ripFreqRun.cont], {freqBins, freqBins});
+biFreqSlpCont = hist3([ripFreqSleep.base, ripFreqSleep.cont], {freqBins, freqBins});
+biFreqRunCont = hist3([ripFreqRun.base, ripFreqRun.cont], {freqBins, freqBins});
+
+biFreqSlpIpsi = hist3([ripFreqSleep.base, ripFreqSleep.ipsi], {freqBins, freqBins});
+biFreqRunIpsi = hist3([ripFreqRun.base, ripFreqRun.ipsi], {freqBins, freqBins});
 
 % occ = smoothn(occ,1);
-imagesc(freqBins, freqBins, bilatFreqDistSleep, 'Parent', axF2(3));
+img = repmat( biFreqSlpCont ,[1 1 3]);
+img = img - min(img(:));
+img = img / max(img(:));
+imagesc(freqBins, freqBins,  1-img, 'Parent', axF2(3));
+
+[r2(1) pR2(1)] = corr(ripFreqSleep.base, ripFreqSleep.cont);
+[r2(2) pR2(2)] = corr(ripFreqRun.base, ripFreqRun.cont);
+[r2(3) pR2(3)] = corr(ripFreqSleep.base, ripFreqSleep.ipsi);
+[r2(4) pR2(4)] = corr(ripFreqRun.base, ripFreqRun.ipsi);
+
+fprintf('R Sq\t%2.2f\t%2.2f\t%2.2f\t%2.2f\n', r2);
+fprintf('P Sq\t%0.2g\t%0.2g\t%0.2g\t%0.2g\n', pR2 * 1000);
+
 
 set(axF2(3),'Xlim', [150 225], 'YLim', [150 225], 'YDir', 'normal');
 set(axF2(3),'XTick',150:25:225,'YTick', 150:25:225);
@@ -106,23 +121,23 @@ sShufIpsi= std(ripCohere.sleep.shuffleIpsi);
 
 
 [p(1), l(1)] = error_area_plot(F, mCoCont, nStd * sCoCont / sqrt(n), 'Parent',axF2(4));
-% [p(2), l(2)] = error_area_plot(F, mCoIpsi, nStd * sCoIpsi / sqrt(n), 'Parent', axF2(4));
+[p(2), l(2)] = error_area_plot(F, mCoIpsi, nStd * sCoIpsi / sqrt(n), 'Parent', axF2(4));
 [p(3), l(3)] = error_area_plot(F, mShufCont, nStd * sShufCont / sqrt(n), 'Parent', axF2(4));
-% [p(4), l(4)] = error_area_plot(F, mShufIpsi, nStd * sShufIpsi / sqrt(n), 'Parent', axF2(4));
+[p(4), l(4)] = error_area_plot(F, mShufIpsi, nStd * sShufIpsi / sqrt(n), 'Parent', axF2(4));
 
 set(l(1), 'Color', [1 0 0], 'LineWidth', 2);
-% set(l(2), 'Color', [0 1 0], 'LineWidth', 2);
-
+set(l(2), 'Color', [0 1 0], 'LineWidth', 2);
 
 set(l(3), 'Color', [0 1 1], 'LineWidth', 2);
-% set(l(4), 'Color', [1 0 1], 'LineWidth', 2);
+set(l(4), 'Color', [1 0 1], 'LineWidth', 2);
 
 set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
-% set(p(2), 'FaceColor', [.7 1 .7], 'edgecolor', 'none');
+set(p(2), 'FaceColor', [.7 1 .7], 'edgecolor', 'none');
 
 set(p(3), 'FaceColor', [.7 1 1], 'edgecolor', 'none');
-% set(p(4), 'FaceColor', [1 .7 1], 'edgecolor', 'none');
+set(p(4), 'FaceColor', [1 .7 1], 'edgecolor', 'none');
 
+legend(l, {'Co-Cont', 'Co-Ipsi', 'Sh-Cont', 'Sh-Ipsi'});
 
 set(axF2(4),'Xlim', [0 400], 'XTick', [0:100:400]);t = title('Bilateral Ripple Coherence', 'Parent', axF2(4));
 set(t,'Position', [200 .5 1]);
@@ -132,50 +147,88 @@ set(t,'Position', [200 .5 1]);
 %       E- Bilateral Freq Distribution : RUN VS SLEEP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-fig2E = figure;
-ax2E = axes(); hold on;
 
-dataS = bilatFreqDistSleep;
-dataR = bilatFreqDistRun;
+fig2E = figure;%('Position', [280 450 800 420]);
+ax2E = axes;%('Position', [.0775 .122 .4279 .8150], 'NextPlot', 'add'); 
+% ax2E(2) = axes('Position', [.5563 .122 .4279 .8150], 'NextPlot', 'add'); 
 
-% dataS = dataS ./ max(dataS(:));
-% dataR = dataR ./ max(dataR(:));
+nShuffle = 3;
+freqBins = 150:3:225;
 
-dataR = smoothn(dataR,2);
-dataS = smoothn(dataS,2);
-
-tholdS = quantile( dataR(:), .5 );
-tholdR = quantile( dataS(:), .5 );
- 
-c{1} = contourc(freqBins, freqBins, bilatFreqDistSleep, [0 0] + tholdS); hold on;
-c{2} = contourc(freqBins, freqBins, bilatFreqDistRun, [0 0] + tholdR);
-
-for i = 1:numel(c)
-    result = parse_contour_matrix( c{i} );
-    cont(i) = result(1);
-end
-% cSleep = contour(freqBins, freqBins, bilatFreqDistSleep, 3); hold on;
-% cRun = contour(freqBins, freqBins, bilatFreqDistRun, 3);
-% nPt = size(cSleep,2);
+for i = 1:nShuffle
+    drawnow;
+    nSleep = numel(ripFreqSleep.base);
+    nRun = numel(ripFreqRun.base);
+    
+    slpIdx = randi(nSleep, round(nSleep * .90), 1);
+    runIdx = randi(nRun, round(nRun*.90), 1);
+    
+    dataSC = hist3([ripFreqSleep.base(slpIdx), ripFreqSleep.cont(slpIdx)], {freqBins, freqBins});
+    dataRC = hist3([ripFreqRun.base(runIdx), ripFreqRun.cont(runIdx)], {freqBins, freqBins});
 % 
-% line(cSleep(2,1:(nPt/2)), cSleep( (1 + nPt/2):nPt),'linestyle', 'none', 'marker','.', 'color','r');
-% line(cRun(,1:(nPt/2)), cRun( (1 + nPt/2):nPt), 'linestyle', 'none', 'marker','.', 'color','k');
+%     dataSC = biFreqSlpCont;
+%     dataRC = biFreqRunCont;
+    % dataSI = biFreqSlpIpsi;
+    % dataRI = biFreqRunIpsi;
 
-for i = 1:numel(cont)
-    [e(i).Z, e(i).A, e(i).B, e(i).ALPHA] = fitellipse( [cont(i).x; cont(i).y] );
-    [el(i).x, el(i).y] = ellipse_points( e(i).Z, e(i).A, e(i).B, e(i).ALPHA );
+    % dataS = dataS ./ max(dataS(:));
+    % dataR = dataR ./ max(dataR(:));
+
+    dataRC = smoothn(dataRC,2);
+    dataSC = smoothn(dataSC,2);
+
+    % dataRI = smoothn(dataRI,2);
+    % dataSI = smoothn(dataSI,2);
+
+    tholdS = quantile( dataRC(:), .5 );
+    tholdR = quantile( dataSC(:), .5 );
+    % 
+    % tholdI = quantile( dataRI(:), .5 );
+    % tholdI = quantile( dataSI(:), .5 );
+
+    c{1} = contourc(freqBins, freqBins, biFreqSlpCont, [0 0] + tholdS); hold on;
+    c{2} = contourc(freqBins, freqBins, biFreqRunCont, [0 0] + tholdR);
+
+    % c{3} = contourc(freqBins, freqBins, biFreqSlpIpsi, [0 0] + tholdS); hold on;
+    % c{4} = contourc(freqBins, freqBins, biFreqRunIpsi, [0 0] + tholdR);
+
+    for i = 1:numel(c)
+        result = parse_contour_matrix( c{i} );
+        cont(i) = result(1);
+    end
+
+    % cSleep = contour(freqBins, freqBins, bilatFreqDistSleep, 3); hold on;
+    % cRun = contour(freqBins, freqBins, bilatFreqDistRun, 3);
+    % nPt = size(cSleep,2);
+    % 
+    % line(cSleep(2,1:(nPt/2)), cSleep( (1 + nPt/2):nPt),'linestyle', 'none', 'marker','.', 'color','r');
+    % line(cRun(,1:(nPt/2)), cRun( (1 + nPt/2):nPt), 'linestyle', 'none', 'marker','.', 'color','k');
+
+    for i = 1:numel(cont)
+        [e(i).Z, e(i).A, e(i).B, e(i).ALPHA] = fitellipse( [cont(i).x; cont(i).y] );
+        [el(i).x, el(i).y] = ellipse_points( e(i).Z, e(i).A, e(i).B, e(i).ALPHA );
+    end
+
+    p = [];
+    p(1) = patch(el(2).x, el(2).y, [.5 1 1], 'Parent', ax2E);
+    % p(4) = patch(el(4).x, el(4).y, [1 1 .5], 'Parent', ax2E(2));
+    p(2) = patch(el(1).x, el(1).y, [1 .5 .5], 'Parent', ax2E);
+    % p(2) = patch(el(2).x, el(2).y, [.5 .5 1], 'Parent', ax2E(2));
+
+    set(ax2E,'XLim', [150 225], 'YLim', [150 225]);
+
+    set(p(2), 'EdgeColor', [1 .5 .5], 'linewidth', 1);
+    set(p(1), 'EdgeColor', [.5 .5 1], 'linewidth', 1);
+    set(p, 'FaceColor', 'none');
+
 end
 
-p(1) = patch(el(1).x, el(1).y, [1 .5 .5]);
-p(2) = patch(el(2).x, el(2).y, [.5 .5 1]);
+set(ax2E, 'Units', 'Pixels');
+axP = get(ax2E, 'Position');
+set(ax2E,'Position', axP([1,2,4,4]) );
 
-set(ax2E,'Units','Pixels');
-axPos = get(ax2E,'Position');
-set(ax2E,'Position', axPos([1 2 4 4]));
-set(ax2E,'Units', 'normal', 'XLim', [150 225], 'YLim', [150 225]);
 
-set(p(1), 'EdgeColor', [.7 0 0]);
-set(p(2), 'EdgeColor', [0 0 .7]);
+
 xlabel('Source Ripple Freq (Hz)');
 ylabel('Test Ripple Freq (Hz)');
 
@@ -195,7 +248,7 @@ mCoRun = mean(ripCohere.run.cohereCont);
 sCoSleep = std(ripCohere.sleep.cohereCont);
 sCoRun = std(ripCohere.run.cohereCont);
 
-nRun = size(ripCohere.sleep.cohereCont,1);
+nRun = size(ripCohere.run.cohereCont,1);
 nSleep = size(ripCohere.sleep.cohereCont,1);
 nStd = 1.96;
 
@@ -213,7 +266,7 @@ X1 = [F; flipud(F)];
 Y1 = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
 
 mCoSleepSh = mean(ripCohere.sleep.shuffleCont);
-mCoRunSh = mean(ripCohere.run.shuffleCont});
+mCoRunSh = mean(ripCohere.run.shuffleCont);
 
 sCoSleepSh = std(ripCohere.sleep.shuffleCont);
 sCoRunSh = std(ripCohere.run.shuffleCont);
