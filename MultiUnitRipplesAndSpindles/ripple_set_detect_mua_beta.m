@@ -7,6 +7,7 @@ if ~exist('allRipples','var')
     allRipples = dset_load_ripples;
 end
 epType = 'SLEEP';
+
 if strcmp('RUN', epType)
     eList = dset_list_epochs('run');
     ripples = allRipples.run;
@@ -16,12 +17,13 @@ elseif strcmp('SLEEP', epType)
 else
     error('Invalid EP TYPE');
 end
+
 Fs = 1500;
 ripWin = -750:750;
 ripTrigMuaAll = [];
 
 
-eps = 3;
+eps = 2;
 %eps = 1:size(eList,1);
 if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exist('fs','var') || ...
  isempty(muRate) || isempty(eeg) || isempty(ts) || isempty(fs)
@@ -75,12 +77,12 @@ for iEpoch = eps%:numel(ripples)
     end
     
     ripTs1 = detect_ripples(eegTs, eeg);
-    ripTs = eegTs(ripples(iEpoch).peakIdx);
+    ripTs = eegTs( ripples(iEpoch).peakIdx);
        
     numel(filter_event_sets(ripTs1, 3, dtThresh))
     numel(filter_event_sets(ripTs, 3, dtThresh))
     
-    [tripletSet, singletSet] = filter_event_sets(ripTs1, 3, dtThresh);
+    [tripletSet, singletSet] = filter_event_sets(ripTs, 3, dtThresh);
 
     tripletTs{iEpoch} = ripTs(tripletSet);
     singletTs{iEpoch} = ripTs(singletSet);

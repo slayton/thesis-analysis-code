@@ -36,6 +36,7 @@ elseif ~isscalar(normalize) && any(normalize == [0 1])
 end
 
 
+
 % Compute the histogram counts.
 [t, r] = rose(data, bins);
 
@@ -44,7 +45,6 @@ if normalize == 1
 end
 
 [x,y] = pol2cart(t,r);
-
 
 % save the largest radius in the histogram
 R = max(r) * 1;
@@ -57,7 +57,11 @@ h = patch(x,y,'b', 'parent', ax, 'linewidth', 2);
 
 data = get(ax, 'UserData');
 data.hObj(end+1) = h;
+data
+uistack(data.handles.rLabel, 'top');
+
 set(ax,'UserData', data);
+
 
 end
 
@@ -95,24 +99,11 @@ function ax = createPolarAxes(R)
     
     data.R = R;
     
-    data.rTick = defineRadialTicks(R);
-    data.aTick = defineAngularTicks(R);
-    
     data.hObj = [];
     
     set(ax,'UserData', data);
     
     renderPolarAxes(ax);
-end
-
-function [rTicks] = defineRadialTicks(R)
-    
-    rTicks = R/3 * [3 2 1];
-        
-end
-
-function [aTicks] = defineAngularTicks(R)
-    aTicks = (0:2:7)/2;
 end
 
 function renderPolarAxes(ax)
@@ -124,75 +115,44 @@ function renderPolarAxes(ax)
     circle(ax, [0 0], data.R, 'edgecolor', 'k', 'linewidth', 2, 'facecolor', 'w');
     
     % Render the ANGULAR ticks and labels
-    [data.handles.aTick, data.handles.aLab] = ...
-        renderAngularTicks(ax, data.aTick, data.R);
+    [data.handles.aTick, data.handles.aLabel] = ...
+        renderAngularTicks(ax, data.R);
     
     % Render the RADIAL ticks and labels
-    [data.handles.rTick, data.handles.rLab] = ...
-        renderRadialTicks(ax, data.rTick);
+    [data.handles.rTick, data.handles.rLabel] = ...
+        renderRadialTicks(ax, data.R);
     
-    
-       
+    data
+    set(ax,'UserData', data);
+   
 end
 
-function [t, l] = renderRadialTicks(ax, rTick)
+function [tick, lab] = renderRadialTicks(ax, R)
     % draw the maxes marks
-    nTick = numel(rTick);
-    
-    [t, l] = deal( zeros(nTick,1) );
-    
-    for i = 1:nTick
+   
+    for i = 1:3
+       r = R * i/3;
+       [x, y] = pol2cart(pi/4, r );
        
-       [x, y] = pol2cart(pi/4, rTick(i) );
-       
-       t(i) = circle([0 0], rTick(i), 'EdgeColor', [.4 .4 .4], 'FaceColor', 'none', 'linestyle', '--', 'Parent', ax);
-       l(i) = text(x, y, sprintf('%3.2f', rTick(i)), 'FontSize', 14);
+       tick(i) = circle([0 0], r, 'EdgeColor', [.4 .4 .4], 'FaceColor', 'none', 'linestyle', '--', 'Parent', ax);
+       lab(i) = text(x, y, sprintf('%3.2f', r), 'FontSize', 14);
+   
     end
     
 end
 
-function [tick, lab] = renderAngularTicks(ax, aTick, R)
+function [tick, lab] = renderAngularTicks(ax, R)
 
-    nTick = numel(aTick);
-    [tick, lab] = deal(zeros(nTick, 1));
-    
-    for i = 1:numel(aTick)
-        
-        
-        [x, y] = pol2cart(pi/2 * aTick(i), R);
-            
-        tick(i) = line(x * [-1 1], y * [-1 1], 'Color', 'k', 'linewidth', 1,'Parent', ax);
-        
-            lab(i) = text(1.05*x, 1.05*y, sprintf('%2.2f', pi * aTick(i)/2), 'FontSize', 14, 'Parent', ax);
        
+    tick(1) = line(R * [-1, 1], [0, 0], 'color', 'k', 'parent', ax);
+    tick(2) = line([0, 0], R * [-1, 1], 'color', 'k', 'parent', ax);
+    tick(3) = line(sqrt(2)/2 * [-R R], sqrt(2)/2 * [R -R], 'color', 'k', 'parent', ax);
+    tick(4) = line(sqrt(2)/2 * [R -R], sqrt(2)/2 * [R -R], 'color', 'k', 'parent', ax);
 
-            if abs(x) < .0005
-                set(lab(i),'HorizontalAlignment', 'center')
-            elseif x>0
-                set(lab(i),'HorizontalAlignment', 'left');
-            else
-                set(lab(i),'HorizontalAlignment', 'Right');
-            end
+    lab(1) = text(1.05*R, 0, '2\pi',      'fontsize', 14, 'HorizontalAlignment', 'left', 'verticalalignment', 'middle');
+    lab(2) = text(-1.075*R, 0, '\pi',     'fontsize', 14, 'HorizontalAlignment', 'right','verticalalignment', 'middle');
+    lab(3) = text(0, 1.05*R, '\pi/_2',    'fontsize', 14, 'horizontalalignment', 'center', 'verticalalignment', 'bottom');
+    lab(4) = text(0, -1.05*R, '3\pi/_2', 'fontsize', 14, 'horizontalalignment', 'center', 'verticalalignment', 'top');
 
-            if abs(y) < .0005 
-                set(lab(i),'VerticalAlignment', 'top');
-            elseif y>0
-                set(lab(i), 'VerticalAlignment', 'bottom');
-            else
-                set(lab(i), 'VerticalAlignment', 'top');
-            end
-         
-        
-    end    
-%     
-%     tick(1) = line(R * [-1, 1], [0, 0], 'color', 'k', 'parent', ax);
-%     tick(2) = line([0, 0], R * [-1, 1], 'color', 'k', 'parent', ax);
-%     tick(3) = line(sqrt(2)/2 * [-R R], sqrt(2)/2 * [R -R], 'color', 'k', 'parent', ax);
-%     tick(4) = line(sqrt(2)/2 * [R -R], sqrt(2)/2 * [R -R], 'color', 'k', 'parent', ax);
-% 
-%     lab(1) = text(1.05*R, 0, '2\pi',      'fontsize', 14, 'HorizontalAlignment', 'left', 'verticalalignment', 'middle');
-%     lab(2) = text(-1.075*R, 0, '\pi',     'fontsize', 14, 'HorizontalAlignment', 'right','verticalalignment', 'middle');
-%     lab(3) = text(0, 1.05*R, '\pi/_2',    'fontsize', 14, 'horizontalalignment', 'center', 'verticalalignment', 'bottom');
-%     lab(4) = text(0, -1.05*R, '3\pi/_2', 'fontsize', 14, 'horizontalalignment', 'center', 'verticalalignment', 'top');
-
+    
 end

@@ -38,15 +38,15 @@ function [results] = calc_bilateral_ripple_phase_diff(ripples)
         
     end
     
-    dPhase = phase(:,1) - phase(:,3);
+    dPhaseCont = phase(:,1) - phase(:,3);
     dPhaseIpsi = phase(:,1) - phase(:,2);
-    dPhaseCont = dPhase;
+    
      
     % mod by 2pi to bring it with that valid range of [-pi pi]
     %results.dPhase  = mod(dPhase, 2*pi)-pi;
     results.dPhaseIpsi = dPhaseIpsi;
     results.dPhaseCont = dPhaseCont;
-    results.phase   =  phase;
+    
     
        
 end

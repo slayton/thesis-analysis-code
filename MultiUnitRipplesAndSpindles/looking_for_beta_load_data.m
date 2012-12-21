@@ -52,4 +52,3 @@ ripWinRun = bsxfun(@plus, win, ripRun.peakIdx);
 muaRun = muRateRun(ripWinRun);
 meanMuaRun = mean(muaRun);
 
-clear dsetSlp dsetRun;

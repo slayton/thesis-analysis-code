@@ -96,8 +96,8 @@ line(rTrigLfp.ts, -1 * rTrigLfp.meanLfp{3}, 'Color', [0 0 1 ], 'Parent', axF1(3)
 
 set(axF1(3),'XLim', [-.075 .075], 'YTick', []);
 
-t = title('SPL11 Rip trig LFP');
-set(t,'Position', [0 460, 1]);
+%t = title('SPL11 Rip trig LFP');
+%set(t,'Position', [0 460, 1]);
 
 %plot_ripple_trig_lfp(rTrigLfp, axF1(3));
 
@@ -155,23 +155,24 @@ sShufIpsi= std(ripCohere.run.shuffleIpsi);
 
 
 [p(1), l(1)] = error_area_plot(F, mCoCont, nStd * sCoCont / sqrt(n), 'Parent', axF1(6));
-% [p(2), l(2)] = error_area_plot(F, mCoIpsi, nStd * sCoIpsi / sqrt(n), 'Parent', axF1(6));
+ [p(2), l(2)] = error_area_plot(F, mCoIpsi, nStd * sCoIpsi / sqrt(n), 'Parent', axF1(6));
 [p(3), l(3)] = error_area_plot(F, mShufCont, nStd * sShufCont / sqrt(n), 'Parent', axF1(6));
-% [p(4), l(4)] = error_area_plot(F, mShufIpsi, nStd * sShufIpsi / sqrt(n), 'Parent', axF1(6));
+ [p(4), l(4)] = error_area_plot(F, mShufIpsi, nStd * sShufIpsi / sqrt(n), 'Parent', axF1(6));
 
 set(l(1), 'Color', [1 0 0], 'LineWidth', 2);
-% set(l(2), 'Color', [0 1 0], 'LineWidth', 2);
-
+set(l(2), 'Color', [0 1 0], 'LineWidth', 2);
 
 set(l(3), 'Color', [0 1 1], 'LineWidth', 2);
-% set(l(4), 'Color', [1 0 1], 'LineWidth', 2);
+set(l(4), 'Color', [1 0 1], 'LineWidth', 2);
 
 set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
-% set(p(2), 'FaceColor', [.7 1 .7], 'edgecolor', 'none');
+set(p(2), 'FaceColor', [.7 1 .7], 'edgecolor', 'none');
 
 set(p(3), 'FaceColor', [.7 1 1], 'edgecolor', 'none');
-% set(p(4), 'FaceColor', [1 .7 1], 'edgecolor', 'none');
+set(p(4), 'FaceColor', [1 .7 1], 'edgecolor', 'none');
 
+
+legend(l, {'Co-Cont', 'Co-Ipsi', 'Sh-Cont', 'Sh-Ipsi'});
 
 set(gca,'Xlim', [0 400], 'XTick', [0:100:400]);
 

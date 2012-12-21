@@ -23,6 +23,7 @@ end
 idx = 1;
 for i = 1:nAnimal
     n = size(ripples(i).raw{1}, 1); % number of ripples for this animal
+    
     ripShuf1( idx : idx+n-1 , :) = ripples(i).raw{2}(randsample(n,n,1),:);
     ripShuf2( idx : idx+n-1 , :) = ripples(i).raw{3}(randsample(n,n,1),:);
 
