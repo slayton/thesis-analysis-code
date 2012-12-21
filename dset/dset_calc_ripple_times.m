@@ -1,4 +1,4 @@
-function [dset, peakIdx] = dset_calc_ripple_times(dset, varargin)
+function [dset, peakIdx, winIdx] = dset_calc_ripple_times(dset, varargin)
     
     args.high_thold = 7;
     args.low_thold =  4;
@@ -44,6 +44,6 @@ function [dset, peakIdx] = dset_calc_ripple_times(dset, varargin)
     
     peakIdx = peakIdx(validPeaks);
     dset.ripples.peakIdx = peakIdx;
-    
+    dset.ripples.burstWin = ripWin(validPeaks,:);    
     
 end
