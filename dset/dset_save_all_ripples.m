@@ -31,3 +31,7 @@ elseif add_ref == 1
 end
 fprintf('Saving file: %s\n', saveFile);
 save(saveFile, 'data');
+
+figure('Position', [700 800 400 30], 'MenuBar', 'none')
+axes('color', 'none', 'XTick', [], 'YTick', [], 'Position',[-.01 -.01 1.01 1.01])
+text(.5, 1, .5,'All Ripples Saved!', 'HorizontalAlignment', 'center', 'verticalalignment', 'top', 'FontSize', 20)

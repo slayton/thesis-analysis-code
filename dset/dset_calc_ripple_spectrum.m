@@ -21,7 +21,7 @@ function dset = dset_calc_ripple_spectrum(dset)
         r = dset.ripples.raw{ii};
         nRip = size(r,1);
            
-        [pkFr, pkFrM] = deal( zeros(nRip, 1) );
+        [pkFr, ~] = deal( zeros(nRip, 1) );
         [sp, wsp]  = deal( zeros(nRip, nFreq) );
 
         parfor jj = 1:size(r,1)
@@ -32,15 +32,14 @@ function dset = dset_calc_ripple_spectrum(dset)
             %pkFrM(jj) = mean( 1 ./  (diff(peakIdx) / Fs) );
         end
         
-        dset.ripples.spect{ii} = sp;
-        dset.ripples.spectW{ii} = wsp;
-        dset.ripples.peakFreq{ii} = pkFr;
+        dset.ripples.spec.spec{ii} = sp;
+        dset.ripples.spec.specW{ii} = wsp;
+        dset.ripples.spec.peakFreq{ii} = pkFr;
         %dset.ripples.peakFreqM{ii} = pkFrM;
         dset.ripples.window = windowTemplate;
     end
     
-    dset.ripples.freqs= f;
-    dset.ripples.Fs = Fs;
+    dset.ripples.spec.freqs= f;
     
     dset.ripples = orderfields(dset.ripples);
 
