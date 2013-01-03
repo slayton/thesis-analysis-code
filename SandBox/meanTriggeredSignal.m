@@ -45,7 +45,7 @@ trigIdx = trigIdx(:);
 
 sampIdx = bsxfun(@plus, win, trigIdx);
 
-badSamps = any( sampIdx < 1, 2) | any( sampIdx > numel(ts),2);
+badSamps = any( sampIdx < 1, 2) | any( sampIdx > numel(ts),2) | any(isnan(sampIdx),2);
 sampIdx = sampIdx(~badSamps, :);
 
 waveSamples = wave(sampIdx);
