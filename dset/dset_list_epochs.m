@@ -2,7 +2,7 @@ function epList = dset_list_epochs(epoch_type)
 % DSET_LIST_EPOCHS - provides a cell matrix of all the animals, days, and epochs that are analyzable given a specific epoch_type (run / sleep)
 
 epList = {};
-
+epoch_type = lower(epoch_type);
 if nargin<1
     error('Epoch Type must be specified, valid choices are: run, sleep');
 end

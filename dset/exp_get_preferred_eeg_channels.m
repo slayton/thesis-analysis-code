@@ -5,7 +5,6 @@ function chans = exp_get_preferred_eeg_channels(eDir)
 
 id = [ani,'-',day];
 
-
 switch id
     case 'spl11-day11'
         chans  = [ 9 10 3];
@@ -23,6 +22,9 @@ switch id
         chans = [9 14 15];
     case 'sg-rat2-day01'
         chans = [10 11 7];
+    otherwise
+        error('Unknown animal id:%s', id);
+        
 end
 
 end

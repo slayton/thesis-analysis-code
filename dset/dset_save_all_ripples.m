@@ -17,7 +17,7 @@ for eNumber = 1:numel(epochsToAnalyze)
         end
         
         fprintf('\tComputing ripple parameters\n');
-        rp = dset_calc_ripple_params(d);
+        [~, rp] = dset_calc_ripple_params(d);
         rp.description = dset_get_description_string(d);
         epData(i) = rp;
     end

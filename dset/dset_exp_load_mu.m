@@ -48,7 +48,7 @@ for a = 1:numel(anat)
         mu.(anat{a}) = nan;
     end
     
-    mu.Fs = muDt^-1;
+    mu.fs = muDt^-1;
 end
 fprintf('\t DONE!\n');
 

@@ -1,6 +1,11 @@
 
 
 %%
+
+% FOR MULTIPLES SEE ripple_set_detect_mua_beta_all.m
+% %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %  SINGLE EXPERIMENT
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clear
 
 if ~exist('allRipples','var')
@@ -50,7 +55,7 @@ if ~exist('muRate', 'var') || ~exist('eeg','var') || ~exist('ts','var') || ~exis
         else
             muRate{iEpoch} = mu.rate;
         end
-        muTs = mu.timestamps;
+        muTs{iEpoch} = mu.timestamps;
         if isfield(mu,'Fs')
             muFs = mu.Fs;
         else
@@ -76,10 +81,8 @@ for iEpoch = eps%:numel(ripples)
         continue;
     end
     
-    ripTs1 = detect_ripples(eegTs, eeg);
     ripTs = eegTs( ripples(iEpoch).peakIdx);
        
-    numel(filter_event_sets(ripTs1, 3, dtThresh))
     numel(filter_event_sets(ripTs, 3, dtThresh))
     
     [tripletSet, singletSet] = filter_event_sets(ripTs, 3, dtThresh);
@@ -89,8 +92,8 @@ for iEpoch = eps%:numel(ripples)
    
     fprintf('Triplets:%d Singlets:%d\n', numel(tripletSet), numel(singletSet));
    
-    [mRip3Mu, sRip3Mu, ts] = meanTriggeredSignal(tripletTs{iEpoch}, muTs, muRate{iEpoch}, win);
-    [mRip1Mu, sRip1Mu, ~ ] = meanTriggeredSignal(singletTs{iEpoch}, muTs, muRate{iEpoch}, win);
+    [mRip3Mu, sRip3Mu, ts] = meanTriggeredSignal(tripletTs{iEpoch}, muTs{iEpoch}, muRate{iEpoch}, win);
+    [mRip1Mu, sRip1Mu, ~ ] = meanTriggeredSignal(singletTs{iEpoch}, muTs{iEpoch}, muRate{iEpoch}, win);
     
     nTriplet = numel(tripletSet);
     nSinglet = numel(singletSet);
@@ -126,102 +129,102 @@ for iEpoch = eps%:numel(ripples)
     
 end
 
-%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%   Compute the Pre/Post burst LFP Spectrum 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-iEpoch = 2;
-
-nTapers = 4;
-hs = spectrum.mtm(nTapers);
-set3Rip = setWinTrip{iEpoch};
-set1Rip = setWinSing{iEpoch};
-
-midIdx = round(size(set3Rip,2)/2);
-preOffset = 75;
-postOffset = -75; %%<------------- REMOVE ALL RIPPLE SAMPS FROM PRE
-nSamp = 600;        %%<------------- SET N SAMP HERE
-
-preIdx = (1:nSamp) + ( (midIdx - nSamp) - preOffset);
-postIdx = (midIdx : midIdx+nSamp ) + postOffset;
-
-specPre3 = [];
-specPost3 = [];
-specPre1 = [];
-specPost1 = [];
-
-lfpPre3 = eeg{iEpoch}(set3Rip(:, preIdx));
-lfpPost3 = eeg{iEpoch}(set3Rip(:, postIdx));
-lfpPre1 = eeg{iEpoch}(set1Rip(:, preIdx));
-lfpPost1 = eeg{iEpoch}(set1Rip(:, postIdx));
-freqs = [];
-
-%%
-for iRip = 1:size(set3Rip,1)
-      
-    psdPre3 =  psd(hs, lfpPre3(iRip,:),  'Fs', Fs);
-    psdPost3 = psd(hs, lfpPost3(iRip,:), 'Fs', Fs);
-    
-    psdPre1 =  psd(hs, lfpPre1(iRip,:),  'Fs', Fs);
-    psdPost1 = psd(hs, lfpPost1(iRip,:), 'Fs', Fs);
-    
-    if isempty(specPre3)
-        specPre3 = psdPre3.Data;
-        specPost3 = psdPost3.Data;
-        specPre1 = psdPre1.Data;
-        specPost1 = psdPost1.Data;
-        
-    else
-        specPre3 = [specPre3, psdPre3.Data];
-        specPost3 = [specPre3, psdPost3.Data];
-        
-        specPre1 = [specPre1, psdPre1.Data];
-        specPost1 = [specPre1, psdPost1.Data];
-    end  
-    if isempty(freqs)
-        freqs = psdPre3.frequencies;
-    end
-end
-
-% transpose the matrices for later use
-[specPre3, specPost3, specPre1, specPost1] = deal( specPre3', specPost3', specPre1', specPost1');
-
-
-
-%% Plot the ratio of the spectra
-
-figure('Position', [400 30 560 1000]);
-
-
-ax(1) = subplot(311);
-line(freqs,  mean(specPost1) ./ mean(specPre1), 'Color', 'r', 'linewidth', 2 );
-set(gca,'XLim', [0 300]);
-title('Post1:Pre1 Ratio');
-
-ax(2) = subplot(312);
-line(freqs,  mean(specPost3) ./ mean(specPre3) , 'Color', 'g', 'linewidth', 2 );
-title('Post3:Pre3 Ratio');
-
-ax(3) = subplot(313);
-line(freqs,  mean(specPost3) ./ mean(specPost1) , 'Color', 'b', 'linewidth', 2 );
-title('Post3:Post1 Ratio');
-set(ax,'XLim', [0 300]);
-
-
-
-%% Plot the Spectrums
-figure;
-clear ax;
-ax(1) = subplot(211);
-imagesc(freqs, 1:size(set3Rip,1), log(specPre3) );
-
-ax(2) = subplot(212);
-imagesc(freqs, 1:size(set3Rip,1), log(specPost3) );
-
-set(ax,'YDir', 'normal');
-%hpsd = psd(Hs, 
-
-%%
+% %% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %   Compute the Pre/Post burst LFP Spectrum 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+% iEpoch = 2;
+% 
+% nTapers = 4;
+% hs = spectrum.mtm(nTapers);
+% set3Rip = setWinTrip{iEpoch};
+% set1Rip = setWinSing{iEpoch};
+% 
+% midIdx = round(size(set3Rip,2)/2);
+% preOffset = 75;
+% postOffset = -75; %%<------------- REMOVE ALL RIPPLE SAMPS FROM PRE
+% nSamp = 600;        %%<------------- SET N SAMP HERE
+% 
+% preIdx = (1:nSamp) + ( (midIdx - nSamp) - preOffset);
+% postIdx = (midIdx : midIdx+nSamp ) + postOffset;
+% 
+% specPre3 = [];
+% specPost3 = [];
+% specPre1 = [];
+% specPost1 = [];
+% 
+% lfpPre3 = eeg{iEpoch}(set3Rip(:, preIdx));
+% lfpPost3 = eeg{iEpoch}(set3Rip(:, postIdx));
+% lfpPre1 = eeg{iEpoch}(set1Rip(:, preIdx));
+% lfpPost1 = eeg{iEpoch}(set1Rip(:, postIdx));
+% freqs = [];
+% 
+% %%
+% for iRip = 1:size(set3Rip,1)
+%       
+%     psdPre3 =  psd(hs, lfpPre3(iRip,:),  'Fs', Fs);
+%     psdPost3 = psd(hs, lfpPost3(iRip,:), 'Fs', Fs);
+%     
+%     psdPre1 =  psd(hs, lfpPre1(iRip,:),  'Fs', Fs);
+%     psdPost1 = psd(hs, lfpPost1(iRip,:), 'Fs', Fs);
+%     
+%     if isempty(specPre3)
+%         specPre3 = psdPre3.Data;
+%         specPost3 = psdPost3.Data;
+%         specPre1 = psdPre1.Data;
+%         specPost1 = psdPost1.Data;
+%         
+%     else
+%         specPre3 = [specPre3, psdPre3.Data];
+%         specPost3 = [specPre3, psdPost3.Data];
+%         
+%         specPre1 = [specPre1, psdPre1.Data];
+%         specPost1 = [specPre1, psdPost1.Data];
+%     end  
+%     if isempty(freqs)
+%         freqs = psdPre3.frequencies;
+%     end
+% end
+% 
+% % transpose the matrices for later use
+% [specPre3, specPost3, specPre1, specPost1] = deal( specPre3', specPost3', specPre1', specPost1');
+% 
+% 
+% 
+% %% Plot the ratio of the spectra
+% 
+% figure('Position', [400 30 560 1000]);
+% 
+% 
+% ax(1) = subplot(311);
+% line(freqs,  mean(specPost1) ./ mean(specPre1), 'Color', 'r', 'linewidth', 2 );
+% set(gca,'XLim', [0 300]);
+% title('Post1:Pre1 Ratio');
+% 
+% ax(2) = subplot(312);
+% line(freqs,  mean(specPost3) ./ mean(specPre3) , 'Color', 'g', 'linewidth', 2 );
+% title('Post3:Pre3 Ratio');
+% 
+% ax(3) = subplot(313);
+% line(freqs,  mean(specPost3) ./ mean(specPost1) , 'Color', 'b', 'linewidth', 2 );
+% title('Post3:Post1 Ratio');
+% set(ax,'XLim', [0 300]);
+% 
+% 
+% 
+% %% Plot the Spectrums
+% figure;
+% clear ax;
+% ax(1) = subplot(211);
+% imagesc(freqs, 1:size(set3Rip,1), log(specPre3) );
+% 
+% ax(2) = subplot(212);
+% imagesc(freqs, 1:size(set3Rip,1), log(specPost3) );
+% 
+% set(ax,'YDir', 'normal');
+% %hpsd = psd(Hs, 
+% 
+% %%
 
 
 

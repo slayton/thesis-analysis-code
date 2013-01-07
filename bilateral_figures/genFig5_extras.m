@@ -27,16 +27,10 @@ i = 1;
     [statSimp(1), reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
     [statSimp(2), reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
 
-    clear st rp;
+ 
     for iii = 1:2
         [st(iii), rp(iii)] = dset_calc_replay_stats(dset, clIdx{iii}, [], [],1);
-    end
-    
-%     score1 = stats(1).score2;
-%     score2 = stats(2).score2;
-%     [~, trajIdx] = max( max(score1, score2), [], 2);
-    
-% get the indecies of the timebins with spikes in both hemispheres
+    end          
     
     lSpikeIdx = logical( sum(reconSimp(1).spike_counts) );
     rSpikeIdx = logical( sum(reconSimp(2).spike_counts) );
@@ -44,6 +38,7 @@ i = 1;
     % get the indecies of the pdf that are within a multi-unit burst
     muTs = reconSimp(1).tbins;
     events = dset.mu.bursts;
+    
     burstIdx = arrayfun(@(x,y) ( muTs >= x & muTs <= y ), events(:,1), events(:,2), 'UniformOutput', 0 );
     burstIdx = sum( cell2mat(burstIdx'), 2);
  
@@ -55,34 +50,50 @@ i = 1;
     nSpike{1} = sum( rp(1).spike_counts(:, replayIdx));
     nSpike{2} = sum( rp(2).spike_counts(:, replayIdx));
     
-% Compute the distances between the peaks od the pdfs
-%     [~, idx1] = max(pdf1);
-%     [~, idx2] = max(pdf2);
-    %binDist = abs(idx1 - idx2);
-%     binDist = calc_posidx_distance(idx1, idx2, dset.clusters(1).pf_edges);
-    
-%     %compute the confusion matrix
-%     confMat = confmat(idx1, idx2);
-%     confMat(:, sum(confMat)==0) = 1;
-%     confMat = normalize(confMat);
-%     confMat(:,:,2) = confMat;
-%     confMat(:,:,3) = confMat(:,:,1);
-%     confMat = 1 - confMat;
     
     % Compute the correlations between the pdfs
     replayCorr = corr_col(pdf1, pdf2);  
     
-% Compute the shuffle distributions
-    nShuffle = 100;    
+    
+    N_SHUFFLE = 250;
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Tuning Curve Shuffles
+    
+    tcShuffCorr = nan(N_SHUFFLE, numel(replayCorr));
+    nTC = sum(clIdx{2});
+    
+    
+    parfor iShuffle = 1:N_SHUFFLE
+      
+        
+        dShuf = dset;
+        dShuf.clusters = dset.clusters(clIdx{2});
+        tcList = {dShuf.clusters.pf};
+        nTC = numel(tcList);
+
+        tcList = randsample(tcList, nTC);
+        [dShuf.clusters(1:16).pf] = tcList{:};
+    
+        [statShuf, reconShuf] = dset_calc_replay_stats(dShuf, [], [], [], 1, 'simple');
+        pdfShuff = reconShuf.pdf(:,replayIdx);
+        
+        tcShuffCorr(iShuffle,:) = corr_col(pdf1, pdfShuff);
+    end
+    fprintf('DONE!!!!!!!!!!!!');
+    fprintf('\n');
+    
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PDF Time Bin Shuffle
+    
     colCorrShuffle = [];
-%     binDistShuffle = [];
    
-    for i = 1:nShuffle
+    for iShuffle = 1:N_SHUFFLE
         randIdx = randsample( size(pdf1,2), size(pdf1,2),0);
         colCorrShuffle = [ colCorrShuffle, corr_col( pdf1, pdf2(:, randIdx) ) ];
 %         binDistShuffle = [ binDistShuffle, calc_posidx_distance(idx1, idx2(randIdx), dset.clusters(1).pf_edges);];
     end
     
+    %%
 % compute the bilateral multi-unit xcorr
 
 xcWin = .25;
@@ -97,15 +108,153 @@ lags = lags * mean( diff( muTs ) );
 
 %%
 [pdfComp, idxHigh, idxLow] = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp);
-%pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active_simple(reconSimp);
+   
+%% Compute the distribution of correlations using shuffled trajectories
+
+eventLen = cellfun(@(x) (size(x,2)), statSimp(1).pdf);
+
+minLen = 2;
+maxLen = 11;
+
+noGoIdx = eventLen<minLen | eventLen> maxLen  | ~(statSimp(1).percentCells > 0)' | ~(statSimp(2).percentCells > 0)';
+
+nPdf = numel(statSimp(1).pdf);
+realEventCorr = nan(1, nPdf);
+
+
+for i = 1:nPdf
+    if noGoIdx(i)
+        continue;
+    end
     
+    realEventCorr(i) = mean( corr_col( statSimp(1).pdf{i}, statSimp(2).pdf{i}) );
+    
+end
+
+
+
+pdfShuf = statSimp(2).pdf;
+shufEventCorr = nan(N_SHUFFLE, nPdf);
+
+ind = 1;
+for iShuf = 1:N_SHUFFLE
+    
+    for iLen = minLen:maxLen
+        lenIdx = eventLen==iLen; 
+        pdfShuf(lenIdx) = randsample(pdfShuf(lenIdx), nnz(lenIdx));
+    
+    end
+    
+    for iPdf = 1:nPdf
+        
+        if noGoIdx(iPdf)
+            continue;
+        end
+        
+        shufEventCorr(iShuf, iPdf) = mean(corr_col( statSimp(1).pdf{iPdf}, pdfShuf{iPdf}));
+    end
+end
+
+
+
+%%
+
+close all;
+
+figure('Position', [200 700 990 275]);
+b = [-1:.01:1];
+
+subplot(131);
+Y1 = ksdensity(realEventCorr, b, 'support', [-1 1]);
+Y2 = ksdensity(shufEventCorr(:), b, 'support', [-1 1]);
+
+line(b, Y1, 'color', 'r');
+line(b, Y2, 'color', 'g');
+title('All Events');
+
+[h, p] = kstest2(realEventCorr, shufEventCorr(:), .05, 'smaller');
+
+fprintf('\nAll Events\t- H:%d, p:%3.3g\n', h, p);
+
+subplot(132);
+
+X1 = realEventCorr(idxHigh);
+X2 = shufEventCorr(:, idxHigh);
+
+[h, p] = kstest2(X1, X2(:), .05, 'smaller');
+fprintf('Popular Events\t- H:%d, p:%3.3g\n', h, p);
+
+Y1 = ksdensity(X1, b, 'support', [-1 1]);
+Y2 = ksdensity(X2(:), b, 'support', [-1 1]);
+
+line(b, Y1, 'color', 'r');
+line(b, Y2, 'color', 'g');
+title('Popular Events');
+
+subplot(133);
+
+X1 = realEventCorr(idxLow);
+X2 = shufEventCorr(:, idxLow);
+[h, p] = kstest2(X1, X2(:), .05, 'smaller');
+fprintf('Sparse Events\t- H:%d, p:%3.3g\n\n', h, p);
+Y1 = ksdensity(X1, b, 'support', [-1 1]);
+Y2 = ksdensity(X2(:), b, 'support', [-1 1]);
+
+line(b, Y1, 'color', 'r');
+line(b, Y2, 'color', 'g');
+legend('Real', 'Shuffle', 'Location', 'northeast');
+title('Sparse Events');
+
+set(get(gcf,'Children'), 'XLim', [-.5, 1], 'YLim', [0 2.5]);
+%%
+b = -1:.01:1;
+figure;
+X1 = realEventCorr;
+X2 = realEventCorr(idxHigh);
+X3 = realEventCorr(idxLow);
+
+Y1 = ksdensity(X1, b, 'support', [-1 1]);
+Y2 = ksdensity(X2, b, 'support', [-1 1]);
+Y3 = ksdensity(X3, b, 'support', [-1 1]);
+
+line(b, Y1, 'color', 'k');
+line(b, Y2, 'Color', 'r');
+line(b, Y3, 'Color', 'm');
+%%
+eventPVal =  1 - sum( bsxfun( @gt, realEventCorr, shufEventCorr) ) / N_SHUFFLE  ;
+eventPVal(isnan(realEventCorr)) = nan;
+
+gIdx = nan * eventPVal;
+gIdx(idxHigh) = 1;
+gIdx(idxLow) = 2;
+
+
+
+%%
+
+
+
+
+%%
+figure;
+b = -1:.025:1;
+ksdensity(realEventCorr, b); hold on;
+ksdensity(shufEventCorr(:), b);
+
+c = get(gca,'Children');
+set(c(1), 'Color', 'r');
+
+legend('Real', 'Shuffle');
+
+
+
     
 %% Draw the figure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           Draw the figure
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-close all;
+% close all;
 
 axHandle = [];
 fHandle = figure('Position',  [350 250 650 620], 'Name', dset_get_description_string(dset) );
@@ -154,54 +303,57 @@ set(axHandle(nAx), 'XLim', [-.25 .25], 'YLim', [.15 .75]);
 title('Bilat MUA XCorr');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       D - Distribution of Column Correlations
+%       D - Distribution of TimeBin Shuffle Columns
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nAx = nAx+1;
-axHandle(nAx) = axes('Position', [.3712 .1226 .2685 .2767]);
+axHandle(nAx) = axes('Position', [.3712 .2726 .2685 .1267]);
 bins = -1:.025:1;
 
 [~, pCorr1] = kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
-%[~, pCorr2] = cmtest2(replayCorr, colCorrShuffle);
 
-[occRealCorr, cent] = hist(replayCorr, bins); 
-[occShufCorr]       = hist(colCorrShuffle, bins);
+corrDistReal = ksdensity(replayCorr, bins);
+corrDistShuf = ksdensity(colCorrShuffle, bins);
 
-
-occRealCorrSm = smoothn(occRealCorr, 3, 'correct', 1);
-occShufCorrSm = smoothn(occShufCorr, 3, 'correct', 1);
-
-
-occRealCorrSm  = occRealCorrSm./sum(occRealCorrSm);
-occShufCorrSm  = occShufCorrSm./sum(occShufCorrSm);
-
-fill( [-1 -1 1 1], [0 1 1 0],  'w', 'edgecolor', 'none', 'parent', axHandle(nAx));
 p = [];
-p(1) = patch( [cent 1], [occRealCorrSm 0], 'r', 'parent', axHandle(nAx)); hold on;
-p(2) = patch( [cent 1], [occShufCorrSm 0], 'g', 'parent', axHandle(nAx));
+p(1) = patch( [bins 1], [corrDistReal 0], 'r', 'parent', axHandle(nAx)); hold on;
+p(2) = patch( [bins 1], [corrDistShuf 0], 'g', 'parent', axHandle(nAx));
 
-set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'YLim', [0 .05]);
+set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1]);
 title( sprintf('PDF Corr, p<%0.2g', pCorr1) ); 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       D - Distribution of TC Shuffle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 nAx = nAx+1;
+axHandle(nAx) = axes('Position', [.3712 .12262 .2685 .1267]);
+bins = -1:.025:1;
+
+[~, pCorr1] = kstest2(replayCorr, tcShuffCorr(:), .05, 'smaller');
+
+corrDistReal = ksdensity(replayCorr, bins);
+corrDistShuf = ksdensity(colCorrShuffle, bins);
+
+p = [];
+p(1) = patch( [bins 1], [corrDistReal 0], 'r', 'parent', axHandle(nAx)); hold on;
+p(2) = patch( [bins 1], [corrDistShuf 0], 'g', 'parent', axHandle(nAx));
+
+set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1]);
+title( sprintf('PDF Corr, p<%0.2g', pCorr1) ); 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           Distribution of Correlations by Percent Cells active
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+nAx = nAx+1;
 axHandle(nAx) = axes('position', [.6972 .1226 .2685 .2767]);
-distHigh = pdfComp.highPerCorr; 
-distLow = pdfComp.lowPerCorr;
-bins = [-5:.05:1];
-[occHigh, cent] = hist(distHigh, bins);
-[occLow, ~] = hist(distLow, bins);
+bins = -1:.05:1;
 
-occHigh = occHigh ./ sum(occHigh);
-occLow = occLow ./ sum(occLow);
-
-occHighSm = smoothn(occHigh, 2.5, 'correct', 1);
-occLowSm = smoothn(occLow, 2.5, 'correct', 1);
+distHigh = ksdensity(pdfComp.highPerCorr, bins);
+distLow =  ksdensity(pdfComp.lowPerCorr, bins);
 
 p = [];
-p(1) = patch( [cent 1], [occHighSm 0], 'b', 'Parent', axHandle(nAx));
-p(2) = patch( [cent 1], [occLowSm 0],  'k', 'Parent', axHandle(nAx));
+
+p(1) = patch( [bins 1], [distHigh 0], 'b', 'Parent', axHandle(nAx));
+p(2) = patch( [bins 1], [distLow 0],  'k', 'Parent', axHandle(nAx));
 
 
 set(axHandle(nAx), 'XLim', [-1 1]);

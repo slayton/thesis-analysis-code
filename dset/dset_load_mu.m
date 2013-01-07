@@ -60,8 +60,12 @@ end
 mu.fs = 1/args.dt;
 
 mu.rate = spikeCounts * mu.fs;
-mu.rateL = leftCounts * mu.fs;
-mu.rateR = rightCounts * mu.fs;
+if exist('leftCounts', 'var')
+    mu.rateL = leftCounts * mu.fs;
+end
+if exist('rightCounts', 'var')
+    mu.rateR = rightCounts * mu.fs;
+end
 
 if args.smooth == 1
     mu.rate = smoothn(mu.rate, args.smooth_dt, args.dt);
@@ -70,5 +74,7 @@ end
 %mu.rate = spikeCounts ./ args.dt;
 
 mu.timestamps = tbins;
+
+mu = orderfields(mu);
 
 

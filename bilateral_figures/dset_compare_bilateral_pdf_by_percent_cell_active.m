@@ -1,4 +1,4 @@
-function results = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp)
+function [results, idxHigh, idxLow] = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp)
 
 per1 = st(1).percentCells; 
 per2 = st(2).percentCells; 

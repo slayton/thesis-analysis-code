@@ -129,6 +129,7 @@ dset.description.epoch = epoch;
 %                        CONVERT  MULTI-UNIT ACTIVITY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 dset.mu = dset_exp_load_mu(edir, epoch);
+dset.mu = orderfields(dset.mu);
 
 
 

@@ -1,11 +1,14 @@
-function idx = seg2binary(seg, ts)
+function v = seg2binary(seg, ts)
+
+ts = (ts(:))';
+v = 0 * ts;
+seg = interp1(ts, 1:numel(ts), seg,'nearest');
 
 
-tmpFun = @(x) (x >= seg(:,1)  & x<=seg(:,2));
+v( seg(:,1) ) = 1;
+v( seg(:,2) ) = -1;
 
-idx = arrayfun(tmpFun, ts, 'UniformOutput', 0 );
-idx = cell2mat(idx);
-idx = logical(sum(idx));
+v = cumsum(v);
 
 % segFilt = segmentfilter(seg);
 % 

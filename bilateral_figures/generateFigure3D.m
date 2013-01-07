@@ -199,11 +199,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 tripTs = tripletTs{2};
-iri = diff(ripTs);
-out = [];
+iri = [ Inf diff(ripTs)];
+out = false(size(ripTs));
 for i = 1:numel(tripTs)
-    
-    out(i,:) = ripTs > tripTs(i) & ripTs < tripTs(i) + 1;
+    out = out | ( ripTs > tripTs(i) & ripTs < tripTs(i) + 1 );
 end
 
 

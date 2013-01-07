@@ -5,6 +5,7 @@ ch = exp_get_preferred_eeg_channels(edir);
 
 e = load_exp_eeg(edir, epoch);
 fs = timestamp2fs(e.ts);
+channels = [];
 
 for i = 1:3
     eeg(i).data = e.data(:,ch(i));

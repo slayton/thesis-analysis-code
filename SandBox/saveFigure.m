@@ -3,6 +3,10 @@ function saveFigure(figHandle, path, name, varargin)
 types = {'fig', 'eps', 'png', 'pdf', 'svg'};
 
 % check the validity of the inputs
+if ~isscalar(figHandle)
+    error('Invalid Figure Handle specified');
+end
+
 if isempty(figHandle) || ~ishandle(figHandle) || ~ isa(handle(figHandle), 'figure');
     error('Invalid argument, must provide a valid figure handle');
 
