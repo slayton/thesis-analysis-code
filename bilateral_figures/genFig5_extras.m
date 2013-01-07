@@ -1,4 +1,4 @@
-function generateFigure4
+function genFig5_extras
 %% Load all the data required for plotting!
 open_pool;
 %%
