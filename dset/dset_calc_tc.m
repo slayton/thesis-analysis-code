@@ -92,7 +92,7 @@ if (args.smooth_segments)
 else 
     pf = smoothn(pf, args.pos_smoothKW, args.bin_width, 'correct', 1);
 end
-pf = pf + .1;
+pf = pf + .01;
 
 warning on;
 segment_edges = nan;
