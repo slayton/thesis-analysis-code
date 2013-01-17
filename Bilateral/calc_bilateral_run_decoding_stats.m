@@ -1,9 +1,11 @@
-function results = calc_bilateral_run_decoding_stats(d)
+function results = calc_bilateral_run_decoding_stats(d, varargin)
 
 args.N_SHUF = 250;
 args.PLOT = 1;
 args.REPORT = 1;
 args.DSET = 1;
+
+args = parseArgs(varargin, args);
 
 %% Load the data and compute reconstruction
 clear;
