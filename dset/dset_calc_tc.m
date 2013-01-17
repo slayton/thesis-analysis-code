@@ -14,7 +14,7 @@ args.bin_width = 5;
 args.pos_smoothKW = 2* args.bin_width;
 args.time_win = [-Inf Inf];
 args.velocityThreshold = 10;
-args = parseArgsLite(varargin,args);
+args = parseArgs(varargin,args);
 args.smooth_segments = 1;
 
 tc = [];

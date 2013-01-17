@@ -116,6 +116,7 @@ if args.mu == 1
     rTet = unique( tetId( rIdx));
 
     fprintf('Loading mua for %s %d-%d\n', animal, day, epoch);
+    {animal, day, epoch, 'timewin', dset.epochTime, 'left', lTet, 'right', rTet}
     dset.mu = dset_load_mu(animal, day, epoch, 'timewin', dset.epochTime,'left', lTet, 'right', rTet);
     
     if isfield(dset, 'position')
