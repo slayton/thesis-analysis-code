@@ -1,13 +1,14 @@
-function results = calc_bilateral_run_decoding_stats(d)
+function results = calc_bilateral_run_decoding_stats(d, varargin)
 
 args.N_SHUF = 250;
-args.PLOT = 1;
+args.PLOT = 0;
 args.REPORT = 1;
 args.DSET = 1;
 
-%% Load the data and compute reconstruction
-clear;
-d = dset_load_all('Bon', 4,4);
+args = parseArgs(varargin, args);
+% %% Load the data and compute reconstruction
+% clear;
+% d = dset_load_all('Bon', 4,4);
 %%
 clearvars -except d args;
 lIdx = strcmp( {d.clusters.hemisphere}, 'left');
@@ -41,6 +42,11 @@ p2 = p2(:, validIdx);
 nTbin = nnz(validIdx);
 
 
+if args.PLOT
+    figure; 
+    imagesc([p1; p2]);
+end
+
 %% Compute the Confusion Matrix, and its precision to within 30cm
 
 [~, idx1] = max(p1);
@@ -66,13 +72,18 @@ for i = 1:args.N_SHUF
     pShuf(i) = sum(cTmp(ind)) /nTbin;
 end
 
-pVal = max( sum( precision < pShuf ) / args.N_SHUF, 1/args.N_SHUF) ;
+pVal = sum( precision < pShuf ) / args.N_SHUF;
 
-if args.REPORT
-    fprintf('Left vs Right ConfMat Precision: %3.4f\tMC-pValue:%1.4f\n', precision, pVal);
+if args.REPORT == 1
+    fprintf('Confusion Matrix Precision: %3.4f\tMC-pValue: %1.4f\n', precision, pVal);
 end
 
-if args.PLOT
+if args.PLOT == 1
+    figure;
+    subplot(121); imagesc(cMat); 
+    subplot(122); imagesc(cTmp);
+
+    
     figure;
     ax = axes;
     [F, X, U] = ksdensity(pShuf, 'Width', .02);
@@ -108,7 +119,7 @@ end
 [~, pValShift] = kstest2(cReal, cShufShift(:), .05, 'smaller');
 
 
-if args.PLOT
+if args.PLOT == 1
 
     ksArgs = { -1:.05:1, 'support', [-1.01 1.01], 'width', .25};
     [F1, X] = ksdensity( cReal, ksArgs{:} );
@@ -126,8 +137,8 @@ if args.PLOT
     
 end
 
-if args.REPORT
-    fprintf('Left vs Right ColCor MC-pValue TB-Swap:%1.4g\tPDF-Shift:%1.4g\n', pValTime, pValShift);    
+if args.REPORT == 1
+    fprintf('Col Correlation pV TB-Swap: %1.4g\tPDF-Shift: %1.4g\n', pValTime, pValShift);    
 end
 
 results.columnCorr.tbSwapPVal = pValTime;

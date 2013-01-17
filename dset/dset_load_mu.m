@@ -35,11 +35,13 @@ if ~isempty(args.right)
     rightCounts = zeros(size(tbins));
 end
 
+nBadFile = 0;
+
 for i = 1:numel(args.electrodes)
     % load the spikes for each specified electrode
     filepath = dset_get_spike_param_file_path(animal, day, epoch, args.electrodes(i));
     if ~exist(filepath, 'file')
-        warning( '%s not found', filepath);
+        nBadFile = nBadFile + 1;
         continue;
     end
     
@@ -62,6 +64,10 @@ for i = 1:numel(args.electrodes)
     if any(i == args.right)
         rightCounts = rightCounts + tmpCounts;
     end
+end
+
+if nBadFile == numel(args.electrodes)
+    warning('Multi-unit not loaded because no spike param files were found');
 end
 
 mu.fs = 1/args.dt;
