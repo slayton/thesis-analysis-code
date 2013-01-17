@@ -5,19 +5,34 @@ eList = dset_list_epochs('Run');
 nEpoch = size(eList, 1);
 
 
+
 for i = 1:nEpoch
     
     fprintf('\n');
     d = dset_load_all(eList{i,:});
     results(i) = calc_bilateral_run_decoding_stats(d, 'PLOT', 0);
+
 end
-%%
-clear; 
-e = exp_load('/data/spl11/day15/', 'epochs', 'run', 'data_types', {'clusters', 'pos'});
-e = process_loaded_exp2(e, [1, 7]);
-%%
-[r1, pf] = dset_reconstruct(e.run.cl, 'time_win', e.run.et, 'tau', .25, 'trajectory_type', 'simple');
-[r2, tc] = exp_reconstruct(e, 'run', 'directional', 0);
+
+
+for i = 12:16
+    nRes = 0;%numel(results);
+    fprintf('\n');
+    animal =  sprintf('/data/spl11/day%d', i); 
+
+    try
+        e = exp_load( animal, 'epochs', 'run', 'data_types', {'pos', 'clusters'});
+    catch
+        e = exp_load( animal, 'epochs', 'run2', 'data_types', {'pos', 'clusters'});
+    end
+    e = process_loaded_exp2(e, [1 7]);
+    e.run = e.run2;
+    e = rmfield(e, 'run2');
+     
+    results(nRes+1) = calc_bilateral_run_decoding_stats(e.run, 'PLOT', 1, 'DSET', 0);
+end
+
+
 %%
 
 cm = [results.confusionMat];

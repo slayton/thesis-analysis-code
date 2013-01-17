@@ -19,10 +19,9 @@ if args.DSET == 1
 
     runVel = interp1(d.position.ts, abs(d.position.smooth_vel), r(1).tbins);
 
-    
 else
     
-    lIdx = strcmp({d.cl.loc}, 'lCA1'); 
+    lIdx = strcmp({d.cl.loc}, 'lCA1');
     rIdx = strcmp({d.cl.loc}, 'rCA1');
     
     r(1) = dset_reconstruct(d.cl(lIdx), 'time_win', d.et, 'tau', .25, 'trajectory_type', 'simple');
@@ -38,7 +37,7 @@ isRunning = runVel > velThold;
 p1 = r(1).pdf(:, isRunning);
 p2 = r(2).pdf(:, isRunning);
 
-nPbin = size(p1, 1);
+nPbin = max(size(p1, 1), size(p2,1));
 
 validIdx = ~( all(p1 == nPbin^-1) | all(p2 == nPbin^-1) );
 
