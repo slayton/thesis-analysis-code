@@ -6,26 +6,32 @@ args.REPORT = 1;
 args.DSET = 1;
 
 args = parseArgs(varargin, args);
-% %% Load the data and compute reconstruction
-% clear;
-% d = dset_load_all('Bon', 4,4);
-%%
-clearvars -except d args;
-lIdx = strcmp( {d.clusters.hemisphere}, 'left');
-rIdx = strcmp( {d.clusters.hemisphere}, 'right');
-
-r(1) = dset_reconstruct(d.clusters(lIdx), 'time_win', d.epochTime, 'tau', .25, 'trajectory_type', 'simple');
-r(2) = dset_reconstruct(d.clusters(rIdx), 'time_win', d.epochTime, 'tau', .25, 'trajectory_type', 'simple');
 
 %% Get the two position PDFS with stopping periods removed
+if args.DSET == 1
+    lIdx = strcmp( {d.clusters.hemisphere}, 'left');
+    rIdx = strcmp( {d.clusters.hemisphere}, 'right');
 
-if args.DSET
+    r(1) = dset_reconstruct(d.clusters(lIdx), 'time_win', d.epochTime, 'tau', .25, 'trajectory_type', 'simple');
+    r(2) = dset_reconstruct(d.clusters(rIdx), 'time_win', d.epochTime, 'tau', .25, 'trajectory_type', 'simple');
+    
     velThold = 15;
-else
-    velThold = .15;
-end
 
-runVel = interp1(d.position.ts, abs(d.position.smooth_vel), r(1).tbins, 'nearest');
+    runVel = interp1(d.position.ts, abs(d.position.smooth_vel), r(1).tbins);
+
+    
+else
+    
+    lIdx = strcmp({d.cl.loc}, 'lCA1'); 
+    rIdx = strcmp({d.cl.loc}, 'rCA1');
+    
+    r(1) = dset_reconstruct(d.cl(lIdx), 'time_win', d.et, 'tau', .25, 'trajectory_type', 'simple');
+    r(2) = dset_reconstruct(d.cl(rIdx), 'time_win', d.et, 'tau', .25, 'trajectory_type', 'simple');
+
+    velThold = .15;
+    runVel = interp1(d.pos.ts, abs(d.pos.lv), r(1).tbins);
+    
+end
 
 isRunning = runVel > velThold;
 
@@ -40,8 +46,7 @@ p1 = p1(:, validIdx);
 p2 = p2(:, validIdx);
 
 nTbin = nnz(validIdx);
-
-
+    
 if args.PLOT
     figure; 
     imagesc([p1; p2]);
@@ -54,9 +59,7 @@ end
 
 cMat = confusionmat(idx1, idx2, 'order', 1:nPbin);
 
-if args.DSET
-    N = round( .3 / .05 );
-end
+N = round( .3 / .05 );
 
 tmp = ones(nPbin);
 ind =  triu( tmp, -N) & tril( tmp, N ) ;
