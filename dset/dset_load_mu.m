@@ -9,12 +9,18 @@ args = parseArgs(varargin, args);
 % default behavior is to load the timewindow information from the position
 % record
 
-if isempty(args.timewin) && args.load_time_from_position && isempty(args.pos_struct)
+if all(args.timewin == 0) && args.load_time_from_position && isempty(args.pos_struct)
+  
     p = dset_load_position(animal, day, epoch);
     args.timewin = [p.ts(1) p.ts(end)];    
-elseif isempty(args.timewin) && args.load_time_from_position
+    
+elseif all(args.timewin == 0) && args.load_time_from_position
+    
     p = args.pos_struct;
     args.timewin = [p.ts(1) p.ts(end)];       
+    
+else
+    
 end
 
 % create the vector of firing rates
@@ -33,6 +39,7 @@ for i = 1:numel(args.electrodes)
     % load the spikes for each specified electrode
     filepath = dset_get_spike_param_file_path(animal, day, epoch, args.electrodes(i));
     if ~exist(filepath, 'file')
+        warning( '%s not found', filepath);
         continue;
     end
     
