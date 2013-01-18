@@ -54,7 +54,8 @@ for i=1:numel(args.epochs)
             exp.(e).cl = cl;
         else
             warning('exp is missing clusters or position, both are required to calculate tuning curves');
-        end            
+        end   
+        return
     end    
 %% Calculate Global Multi-Unit Rate
     if ismember('calc_global_mu', args.operations)

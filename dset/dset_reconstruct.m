@@ -28,15 +28,16 @@ end
 
 
 clusters = clusters(clIdx);
-pfEdges = clusters(1).pf_edges;
+
 
 % if we are using the franklab style TC, each traj is seperated into a
 % different bout
 if strcmp(args.trajectory_type, 'individual')
 %     disp('Reconstucting DSET with independent trajectories');
     %setup matrix for the place fields
-    
-    
+    pfEdges = clusters(1).pf_edges;
+    recon.pbin_edges = clusters(1).pf_edges;
+
     for traj = 1:size(clusters(1).pf_edges)
         
         clear pfIdx;
@@ -102,7 +103,6 @@ elseif strcmp(args.trajectory_type, 'single')
     for cell = 1:numel(clusters)
         pf(:,cell) = clusters(cell).traj_tc{args.trajectory_number};
     end
-    size(pf)
     
     
     [recon.pdf tbins spike_counts] = reconstruct( args.time_win(1), args.time_win(2), ...
@@ -117,6 +117,11 @@ elseif strcmp(args.trajectory_type, 'single')
 elseif strcmp(args.trajectory_type, 'simple')
 %    disp('Reconstucting DSET using a single trajectory');
 
+    if ~isfield(clusters(1), 'pf')
+       for i = 1:numel(clusters)
+           clusters(i).pf = (clusters(i).tc1 + clusters(i).tc2)';
+       end
+    end
     pf = cell2mat({clusters.pf});
 
     idx = false(size(pf,1),1);
@@ -155,7 +160,6 @@ elseif strcmp(args.trajectory_type, 'simple')
     pbins = pbins(idx);
     
     recon.pbins = pbins;
-    recon.pbin_edges = clusters(1).pf_edges;
 
     
     
