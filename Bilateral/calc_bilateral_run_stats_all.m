@@ -16,7 +16,7 @@ end
 
 
 for i = 12:16
-    nRes = 0;%numel(results);
+    numel(results);
     fprintf('\n');
     animal =  sprintf('/data/spl11/day%d', i); 
 
