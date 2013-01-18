@@ -1,0 +1,133 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+</head>
+<body>
+<h3>More about mwl files</h3>
+<h4>File headers</h4>
+Each mwl file starts with an text (ascii) header. The first line of a
+header&nbsp;always reads: %%BEGINHEADER, and the end is marked as:
+%%ENDHEADER. In between those two tags lines start with % and can
+contain one of the following:<br>
+<ul>
+  <li>comment (plain text)</li>
+  <li>parameter / value pair separated by a semicolon followed by a
+space or tab</li>
+  <li>empty line, which starts a new subheader</li>
+</ul>
+In the processing chain headers are sometimes concatenated in the same
+file, separated by an empty line. These are called subheaders. Within a
+subheader parameter names should be unique, but the same parameter can
+exist in multiple subheaders. Here is an example of a valid header:<br>
+<pre>%%BEGINHEADER<br>% File Format:  feature<br>% Fields:       timestamp,5,8,1 diode1,5,8,2    diode2,5,8,2    headpos,5,8,2	headdir,5,8,1   speed,5,8,1     movedir,5,8,1<br>% File type:    Binary<br>% Program:      Matlab mwlIO toolbox<br>% Program version:      local<br>%<br>% this is another subheader<br>% Sampling rate: 2000<br>%<br>%%ENDHEADER</pre>
+<h4><b>Working with headers</b></h4>
+about header and subheader objects<br>
+loading headers<br>
+adding / removing parameters<br>
+adding / removing comments<br>
+dumping headers<span style="font-weight: bold;"><br>
+</span>
+<h4>File types</h4>
+Right after the header in a mwl file the data starts. The data can
+either be stored in ascii or binary format. There are several different
+file types which differ in the way the data is stored: <br>
+<ul>
+  <li><span style="font-style: italic;">Boundary file</span>. In this
+file type cluster boundaries are stored. A boundary is defined for a
+cluster in a particular 2-dimensional projection and consists of a list
+coordinates.</li>
+  <li><span style="font-style: italic;">Record files.</span> Most files
+fall in this category. Data consists of a list of records, each
+containing data in a set of fields. The fields are described in the
+'Fields' parameter in the header. There are two kinds of record files:</li>
+  <ul style="list-style-type: disc;">
+    <li><span style="font-style: italic;">Variable length records.</span></li>
+    <ul style="list-style-type: disc;">
+      <li><span style="font-style: italic;">Raw position file.<br>
+        </span></li>
+    </ul>
+    <li><span style="font-style: italic;">Fixed length records.</span></li>
+    <ul style="list-style-type: disc;">
+      <li><span style="font-style: italic;">Diode file.</span></li>
+      <li type="disc"><span style="font-style: italic;">EEG file.</span></li>
+      <li type="disc"><span style="font-style: italic;">Event string
+file.</span></li>
+      <li type="disc"><span style="font-style: italic;">Feature file.</span></li>
+      <li type="disc"><span style="font-style: italic;">Waveform file.<br>
+        </span></li>
+    </ul>
+  </ul>
+</ul>
+<br>
+<table style="text-align: left; width: 100%;" border="1" cellpadding="2"
+ cellspacing="2">
+  <tbody>
+    <tr>
+      <th>file type</th>
+      <th>read</th>
+      <th>write</th>
+      <th>ascii</th>
+      <th>binary</th>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">boundary file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">no</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">no</td>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">raw position file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">no</td>
+      <td align="undefined" valign="undefined">no</td>
+      <td align="undefined" valign="undefined">yes</td>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">diode file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">EEG file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">no</td>
+      <td align="undefined" valign="undefined">yes</td>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">event string file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">feature file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+    </tr>
+    <tr>
+      <td align="undefined" valign="undefined">waveform file</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">yes</td>
+      <td align="undefined" valign="undefined">no</td>
+      <td align="undefined" valign="undefined">yes</td>
+    </tr>
+  </tbody>
+</table>
+<b><br>
+</b>
+<h4>Working with file objects</h4>
+opening files<br>
+manipulating file objects<br>
+reading data<br>
+creating new files<br>
+<br>
+<b></b>
+</body>
+</html>
