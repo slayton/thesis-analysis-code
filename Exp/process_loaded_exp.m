@@ -8,6 +8,7 @@ function [exp args] = process_loaded_exp(exp, varargin)
 %
 % see also loadexp operation_definitions
 
+warning('USE process_loaded_exp2 instead!');
 if nargin<1
     help process_loaded_exp
     return

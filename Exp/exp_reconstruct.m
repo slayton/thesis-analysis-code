@@ -13,7 +13,7 @@ for i=1:numel(args.structures)
       
     [tc ind] = get_exp_tuning_curves(exp, ep, 'structure', args.structures{i}, 'directional', args.directional, 'shuffle', args.shuffle);
    
-    [pdf tbins] = reconstruct( args.time_win(1), args.time_win(2), ...
+    [pdf tbins, spikecounts] = reconstruct( args.time_win(1), args.time_win(2), ...
                 tc,exp.(ep).cl(ind), 't_var', 'st', 'tau', args.tau);
    
     
@@ -56,5 +56,6 @@ for i=1:numel(args.structures)
     recon(i).pbins = pbins;
     recon(i).pdf = pdf_c;
     recon(i).loc = args.structures{i};
+    recon(i).spike_counts = spikecounts;
 
 end
