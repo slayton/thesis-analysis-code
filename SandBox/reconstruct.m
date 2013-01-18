@@ -16,7 +16,8 @@ function [pdf, tbins, spike_counts] = reconstruct(ts, te, tc, cells, varargin)
     
     for i=1:numel(cells)
         
-        spike_counts(i,:) = sortedhist(cells(i).(args.t_var), tbins);
+%         spike_counts(i,:) = sortedhist(cells(i).(args.t_var), tbins);
+        spike_counts(i,:) = hist(cells(i).(args.t_var), tbins(:,1) );
     end
     
     if args.smooth
