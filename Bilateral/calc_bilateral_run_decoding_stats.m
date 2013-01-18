@@ -1,14 +1,20 @@
 function [results, r] = calc_bilateral_run_decoding_stats(d, varargin)
+%%
+clearvars -except dset e15 e11
+
+d = e11;
+% d = dset;
 
 args.N_SHUF = 250;
-args.PLOT = 0;
+args.PLOT = 1;
 args.REPORT = 1;
-args.DSET = 1;
+args.DSET = isfield(d, 'clusters');
 
-args = parseArgs(varargin, args);
+%%args = parseArgs(varargin, args);
 
-%% Get the two position PDFS with stopping periods removed
+% Get the two position PDFS with stopping periods removed
 if args.DSET == 1
+    
     lIdx = strcmp( {d.clusters.hemisphere}, 'left');
     rIdx = strcmp( {d.clusters.hemisphere}, 'right');
 
@@ -16,10 +22,11 @@ if args.DSET == 1
     r(2) = dset_reconstruct(d.clusters(rIdx), 'time_win', d.epochTime, 'tau', .25, 'trajectory_type', 'simple');
     
     velThold = 15;
-
     runVel = interp1(d.position.ts, abs(d.position.smooth_vel), r(1).tbins);
     
-    isRunning = abs(runVel) > velThold;
+    results.description = dset_get_description_string(d);
+    
+    dPBin = .05;
 
 else
        
@@ -32,35 +39,36 @@ else
     lTmp.run.cl = lTmp.run.cl(lIdx);
     rTmp.run.cl = rTmp.run.cl(rIdx);
     
-   r(1) = exp_reconstruct(lTmp, 'run');
-   r(2) = exp_reconstruct(rTmp, 'run');
+    r(1) = exp_reconstruct(lTmp, 'run');
+    r(2) = exp_reconstruct(rTmp, 'run');
    
-    velThold = .15;
+    velThold = .15;    
+    runVel = interp1(d.run.pos.ts,  d.run.pos.lv, r(1).tbins);
+%     
+%     isRunning = abs(vel) > .15;
     
-    r(1).pdf = sum(r(1).pdf,3);
-    r(2).pdf = sum(r(2).pdf,3);
+    results.description = d.edir;
     
-    vel = interp1(d.run.pos.ts,  d.run.pos.lv, r(1).tbins);
+    dPBin =.1;
     
-    isRunning = abs(vel) > .15;
 end
 
+isRunning = abs(runVel) > velThold;
 
-p1 = r(1).pdf(:, isRunning, 1);
-p2 = r(2).pdf(:, isRunning, 1);
+didSpikeIdx = sum(r(1).spike_counts) & sum(r(2).spike_counts);
+validIdx = isRunning & didSpikeIdx';
+
+p1 = sum(r(1).pdf(:, validIdx, :), 3);
+p2 = sum(r(2).pdf(:, validIdx, :), 3);
 
 nPbin = max(size(p1, 1), size(p2,1));
-
-% validIdx = ~( all(p1 == nPbin^-1) | all(p2 == nPbin^-1) );
-
-% p1 = p1(:, validIdx);
-% p2 = p2(:, validIdx);
-
+    
+    
 nTbin = size(p1,2);
     
 if args.PLOT
     figure; 
-    imagesc([p1; p2]);
+    imagesc(normalize([p1; p2]));
 end
 
 %% Compute the Confusion Matrix, and its precision to within 30cm
@@ -70,9 +78,9 @@ end
 
 cMat = confusionmat(idx1, idx2, 'order', 1:nPbin);
 
-N = round( .3 / .05 );
+N = round( .3 / dPBin );
 
-tmp = ones(nPbin);
+tmp = ones( nPbin );
 ind =  triu( tmp, -N) & tril( tmp, N ) ;
 
 
@@ -94,8 +102,8 @@ end
 
 if args.PLOT == 1
     figure;
-    subplot(121); imagesc(cMat); 
-    subplot(122); imagesc(cTmp);
+    subplot(121); imagesc( (cMat) ); 
+    subplot(122); imagesc( (cTmp) );
 
     
     figure;
@@ -162,6 +170,8 @@ results.columnCorr.pdfShiftPVal = pValShift;
 results.columnCorr.realRange = quantile( cReal, [.25 .5 .75 ]);
 results.columnCorr.tbSwapRange = quantile( cShufTime(:), [.25 .5 .75 ]);
 results.columnCorr.pdfShiftRange = quantile( cShufShift(:), [.25 .5 .75]);
+
+
 
 
 end

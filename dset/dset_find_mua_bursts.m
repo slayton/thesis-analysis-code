@@ -1,6 +1,8 @@
 function [bursts] = dset_find_mua_bursts(mu, varargin)
 %DSET_FIND_MUA_BURSTS - finds burts in the multiunit activity
 
+warning('Update to match exp_find_mua_bursts');
+
 args = dset_get_standard_args;
 args = args.mua_burst;
 args = parseArgs(varargin, args);
