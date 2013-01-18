@@ -22,12 +22,15 @@ for i = 12:16
 
     try
         e = exp_load( animal, 'epochs', 'run', 'data_types', {'pos', 'clusters'});
+        e = process_loaded_exp2(e, [1 7]);
     catch
         e = exp_load( animal, 'epochs', 'run2', 'data_types', {'pos', 'clusters'});
+        e = process_loaded_exp2(e, [1 7]);
+        e.run = e.run2;
+        e = rmfield(e, 'run2');
     end
-    e = process_loaded_exp2(e, [1 7]);
-    e.run = e.run2;
-    e = rmfield(e, 'run2');
+%     e = process_loaded_exp2(e, [1 7]);
+    
      
     results(nRes+1) = calc_bilateral_run_decoding_stats(e.run, 'PLOT', 1, 'DSET', 0);
 end
