@@ -38,6 +38,7 @@ end
 
 %%
 
+
 cm = [results.confusionMat];
 cc = [results.columnCorr];
 
@@ -45,13 +46,17 @@ cReal = cell2mat( {cc.realRange}' );
 cShift = cell2mat( {cc.pdfShiftRange}' );
 cSwap = cell2mat( {cc.tbSwapRange}' );
 
-tmpData = [cReal(:,2), cShift(:,2), cSwap(:,2)];
-boxplot(tmpData)
+idx = 3;
+tmpData = [cReal(:,idx), cShift(:,idx), cSwap(:,idx)];
 
-pVal1 = ranksum(cReal(:,2), cShift(:,2));
-pVal2 = ranksum(cReal(:,2), cSwap(:,2));
+pVal1 = ranksum(cReal(:,idx), cShift(:,idx));
+pVal2 = ranksum(cReal(:,idx), cSwap(:,idx));
 
-hold on;
+close all;
+figure;
+axes('NextPlot', 'add');
+
+boxplot(tmpData);
 plot(1:3, tmpData, 'color', [.4 .4 .4]);
 
 
