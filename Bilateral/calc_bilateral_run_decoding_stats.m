@@ -1,4 +1,4 @@
-function results = calc_bilateral_run_decoding_stats(d, varargin)
+function [results, r] = calc_bilateral_run_decoding_stats(d, varargin)
 
 args.N_SHUF = 250;
 args.PLOT = 0;
@@ -18,33 +18,45 @@ if args.DSET == 1
     velThold = 15;
 
     runVel = interp1(d.position.ts, abs(d.position.smooth_vel), r(1).tbins);
+    
+    isRunning = abs(runVel) > velThold;
 
 else
+       
+    lIdx = strcmp({d.run.cl.loc}, 'lCA1');
+    rIdx = strcmp({d.run.cl.loc}, 'rCA1');
     
-    lIdx = strcmp({d.cl.loc}, 'lCA1');
-    rIdx = strcmp({d.cl.loc}, 'rCA1');
+    lTmp = d;
+    rTmp = d;
     
-    r(1) = dset_reconstruct(d.cl(lIdx), 'time_win', d.et, 'tau', .25, 'trajectory_type', 'simple');
-    r(2) = dset_reconstruct(d.cl(rIdx), 'time_win', d.et, 'tau', .25, 'trajectory_type', 'simple');
-
+    lTmp.run.cl = lTmp.run.cl(lIdx);
+    rTmp.run.cl = rTmp.run.cl(rIdx);
+    
+   r(1) = exp_reconstruct(lTmp, 'run');
+   r(2) = exp_reconstruct(rTmp, 'run');
+   
     velThold = .15;
-    runVel = interp1(d.pos.ts, abs(d.pos.lv), r(1).tbins);
     
+    r(1).pdf = sum(r(1).pdf,3);
+    r(2).pdf = sum(r(2).pdf,3);
+    
+    vel = interp1(d.run.pos.ts,  d.run.pos.lv, r(1).tbins);
+    
+    isRunning = abs(vel) > .15;
 end
 
-isRunning = runVel > velThold;
 
-p1 = r(1).pdf(:, isRunning);
-p2 = r(2).pdf(:, isRunning);
+p1 = r(1).pdf(:, isRunning, 1);
+p2 = r(2).pdf(:, isRunning, 1);
 
 nPbin = max(size(p1, 1), size(p2,1));
 
-validIdx = ~( all(p1 == nPbin^-1) | all(p2 == nPbin^-1) );
+% validIdx = ~( all(p1 == nPbin^-1) | all(p2 == nPbin^-1) );
 
-p1 = p1(:, validIdx);
-p2 = p2(:, validIdx);
+% p1 = p1(:, validIdx);
+% p2 = p2(:, validIdx);
 
-nTbin = nnz(validIdx);
+nTbin = size(p1,2);
     
 if args.PLOT
     figure; 

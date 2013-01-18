@@ -45,12 +45,17 @@ cReal = cell2mat( {cc.realRange}' );
 cShift = cell2mat( {cc.pdfShiftRange}' );
 cSwap = cell2mat( {cc.tbSwapRange}' );
 
-boxplot([cReal(:,2), cShift(:,2), cSwap(:,2)])
+tmpData = [cReal(:,2), cShift(:,2), cSwap(:,2)];
+boxplot(tmpData)
 
-pVal1 = signrank(cReal(:,2), cShift(:,2));
-pVal2 = signrank(cReal(:,2), cSwap(:,2));
+pVal1 = ranksum(cReal(:,2), cShift(:,2));
+pVal2 = ranksum(cReal(:,2), cSwap(:,2));
 
-fprintf('Sign Ranksum vs shift:%0.7f vs swap:%0.7f\n', pVal1, pVal2)
+hold on;
+plot(1:3, tmpData, 'color', [.4 .4 .4]);
+
+
+fprintf('Sign Ranksum vs shift:%0.7g vs swap:%0.7g\n', pVal1, pVal2)
 
 
 
