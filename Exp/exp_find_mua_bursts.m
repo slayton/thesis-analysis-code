@@ -8,15 +8,13 @@ args = parseArgs(varargin, args);
 args.velocity_threshold = .05;
 % if no position struct is specified then assume the animal is always stopped
 % or if the user specifies to not filter on velocity
-if isempty(args.pos_struct) || args.filter_on_velocity == 0
-    isStopped = true * rate;
-    
+if isempty(args.pos_struct) || args.filter_on_velocity == 0 
+    vel = 0 .* ts;
 else
     vel = interp1(args.pos_struct.ts, args.pos_struct.lv, ts, 'nearest');
-    
-    isStopped = abs(vel) < args.velocity_threshold;
-
 end
+
+    isStopped = abs(vel) < args.velocity_threshold;
 
 rate(~isStopped) = nan;
 

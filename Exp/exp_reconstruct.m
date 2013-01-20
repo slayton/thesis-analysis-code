@@ -11,24 +11,28 @@ args = parseArgsLite(varargin,args);
 
 for i=1:numel(args.structures)
       
-    [tc ind] = get_exp_tuning_curves(exp, ep, 'structure', args.structures{i}, 'directional', args.directional, 'shuffle', args.shuffle);
+    [tc, ind] = get_exp_tuning_curves(exp, ep, 'structure', args.structures{i}, 'directional', args.directional, 'shuffle', args.shuffle);
    
-    [pdf tbins, spikecounts] = reconstruct( args.time_win(1), args.time_win(2), ...
+    [pdf, tbins, spikecounts] = reconstruct( args.time_win(1), args.time_win(2), ...
                 tc,exp.(ep).cl(ind), 't_var', 'st', 'tau', args.tau);
    
     
     dp = exp.(ep).cl(1).tc_bw;
-    if isempty(args.pbins)
+   
+    if ~isfield(exp.(ep), 'pos')
+        pbins = (1:numel(exp.(ep).cl(1).tc1)-1) * dp - dp;
+    elseif isempty(args.pbins)
         pbins = min(exp.(ep).pos.lp):dp:max(exp.(ep).pos.lp);
     else
         pbins = args.pbins;
     end
     
+%     pbins
     pdf_c(:,:,1) = pdf(1:numel(pbins),:);
     if ~args.directional
-        pdf_c(:,:,1) = pdf;
-        pdf_c(:,:,2) = pdf;
-        pdf_c(:,:,3) = pdf;       
+       
+        pdf_c = repmat(pdf, [1 1 3]);
+       
     else
         n_p = size(pdf,1);        
         div = n_p/size(tc,3);
