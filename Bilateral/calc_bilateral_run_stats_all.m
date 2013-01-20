@@ -35,7 +35,7 @@ for i = 12:16
     results(nRes+1) = calc_bilateral_run_decoding_stats(e.run, 'PLOT', 1, 'DSET', 0);
 end
 %%
-calc_bilateral_run_decoding_stats(dset_load_all('Bon', 4, 4), 'PLOT', 1)
+calc_bilateral_run_decoding_stats(dset_load_all('Bon', 4, 4), 'PLOT', 1);
 
 
 %%
