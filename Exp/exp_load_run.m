@@ -1,7 +1,7 @@
 function e = exp_load_run(edir, operations)
 
-dList = {'/data/spl11/day11', '/data/spl11/day12', '/data/spl11/day13', '/data/spl11/day14' '/data/spl11/day15'};
-eList = {'run','run2','run','run','run'};
+dList = {'/data/spl11/day10', '/data/spl11/day11', '/data/spl11/day12', '/data/spl11/day13', '/data/spl11/day14' '/data/spl11/day15', '/data/spl11/day16'};
+eList = {'run', 'run','run2','run','run','run', 'run'};
 
 idx = find(strcmp(edir, dList));
 if isempty(idx)

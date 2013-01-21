@@ -2,8 +2,7 @@
 clear;
 
 ep = 'sleep';
-d = dset_exp_load('/data/spl11/day15', ep);
-
+d = dset_exp_load('/data/spl11/day11', ep);
 
 b = d.mu.bursts;
 
@@ -14,8 +13,10 @@ clear r
 r(1) = dset_reconstruct(d.clusters(lIdx), 'tau', .02, 'time_win', d.epochTime);
 r(2) = dset_reconstruct(d.clusters(rIdx), 'tau', .02, 'time_win', d.epochTime);
 
+fprintf('N Cells Left:%d Right:%d\n', nnz(lIdx), nnz(rIdx));
+fprintf('N MUB:%d\n', size(b,1));
 %% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 eventList = [];
 
 % RUN RUN RUN RUN RUN RUN RUN RUN RUN
@@ -24,15 +25,12 @@ eventList = [];
 % eventList = [72, 94, 99];     % SPL11 DAY 12 <-- EXAMPLE
 % eventList = [64,190, 203];    % SPL11 DAY 13 
 % eventList = [150 ]            % SPL11 DAY14  <-- EXAMPLE
-
+% eventList = [80, 113] % SPL11 DAY 16 <- Example good vs bad sampling
 
 % SLEEP SLEEP SLEEP SLEEP SLEEP SLEEP
 %
-% eventList = [34, 38, 115, 188, 250]; %SPL11 DAY 12
-
-% eventList = [35,39,188,251,406,479, 512]; % spl11-d12-sleep
-% spl11-d13 replay events: 
-% spl11-d14 replay events:
+eventList = [471, 525, 579,  826, 969, 1078]; % SPL11 DAY 11 A few good examples of replay spanning bursts
+% eventList = [34, 38, 115, 188, 250];      %SPL11 DAY 12
 % eventList = [4, 48, 275, 289];            % spl11-d15
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -40,7 +38,7 @@ eventList = [];
 clear tb pb p1 p2 l;
 
 
-tb = r(1).tbins;`
+tb = r(1).tbins;
 pb = r(1).pbins;
 p1 = r(1).pdf(:,:,1);
 p2 = r(2).pdf(:,:,1);

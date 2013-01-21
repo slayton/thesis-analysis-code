@@ -6,8 +6,8 @@ elseif isempty( operations ) || ~isvector(operations) || ischar(operations) || i
     operations = [1 2 4 7];
 end
 
-dList = {'/data/spl11/day12', '/data/spl11/day15'};
-eList = {'sleep3', 'sleep2'};
+dList = {'/data/spl11/day11', '/data/spl11/day12', '/data/spl11/day15'};
+eList = {'sleep2', 'sleep3', 'sleep2'};
 
 idx = find(strcmp(edir, dList));
 
