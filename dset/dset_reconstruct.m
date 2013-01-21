@@ -110,9 +110,6 @@ elseif strcmp(args.trajectory_type, 'single')
         recon.pbins = 1:size(pf,1); 
     
         
-        
-        
-
 % use simply calculated T.C.
 elseif strcmp(args.trajectory_type, 'simple')
 %    disp('Reconstucting DSET using a single trajectory');

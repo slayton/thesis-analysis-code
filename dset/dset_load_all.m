@@ -2,7 +2,10 @@ function dset = dset_load_all(animal, day, epoch, varargin)
 
 if strfind(animal, 'spl')
     
-    edir = fullfile('/data/', animal, day);
+    if ~ischar(day)
+        day = sprintf('day%d', day);
+    end
+    edir = fullfile('/data/', animal, day)
     dset = dset_exp_load(edir, epoch);
     
     return;

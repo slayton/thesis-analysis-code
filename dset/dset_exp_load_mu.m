@@ -23,10 +23,11 @@ e = exp_load(edir, 'epochs', epoch);
 anat = unique(loc);
 muDt = standardArgs.dt;
 
-tbins = e.(epoch).et(1):muDt:(e.(epoch).et(2)-muDt);
+tbins = e.(epoch).et(1) : muDt : (e.(epoch).et(2)-muDt);
 
 fprintf('Loading Multiunit...');
 anatomy_to_load = {'lCA1', 'rCA1', 'lCA3', 'rCA3'};
+
 for a = 1:numel(anat)
     
     if all(cellfun( @isempty, strfind(anatomy_to_load, anat{a})))
@@ -35,6 +36,7 @@ for a = 1:numel(anat)
     end
     
     ind = ismember(loc,anat(a));
+    
     %disp(['loading multi-unit rate from: ', anat{a}]);
     wave = load_exp_mu(edir, epoch, 'ignore_tetrode', tt(~ind));
 
@@ -56,14 +58,14 @@ if isfield(mu, 'lCA1')
     mu.rateL = mu.lCA1;
     mu = rmfield(mu, 'lCA1');
 else
-    mu.rateL = [];
+    mu.rateL = 0 .* tbins;
 end
 
 if isfield(mu, 'rCA1')
     mu.rateR = mu.rCA1;
     mu = rmfield(mu, 'rCA1');
 else
-    mu.rateL = [];
+    mu.rateL = 0 .* tbins;
 end
 
 if isfield(mu, 'rCA3')
@@ -73,22 +75,21 @@ if isfield(mu, 'lCA3')
     mu = rmfield(mu, 'lCA3');
 end
 
-if ~isempty(mu.rateL)
-    mu.rateL = smoothn(mu.rateL, standardArgs.smooth_dt, standardArgs.dt);
-end
-if ~isempty(mu.rateR)
-    mu.rateR = smoothn(mu.rateR, standardArgs.smooth_dt, standardArgs.dt);
-end
+muFs = 1/standardArgs.dt;
 
-if isempty(mu.rateL)
-    mu.rate = mu.rateR;
-elseif isempty(mu.rateR)
-    mu.rate = mu.rateL;
+
+mu.rate = smoothn(mu.rateL + mu.rateR, standardArgs.smooth_dt, standardArgs.dt) .* muFs;
+if nnz(mu.rateL) == 0
+    mu.rateL = [];
 else
-    mu.rate = mu.rateL + mu.rateR;
+   mu.rateL = smoothn(mu.rateL, standardArgs.smooth_dt, standardArgs.dt) .* muFs;
 end
 
-mu.bursts = dset_find_mua_bursts(mu, 'filter_on_velocity', 0);
+if nnz(mu.rateR) == 0
+    mu.rateR = [];
+else
+    mu.rateR = smoothn(mu.rateR, standardArgs.smooth_dt, standardArgs.dt) .* muFs;
+end
 
 
 
