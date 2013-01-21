@@ -8,7 +8,7 @@ seg = interp1(ts, 1:numel(ts), seg,'nearest');
 v( seg(:,1) ) = 1;
 v( seg(:,2) ) = -1;
 
-v = cumsum(v);
+v = cumsum(v)~=0;
 
 % segFilt = segmentfilter(seg);
 % 

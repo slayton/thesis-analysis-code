@@ -1,8 +1,6 @@
-function [results, r] = calc_bilateral_run_decoding_stats(d, varargin)
+efunction [results, r] = calc_bilateral_run_decoding_stats(d, varargin)
 %%
-clearvars -except dset e15 e11
-
-d = e11;
+% d = e11;
 % d = dset;
 
 args.N_SHUF = 250;
@@ -101,6 +99,7 @@ if args.REPORT == 1
 end
 
 if args.PLOT == 1
+    
     figure;
     subplot(121); imagesc( (cMat) ); 
     subplot(122); imagesc( (cTmp) );
@@ -113,6 +112,7 @@ if args.PLOT == 1
     line(X, F, 'color', 'b');
     line(precision * [1, 1], max(F) * [0 1.1], 'color', 'r');
     set(ax, 'XLim', [0 1]);
+    
 end
     
 results.N_SHUF = args.N_SHUF;
@@ -172,6 +172,6 @@ results.columnCorr.tbSwapRange = quantile( cShufTime(:), [.25 .5 .75 ]);
 results.columnCorr.pdfShiftRange = quantile( cShufShift(:), [.25 .5 .75]);
 
 
-
+%%
 
 end

@@ -19,7 +19,7 @@ for i = 1:nBurst
     [~, p1] = max( reconSimp(1).pdf(:,idx));
     [~, p2] = max( reconSimp(2).pdf(:,idx));
     
-    posDist = [posDist, calc_posidx_distance(p1, p2, dset.clusters(1).pf_edges)];
+%     posDist = [posDist, calc_posidx_distance(p1, p2, dset.clusters(1).pf_edges)];
     eventCorr(i) = mean( corr_col( reconSimp(1).pdf(:, idx), reconSimp(2).pdf(:, idx) ) );  
 
 end
@@ -38,8 +38,8 @@ idxLow = st(1).percentCells < thL1 & st(2).percentCells < thL2;
 idxHigh = st(1).percentCells >= thH1 & st(2).percentCells >= thH2;
 
 %% - Compute the distances between the PDF based upon % of cells active
-highPerDist = posDist(idxHigh);
-lowPerDist = posDist(idxLow);
+% highPerDist = posDist(idxHigh);
+% lowPerDist = posDist(idxLow);
 
 highPerCorr = eventCorr(idxHigh);
 lowPerCorr = eventCorr(idxLow);
@@ -51,8 +51,8 @@ lowPerCorr = eventCorr(idxLow);
 % [~, results.kstest_dist] = kstest2(highPerDist, lowPerDist, .05, 'larger');
 % [~, results.cmtest_dist] = cmtest2(highPerDist, lowPerDist);
 
-results.highPerDist = highPerDist';
-results.lowPerDist = lowPerDist';
+% results.highPerDist = highPerDist';
+% results.lowPerDist = lowPerDist';
 
 results.highPerCorr = highPerCorr;
 results.lowPerCorr = lowPerCorr;

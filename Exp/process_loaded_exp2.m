@@ -27,8 +27,9 @@ args.tc.smooth_kw = .1;
 args.tc.pos_fs = 1/30;
 args.tc_time_win = [-Inf Inf];
 
-args.mu.dt = .005;
-args.mu.kw = .01;
+tmp = dset_get_standard_args;
+args.mu.dt = tmp.multiunit.dt;
+args.mu.kw = tmp.multiunit.smooth_dt;
 
 args = parseArgsLite(varargin, args);
 
@@ -64,24 +65,33 @@ for i=1:numel(args.epochs)
 %% Calculate Global Multi-Unit Rate
     if any( strcmp('calc_global_mu', args.operations))
         disp([e,': loading global multi-unit']);
-        exp.(e).mu.global = load_exp_mu(exp.edir, e);
-        tbins = exp.(e).et(1):args.mu.dt:exp.(e).et(2);
-        exp.(e).mu.global = smoothn(histc(exp.(e).mu.global,tbins), args.mu.kw, args.mu.dt)/args.mu.dt;
+        
+        tbins = exp.(e).et(1):args.mu.dt: (exp.(e).et(2) - args.mu.dt);
+
+        muSpikeTimes = load_exp_mu(exp.edir, e);
+        exp.(e).mu.global = histc( muSpikeTimes, tbins);
+        exp.(e).mu.global = smoothn( exp.(e).mu.global, args.mu.kw, args.mu.dt)/args.mu.dt;
+%         exp.(e).mu.global = smoothn(histc(exp.(e).mu.global,tbins), args.mu.kw, args.mu.dt)/args.mu.dt;
         exp.(e).mu.ts = tbins;
     end
 %% Calculate Local Multi-Unit Rates
     if any( strcmp('calc_local_mu', args.operations))
+        
         disp([e,': loading local multi-unit']);
+        
         [tt, loc] = load_exp_tt_anatomy(exp.edir);
         anat = unique(loc);
-        tbins = exp.(e).et(1):args.mu.dt:exp.(e).et(2);
+        
+        if ~exist('tbins', 'var')
+            tbins = exp.(e).et(1):args.mu.dt: (exp.(e).et(2) - args.mu.dt);
+        end
         for a = 1:numel(anat)
             ind = ismember(loc,anat(a));
             disp([e, ': loading multi-unit rate from: ', anat{a}]);
             wave = load_exp_mu(exp.edir, e, 'ignore_tetrode', tt(~ind));
             wave = histc(wave,tbins);
             if ~isempty(wave)
-                wave(wave>(mean(wave)+10*std(wave)))=mean(wave);
+%                 wave( wave>(mean(wave)+10*std(wave)))=mean(wave);
                 exp.(e).mu.(anat{a}) = smoothn(wave, args.mu.kw, args.mu.dt)/args.mu.dt;
                 exp.(e).mu.ts = tbins;
             else

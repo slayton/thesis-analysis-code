@@ -7,12 +7,13 @@ clear;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %           LOAD THE DATA
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-runEpochs = dset_list_epochs('run');
+% runEpochs = dset_list_epochs('run');
 
 i = 1;
 % for i = 1:numel(runReconFiles)
     
-    dset = dset_load_all(runEpochs{i,1}, runEpochs{i,2}, runEpochs{i,3});    
+%     dset = dset_load_all(runEpochs{i,1}, runEpochs{i,2}, runEpochs{i,3});    
+    dset = dset_exp_load('/data/spl11/day12', 'run');
 
     lIdx = strcmp({dset.clusters.hemisphere}, 'left');
     rIdx = strcmp({dset.clusters.hemisphere}, 'right');
@@ -24,19 +25,9 @@ i = 1;
         clIdx{1} = rIdx;
         clIdx{2} = lIdx;
     end
+    
     [statSimp(1), reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
     [statSimp(2), reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
-
-    clear st rp;
-    for iii = 1:2
-        [st(iii), rp(iii)] = dset_calc_replay_stats(dset, clIdx{iii}, [], [],1);
-    end
-    
-%     score1 = stats(1).score2;
-%     score2 = stats(2).score2;
-%     [~, trajIdx] = max( max(score1, score2), [], 2);
-    
-% get the indecies of the timebins with spikes in both hemispheres
     
     lSpikeIdx = logical( sum(reconSimp(1).spike_counts) );
     rSpikeIdx = logical( sum(reconSimp(2).spike_counts) );
@@ -52,8 +43,8 @@ i = 1;
     pdf1 = reconSimp(1).pdf(:, replayIdx);
     pdf2 = reconSimp(2).pdf(:, replayIdx);
 
-    nSpike{1} = sum( rp(1).spike_counts(:, replayIdx));
-    nSpike{2} = sum( rp(2).spike_counts(:, replayIdx));
+    nSpike{1} = sum( reconSimp(1).spike_counts(:, replayIdx));
+    nSpike{2} = sum( reconSimp(2).spike_counts(:, replayIdx));
     
 % Compute the distances between the peaks od the pdfs
 %     [~, idx1] = max(pdf1);
@@ -96,7 +87,7 @@ muBurstIdx = logical( sum( cell2mat(muBurstIdx'), 2) );
 lags = lags * mean( diff( muTs ) );
 
 %%
-[pdfComp, idxHigh, idxLow] = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp);
+[pdfComp, idxHigh, idxLow] = dset_compare_bilateral_pdf_by_percent_cell_active(dset, statSimp, reconSimp);
 %pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active_simple(reconSimp);
     
     
@@ -128,7 +119,7 @@ axHandle(6) = axes('Position', [.8193 .53 .1311 .44]);
 
 %e = dset.mu.bursts(124,:);
 
-eIdxList = [159 172 111];
+eIdxList = [72, 94, 99]; %[59, 85,107,126];%[159 172 111];
 trajList = [2 1 2];
 tbins = linspace(-.1, .1, 11);
 for ii = 1:3
@@ -137,10 +128,22 @@ for ii = 1:3
     
     eTime = mean(dset.mu.bursts(eIdx,:));
     xcWin = .1;
-    tIdx = rp(1).tbins > (eTime - xcWin) & rp(1).tbins < (eTime + xcWin);
+    tIdx = reconSimp(1).tbins > (eTime - xcWin) & reconSimp(1).tbins < (eTime + xcWin);
     
-    imagesc(tbins, rp(1).pbins{traj},  rp(1).pdf{traj}(:,tIdx), 'Parent', axHandle((ii-1)*2 + 1) );
-    imagesc(tbins, rp(1).pbins{traj},  rp(2).pdf{traj}(:,tIdx), 'Parent', axHandle((ii-1)*2 + 2) );
+    p1 = normc( reconSimp(1).pdf(:,tIdx) );
+    p2 = normc( reconSimp(2).pdf(:,tIdx) );
+    
+    idx1 = all( p1 > .1768-.1 ) & all( p1  <.1768+.1);
+    idx2 = all( p2 > .1768-.1 ) & all( p2  <.1768+.1);
+    
+    p1( :, idx1 ) = 0;
+    p2( :, idx2 ) = 0;
+    
+    p1 = 1 - repmat( p1 ,[ 1 1 3]);
+    p2 = 1 - repmat( p2 ,[ 1 1 3]);
+    
+    imagesc(tbins, reconSimp(1).pbins,  p1, 'Parent', axHandle((ii-1)*2 + 1) );
+    imagesc(tbins, reconSimp(1).pbins,  p2, 'Parent', axHandle((ii-1)*2 + 2) );
 end
 
 set(axHandle(1:nAx), 'YTick', [])
@@ -150,7 +153,7 @@ set(axHandle(1:nAx), 'YTick', [])
 nAx = nAx + 1;
 axHandle(nAx) = axes('Position', [.0395 .1226 .2685 .2767]);
 area(lags, muXc, 0);
-set(axHandle(nAx), 'XLim', [-.25 .25], 'YLim', [.15 .75]);
+set(axHandle(nAx), 'XLim', [-.25 .25]);
 title('Bilat MUA XCorr');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -161,7 +164,6 @@ axHandle(nAx) = axes('Position', [.3712 .1226 .2685 .2767]);
 bins = -1:.025:1;
 
 [~, pCorr1] = kstest2(replayCorr, colCorrShuffle, .05, 'smaller');
-%[~, pCorr2] = cmtest2(replayCorr, colCorrShuffle);
 
 [occRealCorr, cent] = hist(replayCorr, bins); 
 [occShufCorr]       = hist(colCorrShuffle, bins);
@@ -174,12 +176,12 @@ occShufCorrSm = smoothn(occShufCorr, 3, 'correct', 1);
 occRealCorrSm  = occRealCorrSm./sum(occRealCorrSm);
 occShufCorrSm  = occShufCorrSm./sum(occShufCorrSm);
 
-fill( [-1 -1 1 1], [0 1 1 0],  'w', 'edgecolor', 'none', 'parent', axHandle(nAx));
+% fill( [-1 -1 1 1], [0 1 1 0],  'w', 'edgecolor', 'none', 'parent', axHandle(nAx));
 p = [];
 p(1) = patch( [cent 1], [occRealCorrSm 0], 'r', 'parent', axHandle(nAx)); hold on;
 p(2) = patch( [cent 1], [occShufCorrSm 0], 'g', 'parent', axHandle(nAx));
 
-set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1], 'YLim', [0 .05]);
+set(axHandle(nAx),'XLim', [-1.0 1.0], 'XTick', [-1:.5:1]);
 title( sprintf('PDF Corr, p<%0.2g', pCorr1) ); 
 nAx = nAx+1;
 
