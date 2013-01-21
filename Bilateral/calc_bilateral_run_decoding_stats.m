@@ -2,7 +2,7 @@ efunction [results, r] = calc_bilateral_run_decoding_stats(d, varargin)
 %%
 % d = e11;
 % d = dset;
-
+d = dset_exp_load('/data/spl11/day11', 'run');
 args.N_SHUF = 250;
 args.PLOT = 1;
 args.REPORT = 1;
@@ -101,8 +101,8 @@ end
 if args.PLOT == 1
     
     figure;
-    subplot(121); imagesc( (cMat) ); 
-    subplot(122); imagesc( (cTmp) );
+    subplot(121); imagesc( normalize(cMat) ); 
+    subplot(122); imagesc( normalize(cTmp) );
 
     
     figure;
