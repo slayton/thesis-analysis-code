@@ -12,12 +12,17 @@ function [pdf, tbins, spike_counts] = reconstruct(ts, te, tc, cells, varargin)
     args = parseArgsLite(varargin, args);
     
     tbins = get_tbins(ts, te, args.tau, args.percent_overlap);
+
+    tTmp = [tbins(:,1); tbins(end,1) + args.tau];
+   
     spike_counts= zeros(length(cells), length(tbins));
     
     for i=1:numel(cells)
         
+        sc = histc(cells(i).(args.t_var), tTmp);
+        spike_counts(i,:) = sc(1:end-1);
 %         spike_counts(i,:) = sortedhist(cells(i).(args.t_var), tbins);
-        spike_counts(i,:) = hist(cells(i).(args.t_var), tbins(:,1) );
+%         spike_counts(i,:) = histc(cells(i).(args.t_var), tbins(:,1) );
     end
     
     if args.smooth
@@ -56,10 +61,13 @@ end
 
 
 function tbins = get_tbins(ts, te, tau, percent_overlap)    
+    dt = tau * (1-percent_overlap);
     tbins = ts:(tau*(1-percent_overlap)):te;
+    
     if numel(tbins)==1
         tbins = [tbins, tbins+tau];
     end
+    
     tbins = [tbins', tbins'+tau];
 end
 

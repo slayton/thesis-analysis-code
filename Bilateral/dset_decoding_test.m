@@ -29,7 +29,7 @@ eventList = [];
 
 % SLEEP SLEEP SLEEP SLEEP SLEEP SLEEP
 %
-eventList = [471, 525, 579,  826, 969, 1078]; % SPL11 DAY 11 A few good examples of replay spanning bursts
+% eventList = [471, 525, 579,  826, 969, 1078]; % SPL11 DAY 11 A few good examples of replay spanning bursts
 % eventList = [34, 38, 115, 188, 250];      %SPL11 DAY 12
 % eventList = [4, 48, 275, 289];            % spl11-d15
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

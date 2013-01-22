@@ -26,10 +26,9 @@ end
 %%
 
 %%
-idx = [1:13, 15:17];
-h = cHigh(idx);
-l = cLow(idx);
-s = stats(idx);
+h = cHigh;
+l = cLow;
+s = stats;
 
 C = {stats.colCorr};
 N = {stats.nSpike};
@@ -39,7 +38,7 @@ ll = [];
 
 hhh = [];
 lll = [];
-for i = idx
+for i = 1:nEpoch
     
     c = C{i};
     n = N{i};
@@ -58,7 +57,7 @@ for i = idx
 end
 
 
-figure('Name', ep);
+fig = figure('Name', ep);
 subplot(131);
 boxplot([l', h']);
 set(gca,'XTick', [1 2], 'XTickLabel', {'<25%', '>75%'});
@@ -83,6 +82,8 @@ title( sprintf('%2.3g %2.3g', [t3, r3]))
 
 set( get(gcf,'Children'), 'YLim', [-.1 1]);
 
+figName = sprintf('Fig5_replay_event_corr_by_nSpike_mu%s', ep);
+save_bilat_figure(figName, fig);
 
 %%
 

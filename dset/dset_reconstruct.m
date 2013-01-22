@@ -62,7 +62,7 @@ if strcmp(args.trajectory_type, 'individual')
             
             if args.shuffle_tuning_curves == 1 % col swap shuffle
                 colIdx = randsample( numel(clusters), numel(clusters) );
-                pf = pf(:, colIdx);
+                pf = pf(:, colIdfx);
             
             elseif args.shuffle_tuning_curves == 2 % col shift shuffle
                 pf = circshift_columns(pf);
@@ -144,7 +144,9 @@ elseif strcmp(args.trajectory_type, 'simple')
     [recon.pdf tbins spike_counts] = reconstruct( args.time_win(1), args.time_win(2), ...
                 pf, clusters, 't_var', 'st', 'tau', args.tau);
 
-    dp = 5;
+    
+            
+    dp = 1;
 
     if isempty(args.pbins)
         pbins = 0:dp:numel(clusters(1).pf) * dp;
