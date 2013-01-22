@@ -17,7 +17,7 @@ qReal = cell2mat( {stats.realCorrQuantiles}');
 qShuf = cell2mat( {stats.shufCorrQuantiles}');
 
 f = figure; 
-tmp = [.33 .66 .75 .9];
+tmp = [.1 .25 .5 .75 .9];
 for i = 1:4;
     subplot(1,4,i);
     set(gca,'NextPlot', 'add');
