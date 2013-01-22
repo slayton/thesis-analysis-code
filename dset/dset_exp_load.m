@@ -7,7 +7,7 @@ elseif strcmp(epoch, 'sleep')
 end
   
 dset = exp2dset(e, epoch);
-    
+dset.description.isexp = 1;
     
     
     

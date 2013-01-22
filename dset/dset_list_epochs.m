@@ -31,26 +31,43 @@ for ep = eps
         epList{idx,2} = i;
         epList{idx,3} = ep;
         idx = idx+1;
+        
     end
     
-    for i = [5]
-        if ep == 3
-            continue;
-        end
-        epList{idx,1} = 'Fra';
-        epList{idx,2} = i;
-        epList{idx,3} = ep;
-        idx = idx+1; 
-    end
+%     for i = [5]
+%         if ep == 3
+%             continue;
+%         end
+%         epList{idx,1} = 'Fra';
+%         epList{idx,2} = i;
+%         epList{idx,3} = ep;
+%         idx = idx+1; 
+%     end
   
-    if ep == 3
-        for i = 11:16
-            epList{idx,1} = 'spl11';
-            epList{idx,2} = ['day', num2str(i)];
-            epList{idx,3} = 'sleep2';
-            idx = idx+1;
-        end
-    end
-    
+%     if ep == 3
+%         for i = [11, 12, 15]
+%             epList{idx,1} = 'spl11';
+%             epList{idx,2} = ['day', num2str(i)];
+%             epList{idx,3} = 'sleep';
+%             idx = idx+1;
+%         end
+%     end
+%     
+end
+
+if strcmp('sleep', epoch_type)
+    epList(end+1, :) = {'spl11', 'day11', 'sleep'};
+    epList(end+1, :) = {'spl11', 'day12', 'sleep'};
+    epList(end+1, :) = {'spl11', 'day15', 'sleep'};
+
+end
+
+
+if strcmp('run', epoch_type)
+    epList(end+1, :) = {'spl11', 'day11', 'run'};
+    epList(end+1, :) = {'spl11', 'day12', 'run'};
+    epList(end+1, :) = {'spl11', 'day13', 'run'};
+    epList(end+1, :) = {'spl11', 'day14', 'run'};
+    epList(end+1, :) = {'spl11', 'day15', 'run'};
 end
 

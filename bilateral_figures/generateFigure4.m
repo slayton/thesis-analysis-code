@@ -1,4 +1,4 @@
-function generateFigure3(e)
+function generateFigure4(e)
 open_pool;
 %% Load Data for the figure
 % dset = dset_load_all('spl11', 'day15', 'run');

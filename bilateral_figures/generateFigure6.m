@@ -12,8 +12,9 @@ sleepEpochs = dset_list_epochs('sleep');
 i = 2;
 % for i = 1:numel(runReconFiles)
 
-    dset = dset_load_all(sleepEpochs{i,1}, sleepEpochs{i,2}, sleepEpochs{i,3});    
-
+%     dset = dset_load_all(sleepEpochs{i,1}, sleepEpochs{i,2}, sleepEpochs{i,3});    
+    dset = dset_load_all('spl11', 'day12', 'sleep');
+%%
     lIdx = strcmp({dset.clusters.hemisphere}, 'left');
     rIdx = strcmp({dset.clusters.hemisphere}, 'right');
     
@@ -28,9 +29,9 @@ i = 2;
     [statSimp(1), reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
     [statSimp(2), reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
 
-    for iii = 1:2
-        [st(iii), rp(iii)] = dset_calc_replay_stats(dset, clIdx{iii}, 0, 0,1);
-    end
+%     for iii = 1:2
+%         [st(iii), rp(iii)] = dset_calc_replay_stats(dset, clIdx{iii}, 0, 0,1);
+%     end
 
     
 % get the indecies of the timebins with spikes in both hemispheres
@@ -54,7 +55,7 @@ i = 2;
     [~, idx1] = max(pdf1);
     [~, idx2] = max(pdf2);
     %binDist = abs(idx1 - idx2);
-    binDist = calc_posidx_distance(idx1, idx2, dset.clusters(1).pf_edges);
+%     binDist = calc_posidx_distance(idx1, idx2, dset.clusters(1).pf_edges);
     
     
     %compute the confusion matrix
@@ -76,7 +77,7 @@ i = 2;
     for i = 1:nShuffle
         randIdx = randsample( size(pdf1,2), size(pdf1,2), 0);
         colCorrShuffle = [ colCorrShuffle, corr_col( pdf1, pdf2(:, randIdx) ) ];
-        binDistShuffle = [ binDistShuffle, calc_posidx_distance(idx1, idx2(randIdx), dset.clusters(1).pf_edges);];
+%         binDistShuffle = [ binDistShuffle, calc_posidx_distance(idx1, idx2(randIdx), dset.clusters(1).pf_edges);];
     end
     
     
@@ -94,7 +95,9 @@ muBurstIdx = logical( sum( cell2mat(muBurstIdx'), 2) );
 lags = lags * mean( diff( muTs ) );
 
 
-pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(dset, st, reconSimp);
+% pdfComp = dset_compare_bilateral_pdf_by_percent_cell_active(dset, statSimp, reconSimp);
+pdfComp = dset_compare_bilateral_pdf_by_n_mu_spike(dset, statSimp, reconSimp);
+
 
     
 %% Draw the figure
@@ -135,10 +138,10 @@ for ii = 1:3
     
     eTime = mean(dset.mu.bursts(eIdx,:));
     xcWin = .1;
-    tIdx = rp(1).tbins > (eTime - xcWin) & rp(1).tbins < (eTime + xcWin);
+    tIdx = reconSimp(1).tbins > (eTime - xcWin) & reconSimp(1).tbins < (eTime + xcWin);
     
-    imagesc(tbins, rp(1).pbins{traj},  rp(1).pdf{traj}(:,tIdx), 'Parent', axHandle((ii-1)*2 + 1) );
-    imagesc(tbins, rp(1).pbins{traj},  rp(2).pdf{traj}(:,tIdx), 'Parent', axHandle((ii-1)*2 + 2) );
+    imagesc(tbins, reconSimp(1).pbins{traj},  reconSimp(1).pdf{traj}(:,tIdx), 'Parent', axHandle((ii-1)*2 + 1) );
+    imagesc(tbins, reconSimp(1).pbins{traj},  reconSimp(2).pdf{traj}(:,tIdx), 'Parent', axHandle((ii-1)*2 + 2) );
 end
 % 
 

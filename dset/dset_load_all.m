@@ -1,14 +1,17 @@
 function dset = dset_load_all(animal, day, epoch, varargin)
 
 if strfind(animal, 'spl')
-    
+   
     if ~ischar(day)
         day = sprintf('day%d', day);
     end
-    edir = fullfile('/data/', animal, day)
+    
+    edir = fullfile('/data/', animal, day);
+    
     dset = dset_exp_load(edir, epoch);
     
     return;
+    
 elseif strfind(animal, 'gh-rsc')
     edir = fullfile('/data/', animal, day);
     dset = dset_exp_load(edir, epoch);

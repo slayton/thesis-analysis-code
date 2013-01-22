@@ -1,4 +1,4 @@
-function generateFigure4
+function generateFigure5
 %% Load all the data required for plotting!
 open_pool;
 %%
@@ -26,9 +26,9 @@ i = 1;
         clIdx{2} = lIdx;
     end
     
-    [statSimp(1), reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
-    [statSimp(2), reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
-    
+%     [statSimp(1), reconSimp(1)] = dset_calc_replay_stats(dset, clIdx{1}, [], [], 1, 'simple');
+%     [statSimp(2), reconSimp(2)] = dset_calc_replay_stats(dset, clIdx{2}, [], [], 1, 'simple');
+  
     lSpikeIdx = logical( sum(reconSimp(1).spike_counts) );
     rSpikeIdx = logical( sum(reconSimp(2).spike_counts) );
     
@@ -45,22 +45,7 @@ i = 1;
 
     nSpike{1} = sum( reconSimp(1).spike_counts(:, replayIdx));
     nSpike{2} = sum( reconSimp(2).spike_counts(:, replayIdx));
-    
-% Compute the distances between the peaks od the pdfs
-%     [~, idx1] = max(pdf1);
-%     [~, idx2] = max(pdf2);
-    %binDist = abs(idx1 - idx2);
-%     binDist = calc_posidx_distance(idx1, idx2, dset.clusters(1).pf_edges);
-    
-%     %compute the confusion matrix
-%     confMat = confmat(idx1, idx2);
-%     confMat(:, sum(confMat)==0) = 1;
-%     confMat = normalize(confMat);
-%     confMat(:,:,2) = confMat;
-%     confMat(:,:,3) = confMat(:,:,1);
-%     confMat = 1 - confMat;
-    
-    % Compute the correlations between the pdfs
+   
     replayCorr = corr_col(pdf1, pdf2);  
     
 % Compute the shuffle distributions
