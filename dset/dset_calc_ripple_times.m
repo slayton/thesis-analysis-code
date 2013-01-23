@@ -4,24 +4,37 @@ function [dset, peakIdx, winIdx] = dset_calc_ripple_times(dset, varargin)
     args.low_thold =  4;
     args.min_burst_len = .01;
     
+    args.ripChan = 1;
+    
+    args = parseArgs(varargin, args);
+    ch = args.ripChan;
     
     % FILTER EEG - if not yet filtered
-    if ~isfield(dset.eeg(1), 'rippleband')
+    if ~isfield(dset.eeg(ch), 'rippleband')
         dset = dset_filter_eeg_ripple_band(dset);
     end
     
     % construct indexing vector
-    nSamp = numel(dset.eeg(1).data);
+    nSamp = numel(dset.eeg(ch).data);
     ind = 1:nSamp;
     
     % only define and detect ripples using CHAN #1
-    ripLfp = dset.eeg(1).rippleband;
+    ripLfp = dset.eeg(ch).rippleband;
+    ripHilbert = nan .* ripLfp;
+    
+    validSeg = logical2seg( isfinite( ripLfp ) );
+      
+    for iSeg = 1:size(validSeg, 1)
+        
+        idx = validSeg(iSeg,1):validSeg(iSeg,2);
+        ripHilbert(idx) = abs( hilbert( ripLfp(idx) ) );
+        
+    end
     
     % Get envelope of signal and find bursts
-    ripHilbert = abs( hilbert( ripLfp ));
     
-    high_seg = logical2seg( ind, ripHilbert >= args.high_thold * std(ripHilbert) );
-    low_seg = logical2seg( ind, ripHilbert >= args.low_thold * std(ripHilbert) );
+    high_seg = logical2seg( ind, ripHilbert >= args.high_thold * nanstd(ripHilbert) );
+    low_seg = logical2seg( ind, ripHilbert >= args.low_thold * nanstd(ripHilbert) );
     
     % which low segments contain high segments
     [~, n] = inseg(low_seg, high_seg);

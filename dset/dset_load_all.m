@@ -60,7 +60,7 @@ end
 if args.eeg == 1
     fprintf('Loading EEG for %s %d-%d\n', animal, day, epoch);
     chans(end+1) = dset_get_ref_channel(animal, day, epoch);
-    [dset.eeg, dset.ref] = dset_load_eeg(animal, day, epoch, chans);
+    [dset.eeg] = dset_load_eeg(animal, day, epoch, chans);
 
     dset = dset_order_eeg_channels(dset,args);
     % %old checks - but remove channels that aren't in the specified area

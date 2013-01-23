@@ -9,6 +9,11 @@ metapath = dset_get_tetinfo_file_path(animal);
 % for i = 1:numel(filepaths)
 metaAll = load(metapath);
 
+
+badSamps = 0;
+badTs = [];
+
+
 for i = 1:numel(filepath)
     
     if ~exist(filepath{i},'file')
@@ -44,6 +49,25 @@ end
 if (isempty(eeg))
     return
 end
+
+if strcmpi(animal, 'Bon') && day == 4 && epoch == 5
+    disp('Bon-4-5 has bad eeg, correcting it');
+  
+    nSamp = numel(eeg(1).data);
+   
+    ts = dset_calc_timestamps(eeg(1).starttime, nSamp, eeg(1).fs);
+    
+    badTs = [5775 6320];
+    badIdx = interp1(ts, 1:nSamp, badTs, 'nearest');
+    badIdx = badIdx(1):badIdx(2);
+    for i = 1:numel(eeg)
+        eeg(i).data(badIdx) = nan;
+    end
+    
+end
+    
+    
+
 
 refIdx = strcmp( {eeg.area}, 'Reference');
 ref = eeg(refIdx);

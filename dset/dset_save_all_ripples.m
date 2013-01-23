@@ -5,10 +5,10 @@ add_ref = 0;
 
 for eNumber = 1:numel(epochsToAnalyze)
     
-    epoch = epochsToAnalyze{eNumber};
+%     epoch = epochsToAnalyze{eNumber};
     epochList = dset_list_epochs(epoch);
     
-    parfor i = 1:size(epochList,1);
+    for i = 1:size(epochList,1);
         d = dset_load_all(epochList{i,1},epochList{i,2}, epochList{i,3});
         
         if add_ref == 1
