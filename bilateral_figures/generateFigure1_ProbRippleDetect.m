@@ -19,12 +19,11 @@ parfor iEpoch = 1:size(eList,1)
     else
         d = dset_load_all(eList{iEpoch,:}, 'mu', 0);
     end
-    
-    pk = {};
-    win = {};
-    for iCh = 1:3
-        [~, pk{iCh}, win{iCh}] = dset_calc_ripple_times(d, 'ripChan', iCh);
-    end
+  
+  
+    [d] = dset_calc_ripple_times(d);
+  
+    win = d.ripples.chEventOnOffIdx;
     
     nTrig = size(win{1},1);
     pIpsiSlp(iEpoch) = nnz( inseg( win{2}, win{1}, 'partial' ) ) / nTrig;
@@ -53,11 +52,9 @@ parfor iEpoch = 1:size(eList,1)
         d = dset_load_all(eList{iEpoch,:});
     end
     
-    pk = {};
-    win = {};
-    for iCh = 1:3
-        [~, pk{iCh}, win{iCh}] = dset_calc_ripple_times(d, 'ripChan', iCh);
-    end
+    [d] = dset_calc_ripple_times(d);
+  
+    win = d.ripples.chEventOnOffIdx;
     
     nTrig = size(win{1},1);
     pIpsiRun(iEpoch) = nnz( inseg( win{2}, win{1}, 'partial' ) ) / nTrig;
