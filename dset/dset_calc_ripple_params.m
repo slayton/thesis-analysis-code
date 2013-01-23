@@ -36,7 +36,7 @@ function [dset, data] = dset_calc_ripple_params(dset)
     %data = orderfields(data);
     data = orderfields(data, ...
        {'description','fs', 'raw', 'rip', 'sw', 'window', 'peakIdx',...
-        'eventOnOffIdx', 'meanFreq', 'instFreq', 'spec'} );
+        'eventOnOffIdx', 'meanFreq', 'instFreq', 'spec', 'chPeakIdx', 'chEventOnOffIdx'} );
 
     dset.ripples = data;
 
