@@ -24,7 +24,7 @@ function create_linear_position_file(edir, ep)
     pos_file_path= fullfile(edir, 'position.p');
     pos_file = mwlopen(pos_file_path);
 
-    disp(['Loading position file: ',pos_file_path]);
+%     disp(['Loading position file: ',pos_file_path]);
 
     p = load(pos_file);
     ts = double(p.timestamp)/10000;
@@ -77,7 +77,7 @@ function pos = load_linear_position_file(edir, ep)
     lin_pos_path = fullfile(edir, [ep,'.lin_pos.p']);
     f = mwlopen(lin_pos_path);
 
-    disp([ep, ': loading linear_position file:', lin_pos_path]);
+%     disp([ep, ': loading linear_position file:', lin_pos_path]);
     l = load(f);    
     pos.ts = l.timestamp;
     pos.lp = l.lp;

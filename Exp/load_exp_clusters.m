@@ -24,7 +24,7 @@ function cl =  load_exp_clusters(edir, ep, varargin)
         if ~ismember(args.ignore_tetrode, t)
             cl_files = get_dir_names(fullfile(edir, t, ep, 'cl*'));
 
-            disp(['Loading clusters from tetrode: ', t]);
+            %disp(['Loading clusters from tetrode: ', t]);
             for j = 1:numel(cl_files)
                 nc = nc + 1;
 

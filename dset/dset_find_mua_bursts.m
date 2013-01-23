@@ -14,13 +14,14 @@ else
     vel = interp1(args.pos_struct.ts, args.pos_struct.smooth_vel, mu.timestamps, 'nearest');
 end
 
-isStopped = abs(vel) < args.velocity_threshold;
-
-rate(~isStopped) = nan;
+isStopped = abs( vel ) < args.velocity_threshold;
 
 fprintf('Excluding %d of %d samples during movement\n', nnz(~isStopped), numel(isStopped));
-meanMuRate = mean(mu.rate(isStopped));
-stdMuRate = std(mu.rate(isStopped));
+meanMuRate = nanmean( mu.rate(isStopped) );
+stdMuRate = nanstd( mu.rate(isStopped) );
+
+
+mu.rate(~isStopped) = 0;
 
 highThreshold = meanMuRate + stdMuRate * args.high_threshold;
 lowThreshold = meanMuRate + stdMuRate * args.low_threshold;

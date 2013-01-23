@@ -21,23 +21,46 @@ t_start = e_times(e_ind,1);
 t_end = e_times(e_ind,2);
 
 t = load_exp_tt_list(edir);
+[tt, loc] = load_exp_tt_anatomy(edir);
 
 multi_unit = [];
 ignored = 0;
+
+
 for i =1:length(t)
+    if ~any( strcmp(loc{i}, {'lCA1', 'rCA1'}) )
+%         fprintf('Skipping tetrode in:%s\n', loc{i});
+        continue;
+    end
+    
     if isempty(args.ignore_tetrode) | ~ismember(args.ignore_tetrode, t{i})  %#ok
         file = fullfile(edir, t{i}, [t{i},'.tt']);        
 
-            times = get_spike_times(file, args.threshold);
-            multi_unit = [multi_unit, times];
+        times = get_spike_times(file, args.threshold);
+       
+        
+        multi_unit = [multi_unit, times];
         
     else
         ignored = ignored+1;
         %disp(['Ignoring tetrode: ', t{i}])
     end
 end
+   
+    
 multi_unit = sort(multi_unit);
+
+hardLim = [3892 4118]; % hard coded times to for a bad segment for spl11d15
+
+if strcmp('/data/spl11/day15', edir)
+    fprintf('Filtering out bad time for SPL11 D15\n');
+    badIdx = multi_unit >= hardLim(1) & multi_unit <= hardLim(2);
+    multi_unit = multi_unit(~badIdx);    
+end
+
 mu = single(multi_unit);
+
+
 %mu.info = fullfile(edir, ep);
 %disp(['Multi-unit loaded from :', num2str(i-ignored), ' tetrodes!']);
         

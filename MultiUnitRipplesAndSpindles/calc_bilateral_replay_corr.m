@@ -103,7 +103,9 @@ st.realCorrQuantiles = quantile( eventCorr, q);
 st.shufCorrQuantiles = quantile( eventShufCorr(:), q);
 [~, st.pVal] = kstest2( eventCorr, eventShufCorr(:), .05, 'smaller');
 
-
+st.eventCorrVals = eventCorr;
+st.eventCorrValsShuf = eventShufCorr;
+ 
 if PLOT
     [F1, X1] = ksdensity( eventCorr, 'support', [-1 1] );
     [F2, X2] = ksdensity( eventShufCorr(:), 'support', [-1 1] );

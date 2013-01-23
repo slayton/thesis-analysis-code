@@ -42,12 +42,12 @@ end
 
 for i=1:numel(args.epochs)
     e = args.epochs{i};
-    disp(['PROCESSING EXP']);
+%     disp(['PROCESSING EXP']);
 
 %% Calculate Place fields for each cluster
     if any( strcmp('calc_tc', args.operations))
         if isfield(exp.(e),'pos') && isfield(exp.(e),'cl')
-            disp([10, e, ': computing place fields']);
+             disp([e, ': computing place fields']);
 
             cl = exp.(e).cl;
             for i=1:length(cl)

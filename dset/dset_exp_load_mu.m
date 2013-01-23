@@ -25,13 +25,13 @@ muDt = standardArgs.dt;
 
 tbins = e.(epoch).et(1) : muDt : (e.(epoch).et(2)-muDt);
 
-fprintf('Loading Multiunit...');
-anatomy_to_load = {'lCA1', 'rCA1', 'lCA3', 'rCA3'};
+% fprintf('Loading Multiunit...');
+anatomy_to_load = {'lCA1', 'rCA1'};
 
 for a = 1:numel(anat)
     
     if all(cellfun( @isempty, strfind(anatomy_to_load, anat{a})))
-        fprintf(' skipping %s', anat{a});
+%         fprintf(' skipping %s', anat{a});
         continue;
     end
     

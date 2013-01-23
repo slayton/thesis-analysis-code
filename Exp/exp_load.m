@@ -70,15 +70,15 @@ function epoch_data = load_exp_epoch(edir, ep, et, args)
 % 
 %     args = parseArgsLite(varargin, args);
 
-    disp([10, 'Loading data for epoch: ', ep]);
+    fprintf('Loading data for epoch: %s\n', ep);
     
     if ismember('clusters', args.data_types)
-        disp([10,'Loading single units for epoch: ', ep]);
+        fprintf('Loading single units for epoch: %s\n', ep);
         epoch_data.cl = load_exp_clusters(edir, ep, 'ignore_tetrode', args.ignore_tetrode);
     end
     
     if ismember('eeg', args.data_types)
-        disp([10,'Loading  for epoch: ', ep]);        
+        fprintf('Loading  for epoch: %s\n', ep);        
         epoch_data.eeg = load_exp_eeg(edir, ep,...
             'ignore_eeg_file', args.ignore_eeg_file, ...
             'ignore_eeg_channel', args.ignore_eeg_channel);
@@ -91,7 +91,7 @@ function epoch_data = load_exp_epoch(edir, ep, et, args)
 %     end
     
     if ismember('pos', args.data_types)
-        disp([10,'Loading position for epoch: ', ep]);        
+        fprintf('Loading position for epoch: \t\n', ep);        
         epoch_data.pos = load_exp_pos(edir, ep);
     end
     

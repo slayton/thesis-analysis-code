@@ -18,21 +18,21 @@ else
     error('Invalid epoch type specified, valid choices are: run, sleep');
 end
 
-idx = 1;
-for ep = eps
-
-    for i = [3:7, 9,10]
-        
-        if i == 4 && ep == 5
-            continue;
-        end
-              
-        epList{idx,1} = 'Bon';
-        epList{idx,2} = i;
-        epList{idx,3} = ep;
-        idx = idx+1;
-        
-    end
+% idx = 1;
+% for ep = eps
+% 
+%     for i = [3:7, 9,10]
+%         
+%         if i == 4 && ep == 5
+%             continue;
+%         end
+%               
+%         epList{idx,1} = 'Bon';
+%         epList{idx,2} = i;
+%         epList{idx,3} = ep;
+%         idx = idx+1;
+%         
+%     end
     
 %     for i = [5]
 %         if ep == 3
@@ -53,21 +53,39 @@ for ep = eps
 %         end
 %     end
 %     
-end
+% end
 
 if strcmp('sleep', epoch_type)
+
+    epList(end+1, :) = {'Bon', 4, 3};
+    epList(end+1, :) = {'Bon', 5, 3};
+    epList(end+1, :) = {'Bon', 6, 3};
+    epList(end+1, :) = {'Bon', 9, 3};
+    epList(end+1, :) = {'Bon', 4, 5};
+    epList(end+1, :) = {'Bon', 5, 5};
+    epList(end+1, :) = {'Bon', 6, 5};
+    epList(end+1, :) = {'Bon', 9, 5};
+    
     epList(end+1, :) = {'spl11', 'day11', 'sleep'};
     epList(end+1, :) = {'spl11', 'day12', 'sleep'};
-    epList(end+1, :) = {'spl11', 'day15', 'sleep'};
 
 end
 
 
 if strcmp('run', epoch_type)
+    epList(end+1, :) = {'Bon', 4, 2};
+    epList(end+1, :) = {'Bon', 5, 2};
+    epList(end+1, :) = {'Bon', 6, 2};
+    epList(end+1, :) = {'Bon', 9, 2};
+    epList(end+1, :) = {'Bon', 4, 4};
+    epList(end+1, :) = {'Bon', 5, 4};
+    epList(end+1, :) = {'Bon', 6, 4};
+    epList(end+1, :) = {'Bon', 9, 4};
+    
     epList(end+1, :) = {'spl11', 'day11', 'run'};
     epList(end+1, :) = {'spl11', 'day12', 'run'};
-    epList(end+1, :) = {'spl11', 'day13', 'run'};
-    epList(end+1, :) = {'spl11', 'day14', 'run'};
-    epList(end+1, :) = {'spl11', 'day15', 'run'};
+
+    %     epList(end+1, :) = {'spl11', 'day13', 'run'};
+%     epList(end+1, :) = {'spl11', 'day14', 'run'};
 end
 

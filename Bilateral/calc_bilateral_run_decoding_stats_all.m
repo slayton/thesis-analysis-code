@@ -10,7 +10,7 @@ for i = 1:nEpoch
     fprintf('\n');
     d = dset_load_all(eList{i,:});
     [pReal(i), pShuf(i), mCorr(i), mCorrS(i), stats(i)] =...
-        calc_bilateral_run_decoding_stats(d);
+        calc_bilateral_run_decoding_stats_single(d);
 
 end
 %%
