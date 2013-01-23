@@ -1,10 +1,11 @@
-function [pir, pcr, pis, psc] = generateFigure1_ProbRippleDetect
+function [pir, pcr, pis, pcs] = generateFigure1_ProbRippleDetect
 %%
 clear;
 fprintf('Loading Sleep\n');
 eList = dset_list_epochs('sleep');
 
-for iEpoch = 1:size(eList,1)
+[pIpsiSlp, pContSlp] = deal( nan(10,1) );
+parfor iEpoch = 1:size(eList,1)
     
     fprintf('%d of %d\n', iEpoch, size(eList,1));
     d = [];
@@ -32,11 +33,12 @@ for iEpoch = 1:size(eList,1)
 end
 
 
+[pIpsiRun, pContRun] = deal( nan(10,1) );
 
 eList = dset_list_epochs('run');
 
 fprintf('Loading Run\n');
-for iEpoch = 1:size(eList,1)
+parfor iEpoch = 1:size(eList,1)
     
     fprintf('%d of %d\n', iEpoch, size(eList,1));
     d = [];
@@ -68,6 +70,22 @@ pcr = pContRun;
 pis = pIpsiSlp;
 pcs = pContSlp;
 
-boxplot( [pIpsiRun', pContRun', pIpsiSleep', pContSlp'] );
+%%
+data = [pIpsiRun, pContRun, pIpsiSlp, pContSlp] ;
+
+f1 = figure; axes('NextPlot', 'add');
+
+line( 1:2, data( :, 1:2), 'color', [.8 .8 .8]);
+line( 3:4, data( :,  3:4), 'color', [.8 .8 .8]);
+
+boxplot( data );
+
+
+figName = 'Figure1_ProbRippleDetect';
+save_bilat_figure(figName, f1);
+
+
+set(gca,'XLim', [0 5], 'XTick', [1 2 3 4], 'XTickLabel', {'R:Ipsi', 'R:Cont', 'S:Ipsi', 'S:Cont'})
+
 
 end

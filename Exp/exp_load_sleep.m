@@ -9,7 +9,7 @@ end
 dList = {'/data/spl11/day11', '/data/spl11/day12', '/data/spl11/day15'};
 eList = {'sleep2', 'sleep3', 'sleep2'};
 
-idx = find(strcmp(edir, dList));
+idx = find( strcmp(edir, dList) );
 
 if isempty(idx)
     error('Sleep data for %s has not been clustered', edir);
