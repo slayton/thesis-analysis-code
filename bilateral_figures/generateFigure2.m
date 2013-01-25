@@ -1,375 +1,471 @@
 function generateFigure2
 %% Load all the data required for plotting!
-% open_pool;
-%%
 clear;
-
 ripples = dset_load_ripples;
 
-ripPhaseSleep = calc_bilateral_ripple_phase_diff(ripples.sleep);
-ripFreqSleep = calc_bilateral_ripple_freq_distribution(ripples.sleep);
+%%
+clear rPhase rFreq cPhase cFreq aPhase aFreq sAmp cSAmp rAmp cRAmp
+[rPhase.S, cPhase.S, aPhase.S] = calc_bilateral_ripple_phase_diff(ripples.sleep);
+[rFreq.S,  cFreq.S, aFreq.S] = calc_bilateral_ripple_freq_distribution(ripples.sleep);
 
-ripPhaseRun = calc_bilateral_ripple_phase_diff(ripples.run);
-ripFreqRun = calc_bilateral_ripple_freq_distribution(ripples.run);
+[rPhase.R, cPhase.R, aPhase.R] = calc_bilateral_ripple_phase_diff(ripples.run);
+[rFreq.R, cFreq.R, aFreq.S] = calc_bilateral_ripple_freq_distribution(ripples.run);
 
-data = load('/data/thesis/bilateral_ripple_coherence.mat');
-ripCohere = data.rippleCoherence;
-% ripCohere.sleep.shuffleCoherence = ripCohere.sleep.shuffleCoherence(1);
-% ripCohere.run.shuffleCoherence = ripCohere.run.shuffleCoherence(1);
+[rAmp.S, cRAmp.S] = calc_bilateral_ripple_amplitude(ripples.sleep);
+[rAmp.R, cRAmp.R] = calc_bilateral_ripple_amplitude(ripples.run);
 
-clear data;
+[sAmp.S, cSAmp.S] = calc_bilateral_sharpwave_amplitude(ripples.sleep);
+[sAmp.R, cSAmp.R] = calc_bilateral_sharpwave_amplitude(ripples.run);
 
 %% Close any existing figures
-% close all;
-%% Setup Figure
+close all;
 
-if exist('f2Handle', 'var'), delete( f2Handle( ishandle(f2Handle) ) ); end
-if exist('axF2', 'var'), delete( axF2( ishandle(axF2) ) ); end
+%% Construct the figure
 
-f2Handle = figure('Position', [650 50  581 492], 'NumberTitle','off','Name', 'Bilat Fig 2' );
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%      A, B - Bilateral Ripple Mean Freq Distribution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+f1 = figure; 
+ax(1) = subplot(221);
+ax(2) = subplot(222);
+ax(3) = subplot(223);
+ax(4) = subplot(224);
+
+freqBins = 150:1:225;
+
+fDist{1} = hist3([rFreq.R.trig, rFreq.R.ipsi], {freqBins, freqBins});
+fDist{2} = hist3([rFreq.S.trig, rFreq.S.ipsi], {freqBins, freqBins});
+fDist{3} = hist3([rFreq.R.trig, rFreq.R.cont], {freqBins, freqBins});
+fDist{4} = hist3([rFreq.S.trig, rFreq.S.cont], {freqBins, freqBins});
+
+r(1) = corr(rFreq.R.trig, rFreq.R.ipsi);
+r(2) = corr(rFreq.S.trig, rFreq.S.ipsi);
+r(3) = corr(rFreq.R.trig, rFreq.R.cont);
+r(4) = corr(rFreq.S.trig, rFreq.S.cont);
+
+t = {'Ipsi Run', 'Ipsi Sleep', 'Cont Run', 'Cont Sleep'};
+
+
+for i = 1:4
+   
+    img = fDist{i};
+    
+    img = smoothn(img,.75);
+    img = img - min(img(:));
+    img = img ./ max(img(:));
+    
+    
+    img = 1 - repmat( img, [1 1 3] );
+    imagesc(freqBins, freqBins, img, 'Parent', ax(i));
+    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, r(i) ), 'FontSize', 14);
+    
+    imwrite(img, sprintf('/data/bilateral/fig2_img_%d.png', i), 'png');
+    
+end
+
+set(ax, 'YDir', 'normal');
+
+figName = 'Fig2_BilateralFreqDist';
+save_bilat_figure(figName, f1);
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     Ripple Freq Distribution by Animal
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+freq = [];
+g = [];
+for i = 1:10
+   freq = [freq; ripples.sleep(i).meanFreq{1}];
+   g = [g; ones(size(ripples.sleep(i).peakIdx))*i];
+end
+
+f = figure; 
+boxplot(freq, g);
+figName = 'Fig2_sup_RippleFreqDist_ByAnimal';
+
+save_bilat_figure(figName, f);
+
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     Ripple Freq Distribution by Animal
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+freqT = [];
+freqS = [];
+freqI = [];
+freqC = [];
+
+for i = 1:10
+   nRip = numel( ripples.sleep(i).peakIdx );
+   idx = randsample(nRip, nRip, 1);
+   
+   freqS = [freqS; ripples.sleep(i).meanFreq{1}(idx)];
+   freqT = [freqT; ripples.sleep(i).meanFreq{1}];
+   freqI = [freqI; ripples.sleep(i).meanFreq{2}];
+   freqC = [freqC; ripples.sleep(i).meanFreq{3}];
+  
+end
+
+
+freqBins = 150:1:225;
+
+fDist{1} = hist3([freqT, freqI], {freqBins, freqBins});
+fDist{2} = hist3([freqT, freqC], {freqBins, freqBins});
+
+fDist{3} = hist3([freqS, freqI], {freqBins, freqBins});
+fDist{4} = hist3([freqS, freqC], {freqBins, freqBins});
+
+c(1) = corr(freqT, freqI);
+c(2) = corr(freqT, freqC);
+c(3) = corr(freqS, freqI);
+c(4) = corr(freqS, freqC);
+
+t = {'Ipsilateral', 'Contralateral', 'Ipsi-Shuffle', 'Contra-Shuffle'};
+
+f = figure;  
+ax(1) = subplot(221);
+ax(2) = subplot(222);
+ax(3) = subplot(223);
+ax(4) = subplot(224);
+
+for i = 1:numel(ax);
+   
+    img = fDist{i};
+    
+    img = smoothn(img,.75);
+    img = img - min(img(:));
+    img = img ./ max(img(:));
+    
+    
+    img = 1 - repmat( img, [1 1 3] );
+    imagesc(freqBins, freqBins, img, 'Parent', ax(i));
+    
+    imwrite(img, sprintf('/data/bilateral/fig2_img_shuf_%d.png', i), 'png');
+    title(ax(i), sprintf('%s R^2:%3.3f', t{i}, c(i)) );
+end
+
+set( ax, 'YDir', 'normal');
+figName = 'Fig2_BilateralFreqDist_Sleep_WithShuffle';
+
+save_bilat_figure(figName, f);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                     Ripple Freq Corr vs Shuffles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+
+
+f = figure;
+axes('NextPlot','Add');
+
+[f,x] = ksdensity(cFreq.S.contShuf);
+
+line(x,f,'Color', 'b');
+
+line(cFreq.S.cont * [1 1], max(f) * [0 1], 'color', 'r');
 
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       A - Ripple Peak Triggered LFP
+%                     Ripple Frequency Distributions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axF2(1) = axes('Position', [.055 .57 .35 .38]);
+%%
+freqBins = 150:1:225;
+
+[muS, sigS, muCiS, sigCiS] = normfit(rFreq.S.trig);
+[muR, sigR, muCiR, sigCiR] = normfit(rFreq.R.trig);
+
+fS(1,:) = normpdf(freqBins, muCiS(1), sigCiS(1));
+fS(2,:) = normpdf(freqBins, muCiS(2), sigCiS(1));
+fS(3,:) = normpdf(freqBins, muCiS(1), sigCiS(2));
+fS(4,:) = normpdf(freqBins, muCiS(2), sigCiS(2));
+
+fR(1,:) = normpdf(freqBins, muCiR(1), sigCiR(1));
+fR(2,:) = normpdf(freqBins, muCiR(2), sigCiR(1));
+fR(3,:) = normpdf(freqBins, muCiR(1), sigCiR(2));
+fR(4,:) = normpdf(freqBins, muCiR(2), sigCiR(2));
 
 
-% rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.sleep());
-rTrigLfp = calc_ripple_triggered_mean_lfp(ripples.sleep([10:13]));
+f = figure;
 
-% error_area_plot(rTrigLfp.ts, rTrigLfp.meanLfp{1}, 'Color', [1 0 0 ], 'Parent', axF2(3));
-line(rTrigLfp.ts, rTrigLfp.meanLfp{1}, 'Color', [1 0 0 ], 'Parent', axF2(1)); 
-line(rTrigLfp.ts, rTrigLfp.meanLfp{2}, 'Color', [0 1 0 ], 'Parent', axF2(1));
-line(rTrigLfp.ts, rTrigLfp.meanLfp{3}, 'Color', [0 0 1 ], 'Parent', axF2(1)); 
+ax = axes;
+x = [freqBins, fliplr(freqBins)];
+y1 = [max(fS), fliplr( min(fS))];
+y2 = [max(fR), fliplr( min(fR))];
 
 
-set(axF2(1),'XLim', [-.075 .075], 'YTick', []);
-t = title('Bon4 Rip trig LFP');
-set(t,'Position', [0 200, 1]);
-%plot_ripple_trig_lfp(rTrigLfp, axF2(3));
+p(1) = patch( x, y2, 'b', 'Parent', ax);
+p(2) = patch( x, y1, 'r', 'Parent', ax); 
+
+set(p, 'EdgeColor', 'none');
+xlabel('Frequency');
+ylabel('Probability');
+legend({'Run', 'Sleep'});
+
+figName = 'Fig2_SleepVsRun_FreqDist';
+save_bilat_figure(figName, f);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       B - Bilateral Ripple Peak Phase Distribution
+%       E- Ripple Amplitude Distribution
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axF2(2) = axes('Position', [.55 .55 .35 .38]);
+%%
+f1 = figure; 
+ax(1) = subplot(221);
+ax(2) = subplot(222);
+ax(3) = subplot(223);
+ax(4) = subplot(224);
+
+rAmpBins = 0:5:800;
+
+rAmpDist{1} = hist3([rAmp.R.trig, rAmp.R.ipsi], {rAmpBins, rAmpBins});
+rAmpDist{2} = hist3([rAmp.S.trig, rAmp.S.ipsi], {rAmpBins, rAmpBins});
+rAmpDist{3} = hist3([rAmp.R.trig, rAmp.R.cont], {rAmpBins, rAmpBins});
+rAmpDist{4} = hist3([rAmp.S.trig, rAmp.S.cont], {rAmpBins, rAmpBins});
+
+r(1) = corr(rAmp.R.trig, rAmp.R.ipsi);
+r(2) = corr(rAmp.S.trig, rAmp.S.ipsi);
+r(3) = corr(rAmp.R.trig, rAmp.R.cont);
+r(4) = corr(rAmp.S.trig, rAmp.S.cont);
+
+t = {'Ipsi Run', 'Ipsi Sleep', 'Cont Run', 'Cont Sleep'};
+
+
+for i = 1:4
+   
+    img = rAmpDist{i};
+    
+    img = smoothn(img,1);
+    img = img - min(img(:));
+    img = img ./ max(img(:));
+    
+    
+    img = 1 - repmat( img, [1 1 3] );
+    imagesc(rAmpBins, rAmpBins, img, 'Parent', ax(i));
+    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, r(i) ), 'FontSize', 14);
+    
+    imwrite(img, sprintf('/data/bilateral/ripAmpDist2_img_%d.png', i), 'png');
+    
+end
+
+set(ax, 'YDir', 'normal');
+
+
+figName = 'Fig2_BilateralRipAmpDist';
+save_bilat_figure(figName, f1);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       E- SharpWave Amplitude Distribution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+f1 = figure; 
+ax(1) = subplot(221);
+ax(2) = subplot(222);
+ax(3) = subplot(223);
+ax(4) = subplot(224);
+
+sAmpBins = 0:10:2000;
+swAmpDist{1} = hist3([sAmp.R.trig, sAmp.R.ipsi], {sAmpBins, sAmpBins});
+swAmpDist{2} = hist3([sAmp.S.trig, sAmp.S.ipsi], {sAmpBins, sAmpBins});
+swAmpDist{3} = hist3([sAmp.R.trig, sAmp.R.cont], {sAmpBins, sAmpBins});
+swAmpDist{4} = hist3([sAmp.S.trig, sAmp.S.cont], {sAmpBins, sAmpBins});
+
+t = {'Ipsi Run', 'Ipsi Sleep', 'Cont Run', 'Cont Sleep'};
+r(1) = cSAmp.R.ipsi;
+r(2) = cSAmp.S.ipsi;
+r(3) = cSAmp.R.cont;
+r(4) = cSAmp.S.cont;
+
+for i = 1:4
+   
+    
+    img = swAmpDist{i};
+    img(1,:) = 0;
+    img(:,1) = 0;
+    img = smoothn(img,1, 'correct', 1);
+    img = img - min(img(:));
+    img = img ./ max(img(:));
+    
+    
+    img = 1 - repmat( img, [1 1 3] );
+    imagesc(sAmpBins, sAmpBins, img, 'Parent', ax(i));
+    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, r(i) ), 'FontSize', 14);
+    
+    imwrite(img, sprintf('/data/bilateral/swAmpDist2_img_%d.png', i), 'png');
+    
+end
+
+set(ax, 'YDir', 'normal');
+
+
+figName = 'Fig2_BilateralSharpWaveAmpDist';
+save_bilat_figure(figName, f1);
+
+%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%       E, F - Bilateral Ripple Peak Phase Distribution
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 bins = -(pi) : pi/8 : (pi + pi/8);
 
-rose2(ripPhaseSleep.dPhaseIpsi, bins, [], 'r', 'Parent', axF2(2)); hold on;
-rose2(ripPhaseSleep.dPhaseCont, bins, 'Parent', axF2(2));
+[h(1), ax(1)]  = polar_hist( rPhase.S.trig - rPhase.S.ipsi, bins);
 
 
-title('Ripple Phase difference distribution', 'Parent', axF2(2));
+title( sprintf('%s - Ipsi:%3.2f Cont:%3.2f', 'Sleep', cPhase.S.ipsi, cPhase.S.cont), 'fontsize', 14);
+
+[h(2), ax(2)] = polar_hist(rPhase.S.trig - rPhase.S.cont, bins);
+% [h(3), ax(2)] = polar_hist( rPhase.R.trig - rPhase.R.ipsi, bins);
+% h(4) = polar_hist(ax(2), rPhase.R.trig - rPhase.R.cont, bins);
+title(sprintf('%s - Ipsi:%3.2f Cont:%3.2f', 'Run', cPhase.R.ipsi, cPhase.R.cont), 'fontsize', 14);
+
+set(h(2), 'FaceColor', 'r');
+set(h, 'linewidth',2);
+
+f1 = get(ax(1),'Parent');
+f2 = get(ax(2),'Parent');
+
+figName1 = 'Fig2_deltaRipplePhase_sleep';
+figName2 = 'Fig2_deltaRipplePhase_run';
+
+save_bilat_figure(figName1, f1);
+save_bilat_figure(figName2, f2);
+
+
+% rose2(ripPhaseSleep.dPhaseCont, bins, 'Parent', axF2(1));
+
+
+% title('Ripple Phase difference distribution', 'Parent', axF2(2));
 
 % set(axF2(4), 'XLim', [-1.05 1.05] * pi , 'XTick', -pi:pi/2:pi);
 % set(axF2(4), 'XTickLabel', {'-pi','-pi/2',  '0', 'pi/2', 'pi'});
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       C - Bilateral Ripple Mean Freq Distribution
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axF2(3) = axes('Position', [.055 .065 .35 .38]);
-
-freqBins = 150:3:225;
-biFreqSlpCont = hist3([ripFreqSleep.base, ripFreqSleep.cont], {freqBins, freqBins});
-biFreqRunCont = hist3([ripFreqRun.base, ripFreqRun.cont], {freqBins, freqBins});
-
-biFreqSlpIpsi = hist3([ripFreqSleep.base, ripFreqSleep.ipsi], {freqBins, freqBins});
-biFreqRunIpsi = hist3([ripFreqRun.base, ripFreqRun.ipsi], {freqBins, freqBins});
-
-% occ = smoothn(occ,1);
-img = repmat( biFreqSlpCont ,[1 1 3]);
-img = img - min(img(:));
-img = img / max(img(:));
-imagesc(freqBins, freqBins,  1-img, 'Parent', axF2(3));
-
-[r2(1) pR2(1)] = corr(ripFreqSleep.base, ripFreqSleep.cont);
-[r2(2) pR2(2)] = corr(ripFreqRun.base, ripFreqRun.cont);
-[r2(3) pR2(3)] = corr(ripFreqSleep.base, ripFreqSleep.ipsi);
-[r2(4) pR2(4)] = corr(ripFreqRun.base, ripFreqRun.ipsi);
-
-fprintf('R Sq\t%2.2f\t%2.2f\t%2.2f\t%2.2f\n', r2);
-fprintf('P Sq\t%0.2g\t%0.2g\t%0.2g\t%0.2g\n', pR2 * 1000);
-
-
-set(axF2(3),'Xlim', [150 225], 'YLim', [150 225], 'YDir', 'normal');
-set(axF2(3),'XTick',150:25:225,'YTick', 150:25:225);
-t = title('Bilateral Ripple Mean Freq Dist', 'Parent', axF2(3));
-set(t,'Position', [187.5 225, 1]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       D - Bilateral Coherence Around Ripples
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-axF2(4) = axes('Position', [.55 .065 .35 .38]);
-
-F = ripCohere.run.F;
-mCoCont = mean(ripCohere.sleep.cohereCont);
-sCoCont = std(ripCohere.sleep.cohereCont);
-
-mCoIpsi = mean(ripCohere.sleep.cohereIpsi);
-sCoIpsi = std(ripCohere.sleep.cohereIpsi);
-
-n = size(ripCohere.sleep.cohereIpsi,1);
-nStd = 3;
-
-mShufCont = mean(ripCohere.sleep.shuffleCont);
-sShufCont= std(ripCohere.sleep.shuffleCont);
-
-mShufIpsi = mean(ripCohere.sleep.shuffleIpsi);
-sShufIpsi= std(ripCohere.sleep.shuffleIpsi);
-
-
-[p(1), l(1)] = error_area_plot(F, mCoCont, nStd * sCoCont / sqrt(n), 'Parent',axF2(4));
-[p(2), l(2)] = error_area_plot(F, mCoIpsi, nStd * sCoIpsi / sqrt(n), 'Parent', axF2(4));
-[p(3), l(3)] = error_area_plot(F, mShufCont, nStd * sShufCont / sqrt(n), 'Parent', axF2(4));
-[p(4), l(4)] = error_area_plot(F, mShufIpsi, nStd * sShufIpsi / sqrt(n), 'Parent', axF2(4));
-
-set(l(1), 'Color', [1 0 0], 'LineWidth', 2);
-set(l(2), 'Color', [0 1 0], 'LineWidth', 2);
-
-set(l(3), 'Color', [0 1 1], 'LineWidth', 2);
-set(l(4), 'Color', [1 0 1], 'LineWidth', 2);
-
-set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
-set(p(2), 'FaceColor', [.7 1 .7], 'edgecolor', 'none');
-
-set(p(3), 'FaceColor', [.7 1 1], 'edgecolor', 'none');
-set(p(4), 'FaceColor', [1 .7 1], 'edgecolor', 'none');
-
-legend(l, {'Co-Cont', 'Co-Ipsi', 'Sh-Cont', 'Sh-Ipsi'});
-
-set(axF2(4),'Xlim', [0 400], 'XTick', [0:100:400]);t = title('Bilateral Ripple Coherence', 'Parent', axF2(4));
-set(t,'Position', [200 .5 1]);
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%       E- Bilateral Freq Distribution : RUN VS SLEEP
+%                     Ripple Frequency Distributions
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
+freqBins = 150:1:225;
 
-fig2E = figure;%('Position', [280 450 800 420]);
-ax2E = axes;%('Position', [.0775 .122 .4279 .8150], 'NextPlot', 'add'); 
-% ax2E(2) = axes('Position', [.5563 .122 .4279 .8150], 'NextPlot', 'add'); 
+A1 = rAmp.S.trig;
+A2 = rAmp.S.ipsi;
+F = rFreq.S.trig;
 
-nShuffle = 3;
-freqBins = 150:3:225;
+ampThold = 225;
+idxH = A1 > 175 & A2 > ampThold;
+idxL = A1 < 175 & A2 < ampThold;
 
-for i = 1:nShuffle
-    drawnow;
-    nSleep = numel(ripFreqSleep.base);
-    nRun = numel(ripFreqRun.base);
-    
-    slpIdx = randi(nSleep, round(nSleep * .90), 1);
-    runIdx = randi(nRun, round(nRun*.90), 1);
-    
-    dataSC = hist3([ripFreqSleep.base(slpIdx), ripFreqSleep.cont(slpIdx)], {freqBins, freqBins});
-    dataRC = hist3([ripFreqRun.base(runIdx), ripFreqRun.cont(runIdx)], {freqBins, freqBins});
-% 
-%     dataSC = biFreqSlpCont;
-%     dataRC = biFreqRunCont;
-    % dataSI = biFreqSlpIpsi;
-    % dataRI = biFreqRunIpsi;
+fHigh = F(idxH);
+fLow = F(idxL);
 
-    % dataS = dataS ./ max(dataS(:));
-    % dataR = dataR ./ max(dataR(:));
+[muH, sigH, muCiH, sigCiH] = normfit(fHigh);
+[muL, sigL, muCiL, sigCiL] = normfit(fLow);
 
-    dataRC = smoothn(dataRC,2);
-    dataSC = smoothn(dataSC,2);
+fH(1,:) = normpdf(freqBins, muCiH(1), sigCiH(1));
+fH(2,:) = normpdf(freqBins, muCiH(2), sigCiH(1));
+fH(3,:) = normpdf(freqBins, muCiH(1), sigCiH(2));
+fH(4,:) = normpdf(freqBins, muCiH(2), sigCiH(2));
 
-    % dataRI = smoothn(dataRI,2);
-    % dataSI = smoothn(dataSI,2);
+fL(1,:) = normpdf(freqBins, muCiL(1), sigCiL(1));
+fL(2,:) = normpdf(freqBins, muCiL(2), sigCiL(1));
+fL(3,:) = normpdf(freqBins, muCiL(1), sigCiL(2));
+fL(4,:) = normpdf(freqBins, muCiL(2), sigCiL(2));
 
-    tholdS = quantile( dataRC(:), .5 );
-    tholdR = quantile( dataSC(:), .5 );
-    % 
-    % tholdI = quantile( dataRI(:), .5 );
-    % tholdI = quantile( dataSI(:), .5 );
+fR(1,:) = normpdf(freqBins, muCiR(1), sigCiR(1));
+fR(2,:) = normpdf(freqBins, muCiR(2), sigCiR(1));
+fR(3,:) = normpdf(freqBins, muCiR(1), sigCiR(2));
+fR(4,:) = normpdf(freqBins, muCiR(2), sigCiR(2));
 
-    c{1} = contourc(freqBins, freqBins, biFreqSlpCont, [0 0] + tholdS); hold on;
-    c{2} = contourc(freqBins, freqBins, biFreqRunCont, [0 0] + tholdR);
+f = figure;
 
-    % c{3} = contourc(freqBins, freqBins, biFreqSlpIpsi, [0 0] + tholdS); hold on;
-    % c{4} = contourc(freqBins, freqBins, biFreqRunIpsi, [0 0] + tholdR);
+ax = axes;
+x = [freqBins, fliplr(freqBins)];
+y1 = [max(fH), fliplr( min(fH))];
+y2 = [max(fL), fliplr( min(fL))];
+y3 = [max(fR), fliplr( min(fR))];
 
-    for i = 1:numel(c)
-        result = parse_contour_matrix( c{i} );
-        cont(i) = result(1);
-    end
-
-    % cSleep = contour(freqBins, freqBins, bilatFreqDistSleep, 3); hold on;
-    % cRun = contour(freqBins, freqBins, bilatFreqDistRun, 3);
-    % nPt = size(cSleep,2);
-    % 
-    % line(cSleep(2,1:(nPt/2)), cSleep( (1 + nPt/2):nPt),'linestyle', 'none', 'marker','.', 'color','r');
-    % line(cRun(,1:(nPt/2)), cRun( (1 + nPt/2):nPt), 'linestyle', 'none', 'marker','.', 'color','k');
-
-    for i = 1:numel(cont)
-        [e(i).Z, e(i).A, e(i).B, e(i).ALPHA] = fitellipse( [cont(i).x; cont(i).y] );
-        [el(i).x, el(i).y] = ellipse_points( e(i).Z, e(i).A, e(i).B, e(i).ALPHA );
-    end
-
-    p = [];
-    p(1) = patch(el(2).x, el(2).y, [.5 1 1], 'Parent', ax2E);
-    % p(4) = patch(el(4).x, el(4).y, [1 1 .5], 'Parent', ax2E(2));
-    p(2) = patch(el(1).x, el(1).y, [1 .5 .5], 'Parent', ax2E);
-    % p(2) = patch(el(2).x, el(2).y, [.5 .5 1], 'Parent', ax2E(2));
-
-    set(ax2E,'XLim', [150 225], 'YLim', [150 225]);
-
-    set(p(2), 'EdgeColor', [1 .5 .5], 'linewidth', 1);
-    set(p(1), 'EdgeColor', [.5 .5 1], 'linewidth', 1);
-    set(p, 'FaceColor', 'none');
-
-end
-
-set(ax2E, 'Units', 'Pixels');
-axP = get(ax2E, 'Position');
-set(ax2E,'Position', axP([1,2,4,4]) );
+% patch( x, y3, 'g', 'Parent', ax);
+patch( x, y2, 'b', 'Parent', ax);
+patch( x, y1, 'r', 'Parent', ax); 
 
 
+set( get(gca,'Children'), 'EdgeColor', 'none');
+xlabel('Frequency');
+ylabel('Probability');
+% legend({'Run', 'Sleep - Low', 'Sleep - High'});
+legend({'Sleep - Low', 'Sleep - High'});
 
-xlabel('Source Ripple Freq (Hz)');
-ylabel('Test Ripple Freq (Hz)');
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%      F - Bilateral Ripple Coherence : RUN VS SLEEP
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-fig2F = figure;
-ax2F = axes();
-set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400); 
-
-F = ripCohere.sleep.F;
-
-mCoSleep = mean(ripCohere.sleep.cohereCont);
-mCoRun = mean(ripCohere.run.cohereCont);
-
-sCoSleep = std(ripCohere.sleep.cohereCont);
-sCoRun = std(ripCohere.run.cohereCont);
-
-nRun = size(ripCohere.run.cohereCont,1);
-nSleep = size(ripCohere.sleep.cohereCont,1);
-nStd = 1.96;
-
-rError = (nStd * sCoRun)/sqrt(nRun);
-sError = (nStd * sCoSleep)/sqrt(nSleep);
-
-rCorr{1} = mCoRun + rError;
-rCorr{2} = mCoRun - rError;
-
-sCorr{1} = mCoSleep + sError;
-sCorr{2} = mCoSleep - sError;
-
-
-X1 = [F; flipud(F)];
-Y1 = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
-
-mCoSleepSh = mean(ripCohere.sleep.shuffleCont);
-mCoRunSh = mean(ripCohere.run.shuffleCont);
-
-sCoSleepSh = std(ripCohere.sleep.shuffleCont);
-sCoRunSh = std(ripCohere.run.shuffleCont);
-
-nRun = size(ripCohere.sleep.shuffleCont,1);
-nSleep = size(ripCohere.sleep.shuffleCont,1);
-nStd = 1.96;
-
-rError = (nStd * sCoRunSh)/sqrt(nRun);
-sError = (nStd * sCoSleepSh)/sqrt(nSleep);
-
-rCorr{1} = mCoRunSh + rError;
-rCorr{2} = mCoRunSh - rError;
-
-sCorr{1} = mCoSleepSh + sError;
-sCorr{2} = mCoSleepSh - sError;
-
-
-X2 = [F; flipud(F)];
-Y2 = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
-    
-    
-   
-p(1) = patch(X1,Y1, [ .5 .7 .7] ,'Parent', ax2F);
-p(2) = patch(X2,Y2, [ .7 .5 .7] ,'Parent', ax2F);
-
-set(p,'edgecolor', 'none');
-
-%line(F, mCoSleep./mCoRun, 'Color', [0 0 0 ], 'Parent', ax2F(2), 'linewidth', 1.5);
-
-set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400, 'YColor', 'k');
-set(ax2F, 'Ylim', [.9 2.1]);
-
-ylabel('Ratio');
-xlabel(ax2F, 'Frequency Hz');
-
-% fig2F = figure;
-% ax2F = plotyy(1,1,1,1);
-% 
-% F = ripCohere.sleep.F;
-% mCoSleep = mean(ripCohere.sleep.rippleCoherence);
-% mCoRun = mean(ripCohere.run.rippleCoherence);
-% 
-% sCoSleep = std(ripCohere.sleep.rippleCoherence);
-% sCoRun = std(ripCohere.run.rippleCoherence);
-% 
-% n = size(ripCohere.sleep.rippleCoherence,1);
-% nStd = 3;
-% 
-% [p(1), l(1)] = error_area_plot(F, mCoSleep, nStd * sCoSleep / sqrt(n), 'Parent', ax2F(1));
-% [p(2), l(2)] = error_area_plot(F, mCoRun, nStd * sCoRun / sqrt(n), 'Parent', ax2F(1));
-% 
-% % set(l(1), 'Color', [1 0 0], 'LineWidth', 1.5);
-% % set(l(2), 'Color', [0 0 1], 'LineWidth', 1.5);
-% 
-% delete(l(1:2));
-% 
-% set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400); 
-% 
-% set(p(1), 'FaceColor', [1 .7 .7], 'edgecolor', 'none');
-% set(p(2), 'FaceColor', [.7 .7 1], 'edgecolor', 'none');
-% uistack(p(2), 'top')
-% 
-% rError = (nStd * sCoRun)/sqrt(n);
-% sError = (nStd * sCoSleep)/sqrt(n);
-% 
-% rCorr{1} = mCoRun + rError;
-% rCorr{2} = mCoRun - rError;
-% 
-% sCorr{1} = mCoSleep + sError;
-% sCorr{2} = mCoSleep - sError;
-% 
-% 
-% X = [F; flipud(F)];
-% Y = [sCorr{2}./rCorr{1}, fliplr(sCorr{1}./rCorr{2})]';
-% 
-% p(3) = patch(X,Y, [ .5 .7 .7] ,'Parent', ax2F(2));
-% set(p(3),'edgecolor', 'none')
-% 
-% %line(F, mCoSleep./mCoRun, 'Color', [0 0 0 ], 'Parent', ax2F(2), 'linewidth', 1.5);
-% 
-% set(ax2F,'Xlim', [0 400], 'XTick', 0:100:400, 'YColor', 'k');
-% set(ax2F(1),'YLim', [.15 .5], 'YTick', [0:.1:.5], 'box', 'off');
-% set(ax2F(2), 'Ylim', [.9 2.1]);
-% 
-% uistack(ax2F(1),'top');
-% set(ax2F(2),'Color', 'w');
-% set(ax2F(1),'Color', 'none');
-% ylabel(ax2F(1), 'Ripple Coherence');
-% ylabel(ax2F(2), 'Sleep to Run Ratio');
-% xlabel(ax2F(1), 'Frequency Hz');
+figName = 'Ripple_freq_distribution_High_vs_Low_Amplitude';
+save_bilat_figure(figName, f);
 
 %%
 
-%% Save the figure
-save_bilat_figure('figure2-abcd', f2Handle);
-save_bilat_figure('figure2-e', fig2E);
-save_bilat_figure('figure2-f', fig2F);
-% 
-% saveDir = '/data/bilateral/figures';
-% figName = ['figure2-', datestr(now, 'yyyymmdd')];
-% 
-% saveFigure(fHandle, saveDir, figName, 'png', 'fig', 'svg');
-% save(fullfile(saveDir, 'figure2-data.mat'))
+close all;
+
+% [F, X, U] = ksdensity(rAmp.S.trig);
+
+A = rAmp.S.trig;
+idxL = A < 200;
+idxH = A > 150;
+
+[m1, s1] = normfit(A(idxL));
+[m2, s2] = normfit(A(idxH));
+
+bins = 0:5:800;
+
+f1 = normpdf(bins, m1, s1);
+f2 = normpdf(bins, m2, s2);
+
+f1C = sum(f1) / (sum(f1) + sum(f2));
+f2C = sum(f2) / (sum(f1) + sum(f2));
+
+
+
+[F, X] = ksdensity(A, bins, 'width',  20);
+
+figure;
+axes('NextPlot','add');
+
+bar(X, F, 1, 'g');
+line(bins, f1/3, 'color', 'r', 'linewidth', 2);
+line(bins, f2/1.75, 'color', 'b', 'linewidth', 2);
+
+
 %%
+close all;
+
+% [F, X, U] = ksdensity(rAmp.S.trig);
+
+A = rAmp.S.ipsi;
+idxL = A < 200;
+idxH = A > 150;
+
+[m1, s1] = normfit(A(idxL));
+[m2, s2] = normfit(A(idxH));
+
+
+bins = 0:10:800;
+
+gmfit = gmdistribution.fit(A,2);
+f = pdf(gmfit, bins');
+
+[F, X] = ksdensity(A, bins, 'width', 2);
+
+close all;
+figure; axes('NextPlot', 'add')
+bar(X,F,1);
+line(bins, f, 'color', 'r', 'linewidth', 2);
+
+xlabel('Amplitude');
+
+
+
+%%
+
 end

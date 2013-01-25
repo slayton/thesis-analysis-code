@@ -56,9 +56,14 @@ end
 h = patch(x,y,'b', 'parent', ax, 'linewidth', 2);
 
 data = get(ax, 'UserData');
+
+if isempty(data)
+     data = struct('hObj', []);
+end
+
 data.hObj(end+1) = h;
-data
-uistack(data.handles.rLabel, 'top');
+
+%uistack(data.handles.rLabel, 'top');
 
 set(ax,'UserData', data);
 
@@ -88,7 +93,7 @@ function ax = createPolarAxes(R)
     axPos = [ ...
         (fPos(3) - dim)/2 + 5,  ...
         (fPos(4) - dim)/2 + 5, ...
-        dim - 10, dim - 10];
+        dim - 40, dim - 40];
     
     % set the values on the axes
     set(ax,'Position', axPos , 'Color', 'none', 'Units', 'normal');
@@ -122,7 +127,6 @@ function renderPolarAxes(ax)
     [data.handles.rTick, data.handles.rLabel] = ...
         renderRadialTicks(ax, data.R);
     
-    data
     set(ax,'UserData', data);
    
 end
@@ -143,7 +147,7 @@ end
 
 function [tick, lab] = renderAngularTicks(ax, R)
 
-       
+    
     tick(1) = line(R * [-1, 1], [0, 0], 'color', 'k', 'parent', ax);
     tick(2) = line([0, 0], R * [-1, 1], 'color', 'k', 'parent', ax);
     tick(3) = line(sqrt(2)/2 * [-R R], sqrt(2)/2 * [R -R], 'color', 'k', 'parent', ax);
