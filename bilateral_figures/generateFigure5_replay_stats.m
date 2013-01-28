@@ -7,7 +7,7 @@ nEpoch = size(eList,1);
 
 
 for i = 1:nEpoch
-    
+    %%
     d = dset_load_all( eList{i,:} );
     
     lIdx = strcmp({d.clusters.hemisphere}, 'left');
@@ -20,7 +20,6 @@ for i = 1:nEpoch
     recon(2) = dset_reconstruct(d.clusters(rIdx), args{:} );
     
     [cHigh(i), cLow(i), stats(i)] = dset_compare_bilateral_pdf_by_n_mu_spike(d, recon);
-    
     
 end
 
