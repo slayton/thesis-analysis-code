@@ -21,12 +21,129 @@ for i = 1:nEpoch
     
     [cHigh(i), cLow(i), stats(i)] = dset_compare_bilateral_pdf_by_n_mu_spike(d, recon);
     
-    
 end
 
 %%
 
+bC = [stats.burstCorr]';
+bS = [stats.burstCorr]';
+for i = 1:10
+   nBurst = numel(stats(i).burstRate{1});
+   
+   idx = randsample(nBurst, nBurst, 1);
+   
+   bS(i) = corr( stats(i).burstRate{1}(idx), stats(i).burstRate{2});
+end
+close all;
+
+figure;
+s = stats(9);
+bins = 0:.025:1;
+
+b1 = s.burstRate{1};
+b2 = s.burstRate{2};
+
+b1 = b1 - min(b1);
+b2 = b2 - min(b2);
+b1 = b1 ./ max(b1);
+b2 = b2 ./ max(b2);
+cts = hist3( [b1 , b2 ], {bins, bins});
+
+
+subplot(1,3,1:2);
+
+imagesc(bins, bins, cts);
+set(gca,'YDir', 'normal');
+
+subplot(133)
+set(gca, 'NextPlot', 'add');
+
+line(1:2, [bC, bS], 'color', [.8 .8 .8]);
+boxplot([bC, bS]);
+set(gca,'XTick', [1, 2], 'XTickLabel', {'Coincident', 'Shuffled'});
+    
+%%
+
 f = figure;
+axes('NextPlot', 'add');
+
+line([1 2], [cLow', cHigh'], 'color', [.8 .8 .8]);
+boxplot([cLow', cHigh']); 
+
+p = signrank( cLow, cHigh, 'tail', 'left');
+title( sprintf( 'SignRank:%4.4f', p) );
+
+set(gca,'XTick', [1 2], 'XTickLabel', {'Low', 'High'});
+
+
+figName = sprintf('Figure5-EventCorr-BurstRate-boxplot-%s',ep);
+save_bilat_figure(figName, f);
+
+%%
+
+bC = [stats.burstCorr]';
+bS = [stats.burstCorr]';
+for i = 1:10
+   nBurst = numel(stats(i).burstRate{1});
+   
+   idx = randsample(nBurst, nBurst, 1);
+   
+   bS(i) = corr( stats(i).burstRate{1}(idx), stats(i).burstRate{2});
+end
+close all;
+
+figure;
+s = stats(9);
+bins = 0:.025:1;
+
+b1 = s.burstRate{1};
+b2 = s.burstRate{2};
+
+b1 = b1 - min(b1);
+b2 = b2 - min(b2);
+b1 = b1 ./ max(b1);
+b2 = b2 ./ max(b2);
+cts = hist3( [b1 , b2 ], {bins, bins});
+
+cts = smoothn(cts, .5);
+cts = cts - min(cts(:));
+cts = cts ./ max(cts(:));
+cts = 1 - repmat( cts, [1 1 3]);
+
+subplot(1,3,1:2);
+
+imagesc(bins, bins, cts);
+set(gca,'YDir', 'normal');
+
+subplot(133)
+set(gca, 'NextPlot', 'add');
+
+line(1:2, [bC, bS], 'color', [.8 .8 .8]);
+boxplot([bC, bS]);
+set(gca,'XTick', [1, 2], 'XTickLabel', {'Coincident', 'Shuffled'});
+
+
+figure('Position', get(gcf,'Position') + [100 0 0 0]);
+
+
+subplot(1,3,1:2);
+
+plot(b1, b2, '.');
+
+
+subplot(133)
+set(gca, 'NextPlot', 'add');
+
+line(1:2, [bC, bS], 'color', [.8 .8 .8]);
+boxplot([bC, bS]);
+set(gca,'XTick', [1, 2], 'XTickLabel', {'Coincident', 'Shuffled'});
+
+cts = imresize(cts, 5, 'method', 'nearest');
+imwrite(cts, '~/Desktop/Bilateral_MU_BurstRate_Dist.png', 'png');
+    
+%%
+
+f = figure();
 axes('NextPlot', 'add');
 
 line([1 2], [cLow', cHigh'], 'color', [.8 .8 .8]);

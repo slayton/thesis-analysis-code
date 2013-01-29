@@ -80,6 +80,7 @@ corrHigh = mean( eventCorr( idxHigh ) );
 % stats.correlation_pval = pval;
 stats.colCorr = eventCorr;
 stats.burstRate = {bRateL, bRateR};
+stats.burstCorr = corr(bRateL, bRateR);
 % stats.plot_m = x;
 % stats.plot_e= e;
 % stats.quantiles = q;
