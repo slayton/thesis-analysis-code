@@ -1,52 +1,84 @@
-function [results] = calc_bilateral_ripple_phase_diff(ripples)
- 
-    % Prepare the data for analysis
-    nAnimal = numel(ripples);
-    nRipple = sum( arrayfun(@(x) size(x.raw{1},1), ripples, 'UniformOutput', 1) );
+function [results, c, animal] = calc_bilateral_ripple_phase_diff(ripples)
 
-    phase = zeros( nRipple,3 );
+% Prepare the data for analysis
+nAnimal = numel(ripples);
+nRipple = sum( arrayfun(@(x) size(x.raw{1},1), ripples, 'UniformOutput', 1) );
+
+phase = zeros( nRipple,3 );
+
+curIdx = 1;
+
+for iAnimal = 1:nAnimal
     
-    curIdx = 1;
-    for iAnimal = 1:nAnimal
-     
-        r = ripples(iAnimal);
-        peakIdx = find(r.window==0) - 1; % correction for bad peak indexing!?!
-        nRip = numel(r.peakIdx);
-     
-        for i = 1:numel(r.rip)
-            if isempty(r.rip{i})
-                continue;
-            end
-            
-            hil = hilbert(r.rip{i}')';
-            
-%             h3 = hilbert(r.rip{3}')';
+    r = ripples(iAnimal);
+    peakIdx = find(r.window==0) - 1; % correction for bad peak indexing!?!
+    nRip = numel(r.peakIdx);
+    
+    animal(iAnimal).trig = [];
+    animal(iAnimal).ipsi = [];
+    animal(iAnimal).cont = [];
+    
+    for i = 1:numel(r.rip)
+        if isempty(r.rip{i})
+            continue;
+        end
+        
+        hil = hilbert(r.rip{i}')';
 
         % unwrap the phases so we can compute a clean difference in angles
-            phs = unwrap( angle(hil) );
-%         p3 = unwrap( angle(h3) );
+        phs = unwrap( angle(hil) );        
+        phs = phs(:, peakIdx);      
+        phase(curIdx:(curIdx+nRip-1), i) = phs;       
         
-            phs = phs(:, peakIdx);
-     
-    
-            phase(curIdx:(curIdx+nRip-1), i) = phs;
-%         phase3(curIdx:(curIdx+nRip-1)) = p3;
-        
-        
+        switch i
+            case 1
+                animal(iAnimal).trig = [animal(iAnimal).trig phs];
+            case 2
+                animal(iAnimal).ipsi = [animal(iAnimal).ipsi phs];
+            case 3
+                animal(iAnimal).cont = [animal(iAnimal).cont phs];
         end
-        curIdx = curIdx + nRip;
-        
     end
     
-    dPhaseCont = phase(:,1) - phase(:,3);
-    dPhaseIpsi = phase(:,1) - phase(:,2);
+    curIdx = curIdx + nRip;
     
-     
-    % mod by 2pi to bring it with that valid range of [-pi pi]
-    %results.dPhase  = mod(dPhase, 2*pi)-pi;
-    results.dPhaseIpsi = dPhaseIpsi;
-    results.dPhaseCont = dPhaseCont;
+end
+
+results.trig = phase(:,1);
+results.ipsi = phase(:,2);
+results.cont = phase(:,3);
+
+cIpsi = circ_corrcc( phase(:,1), phase(:,2) );
+cCont = circ_corrcc( phase(:,1), phase(:,3) );
+
+[cIpsiShuff, cContShuff] =  deal( nan(250, 1) );
+
+nShuffle = 250;
+for i = 1:nShuffle
+    phShuf = nan * phase(:,1);
     
+    idx = 1;
+    for j = 1:nAnimal
+        
+        nRip = numel(animal(j).trig);
+        randIdx = randsample(nRip, nRip, 1);
+
+        phShuf( idx : (idx+nRip-1) ) = animal(j).trig(randIdx);      
+        
+        idx = idx + nRip;
     
-       
+    end
+    
+    cIpsiShuff(i) = circ_corrcc(phase(:,2), phShuf);
+    cContShuff(i) = circ_corrcc(phase(:,3), phShuf);
+    
+end
+
+
+
+c.ipsi = cIpsi;
+c.cont = cCont;
+c.ipsiShuf = cIpsiShuff;
+c.contShuf = cContShuff;
+
 end

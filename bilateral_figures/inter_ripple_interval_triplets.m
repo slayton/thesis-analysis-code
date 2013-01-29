@@ -1,174 +1,173 @@
 
+
+%%
 clear
+allRipples = dset_load_ripples;
 %%
-iExp = 1;
-if ~exist('allRipples','var')
-    allRipples = dset_load_ripples;
-end
-% epType = 'sleep';
 
+tripIri = [];
+allIri = [];
 
-%%
-tripIri.sleep = {[],[]};
-tripIri.run = {[],[]};
-allIri.sleep = {[],[]};
-allIri.run = {[],[]};
+ripples = allRipples.sleep;
 
-for ep = {'sleep', 'run'}
-    
-    ep = char(ep);
-    
-    ripples = allRipples.(ep);
+for iExp = 1:numel(ripples)
 
-   for iExp = 1:numel(allRipples.(ep))
-%   for iExp = 8:13%:numel(allRipples.(ep))
-%   for iExp = 14:numel(allRipples.(ep))
+    rips = ripples(iExp);
 
-        rips = allRipples.(ep)(iExp);
+    ripTs = rips.peakIdx /rips.fs;
 
-        ripTs = rips.peakIdx /rips.fs;
-        ripLen = diff(rips.eventOnOffIdx, [], 2);
-        
-        randOffset = randomInts(ripLen + 1) - 1;
-        randTs = (rips.eventOnOffIdx(:,1) + randOffset ) / rips.fs;    
-        
-%         randTs = rips.eventIdx(:,1) / rips.Fs;  % start of event
-%         randTs = rips.eventIdx(:,2) / rips.Fs;  % End of event
+    ripLen = diff(rips.eventOnOffIdx, [], 2);
 
-        realTripIdx = filter_event_sets(ripTs, 3, [.5 .25 .25]);
-        randTripIdx = filter_event_sets(randTs, 3, [.5 .25 .25]);
-        
-        realTripTs = ripTs(realTripIdx);
-        randTripTs = randTs(randTripIdx);
+    realTripIdx = filter_event_sets(ripTs, 3, [.5 .25 .25]);
 
-        iriReal = [50; diff(ripTs)];
-        iriRand = [50; diff(randTs)];
+    realTripTs = ripTs(realTripIdx);
 
-        realSetIdx = false(size(ripTs));
-        randSetIdx = false(size(randTs));
+    iriReal = [50; diff(ripTs)];
 
-        for iRip = 1:numel(realTripTs)
-            realSetIdx = realSetIdx | ( ripTs > realTripTs(iRip) & ripTs < realTripTs(iRip) + 1 );
-        end
-        
-        for iRip = 1:numel(randTripTs)
-            randSetIdx = randSetIdx | ( randTs > randTripTs(iRip) & randTs < randTripTs(iRip) + 1 );
-        end
+    realSetIdx = false(size(ripTs));
 
-        tripIri.(ep){1} = [tripIri.(ep){1}; iriReal(realSetIdx)];
-        tripIri.(ep){2} = [tripIri.(ep){2}; iriRand(randSetIdx)];
-
-        allIri.(ep){1} = [allIri.(ep){1}; iriReal];
-        allIri.(ep){2} = [allIri.(ep){2}; iriRand];
-
+    for iRip = 1:numel(realTripTs)
+        realSetIdx = realSetIdx | ( ripTs > realTripTs(iRip) & ripTs < realTripTs(iRip) + 1 );
     end
+    
+    tripIri = [tripIri; iriReal(realSetIdx)];
+    allIri = [allIri; iriReal];
+
 end
 
-%%
 
-b = 0 : 0.0025 : 0.25;
+allIri = allIri * 1000;
+tripIri = tripIri * 1000;
 
-
-for ep = {'sleep', 'run'}
-    
-    ep = char(ep);
-   
-    for i = 1:2
-        hTrip.(ep){i} = histc(tripIri.(ep){i}, b);
-        hAll.(ep){i} = histc(allIri.(ep){i}, b);
-
-        hTrip.(ep){i} = hTrip.(ep){i}./sum(hTrip.(ep){i});
-        hAll.(ep){i} = hAll.(ep){i}./sum(hAll.(ep){i});
-        
-        hTrip.(ep){i} = smoothn(hTrip.(ep){i}, 2);
-        hAll.(ep){i} = smoothn(hAll.(ep){i}, 2);
-    end
-end
-
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%         KDE - Inter Ripple Intervals
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Inter Ripple Intervals
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    f = figure('Position', [150 500 900 400]);
-    ax = [];
-    ax(1) = subplot(121);
-
-    line(b, hTrip.sleep{1}, 'color', 'b', 'Parent', ax(1), 'linewidth', 2);
-    line(b, hAll.sleep{1}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2);
-
-    %line(b, hTrip.sleep{2}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2)
-    
-    title('Sleep');
-    legend('Triplets', 'All Ripples');
-
-    ax(2) = subplot(122);
-    
-    line(b, hTrip.run{1}, 'color', 'b', 'Parent', ax(2), 'linewidth', 2);
-    line(b, hAll.run{1}, 'color', 'r', 'Parent', ax(2), 'linewidth', 2);
-
-    title('Run');
-    legend('Triplets', 'All Ripples');
-    
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Inter Ripple Intervals - JITTERED
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-
-    f = figure('Position', [250 400 900 400]);
-    ax = [];
-    ax(1) = subplot(121);
-
-    line(b, hTrip.sleep{2}, 'color', 'b', 'Parent', ax(1), 'linewidth', 2);
-    line(b, hAll.sleep{2}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2);
-
-    %line(b, hTrip.sleep{2}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2)
-    
-    title('Sleep - Jittered');
-    legend('Triplets', 'All Ripples');
-
-    ax(2) = subplot(122);
-    
-    line(b, hTrip.run{2}, 'color', 'b', 'Parent', ax(2), 'linewidth', 2);
-    line(b, hAll.run{2}, 'color', 'r', 'Parent', ax(2), 'linewidth', 2);
-
-    title('Run - Jittered');
-    legend('Triplets', 'All Ripples');
-
-    set(ax,'XLim', [0 .25]);
-
-    
-%%
-
-
 % plot(b, hTrip.sleep{1}); hold on;
-iriSleep = tripIri.sleep{1};
-idxSleep = iriSleep<.95;
 
-iriRun = tripIri.run{1};
-idxRun = iriRun<.95;
+[kAll, X] = ksdensity(allIri( allIri < 1000) , 0:1000, 'support', [0 1000], 'width', .25);
+[kTrip, ~] = ksdensity(tripIri( tripIri < 1000) , 0:1000, 'support', [0 1000], 'width', .25);
 
-[Y1,X1] = ksdensity(iriSleep(idxSleep)*1000, 0:1000, 'support', 'positive');
-[~, idxSleep] = findpeaks(Y1);
-
-[Y2,X2] = ksdensity(iriRun(idxRun)*1000, 0:1000, 'support', 'positive');
-[~, idxRun] = findpeaks(Y2);
+[~, pkIdx] = findpeaks(kTrip);
 
 idx = 1:500;
 
 f = figure;
-line(X1(idx),Y1(idx));
-line(X2(idx),Y2(idx), 'color', 'r');
-distPeakTs = X1(idxSleep(2));
-line(distPeakTs * [1 1], [0 max(Y)*1.1]);
+line( X(idx), kAll(idx) );
+line( X(idx), kTrip(idx), 'color', 'r');
+
+legend({'All Ripples', 'Triplets'});
+distPeakTs = X(pkIdx(2));
+line(distPeakTs * [1 1], [0 max(kAll)*1.1]);
+
 set(gca,'XTick', [0 distPeakTs 100], 'XLim', [0 500])
 
 figName = 'figure3-InterRipIntervalDistribution';
-legend({'Sleep', 'Run'});
-% save_bilat_figure(figName, f)
 
 
 
 %%
+
+longIri = allIri(allIri/1000 < 10)/ 1000; 
+short = allIri( allIri<1000 );
+close all;
+figure;
+
+subplot(211)
+hist(longIri, 0:.1:10);
+
+set(gca,'XTick', [0:10], 'XLim', [-.1 10.1]);
+
+subplot(212); hold on;
+hist(short, (0:10:1000))
+
+set(gca,'XTick', 0:100:1000, 'XLim', [-10 1010]);
+
+[F, X] = ksdensity( short, 0:1:1000, 'support', 'positive', 'width', .2);
+line(X,F * 15000,'Color', 'r', 'LineWidth', 1);
+
+
+
+title('Inter Ripple Interval')
+
+
+
+
+%%
+
+
+%%
+% 
+% b = 0 : 0.0025 : 0.25;
+% 
+% 
+% for ep = {'sleep', 'run'}
+%     
+%     ep = char(ep);
+%    
+%     for i = 1:2
+%         hTrip.(ep){i} = histc(tripIri.(ep){i}, b);
+%         hAll.(ep){i} = histc(allIri.(ep){i}, b);
+% 
+%         hTrip.(ep){i} = hTrip.(ep){i}./sum(hTrip.(ep){i});
+%         hAll.(ep){i} = hAll.(ep){i}./sum(hAll.(ep){i});
+%         
+%         hTrip.(ep){i} = smoothn(hTrip.(ep){i}, 2);
+%         hAll.(ep){i} = smoothn(hAll.(ep){i}, 2);
+%     end
+% end
+% 
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%% Inter Ripple Intervals
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 
+%     f = figure('Position', [150 500 900 400]);
+%     ax = [];
+%     ax(1) = subplot(121);
+% 
+%     line(b, hTrip.sleep{1}, 'color', 'b', 'Parent', ax(1), 'linewidth', 2);
+%     line(b, hAll.sleep{1}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2);
+% 
+%     %line(b, hTrip.sleep{2}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2)
+%     
+%     title('Sleep');
+%     legend('Triplets', 'All Ripples');
+% 
+%     ax(2) = subplot(122);
+%     
+%     line(b, hTrip.run{1}, 'color', 'b', 'Parent', ax(2), 'linewidth', 2);
+%     line(b, hAll.run{1}, 'color', 'r', 'Parent', ax(2), 'linewidth', 2);
+% 
+%     title('Run');
+%     legend('Triplets', 'All Ripples');
+%     
+%     
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% %%% Inter Ripple Intervals - JITTERED
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
+% 
+%     f = figure('Position', [250 400 900 400]);
+%     ax = [];
+%     ax(1) = subplot(121);
+% 
+%     line(b, hTrip.sleep{2}, 'color', 'b', 'Parent', ax(1), 'linewidth', 2);
+%     line(b, hAll.sleep{2}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2);
+% 
+%     %line(b, hTrip.sleep{2}, 'color', 'r', 'Parent', ax(1), 'linewidth', 2)
+%     
+%     title('Sleep - Jittered');
+%     legend('Triplets', 'All Ripples');
+% 
+%     ax(2) = subplot(122);
+%     
+%     line(b, hTrip.run{2}, 'color', 'b', 'Parent', ax(2), 'linewidth', 2);
+%     line(b, hAll.run{2}, 'color', 'r', 'Parent', ax(2), 'linewidth', 2);
+% 
+%     title('Run - Jittered');
+%     legend('Triplets', 'All Ripples');
+% 
+%     set(ax,'XLim', [0 .25]);
+
+    %%
 
 b = 0:10:1000;
 figure; 
