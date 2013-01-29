@@ -39,10 +39,17 @@ fDist{2} = hist3([rFreq.S.trig, rFreq.S.ipsi], {freqBins, freqBins});
 fDist{3} = hist3([rFreq.R.trig, rFreq.R.cont], {freqBins, freqBins});
 fDist{4} = hist3([rFreq.S.trig, rFreq.S.cont], {freqBins, freqBins});
 
-r(1) = corr(rFreq.R.trig, rFreq.R.ipsi);
-r(2) = corr(rFreq.S.trig, rFreq.S.ipsi);
-r(3) = corr(rFreq.R.trig, rFreq.R.cont);
-r(4) = corr(rFreq.S.trig, rFreq.S.cont);
+fCorr(1) = corr(rFreq.R.trig, rFreq.R.ipsi);
+fCorr(2) = corr(rFreq.S.trig, rFreq.S.ipsi);
+fCorr(3) = corr(rFreq.R.trig, rFreq.R.cont);
+fCorr(4) = corr(rFreq.S.trig, rFreq.S.cont);
+
+[b{1}, ~, ~, ~, rSq{1}] = regress( rFreq.R.ipsi, [rFreq.R.trig, ones(size(rFreq.R.trig))]);
+[b{2}, ~, ~, ~, rSq{2}] = regress( rFreq.S.ipsi, [rFreq.S.trig, ones(size(rFreq.S.trig))]);
+[b{3}, ~, ~, ~, rSq{3}] = regress( rFreq.R.cont, [rFreq.R.trig, ones(size(rFreq.R.trig))]);
+[b{4}, ~, ~, ~, rSq{4}] = regress( rFreq.S.cont, [rFreq.S.trig, ones(size(rFreq.S.trig))]);
+
+
 
 t = {'Ipsi Run', 'Ipsi Sleep', 'Cont Run', 'Cont Sleep'};
 
@@ -58,9 +65,14 @@ for i = 1:4
     
     img = 1 - repmat( img, [1 1 3] );
     imagesc(freqBins, freqBins, img, 'Parent', ax(i));
-    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, r(i) ), 'FontSize', 14);
+    
+    line(freqBins, freqBins * b{i}(1) + b{i}(2), 'color', 'r', 'parent', ax(i));
+    
+    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, fCorr(i) ), 'FontSize', 14);
     
     imwrite(img, sprintf('/data/bilateral/fig2_img_%d.png', i), 'png');
+    
+    
     
 end
 
@@ -229,10 +241,10 @@ rAmpDist{2} = hist3([rAmp.S.trig, rAmp.S.ipsi], {rAmpBins, rAmpBins});
 rAmpDist{3} = hist3([rAmp.R.trig, rAmp.R.cont], {rAmpBins, rAmpBins});
 rAmpDist{4} = hist3([rAmp.S.trig, rAmp.S.cont], {rAmpBins, rAmpBins});
 
-r(1) = corr(rAmp.R.trig, rAmp.R.ipsi);
-r(2) = corr(rAmp.S.trig, rAmp.S.ipsi);
-r(3) = corr(rAmp.R.trig, rAmp.R.cont);
-r(4) = corr(rAmp.S.trig, rAmp.S.cont);
+fCorr(1) = corr(rAmp.R.trig, rAmp.R.ipsi);
+fCorr(2) = corr(rAmp.S.trig, rAmp.S.ipsi);
+fCorr(3) = corr(rAmp.R.trig, rAmp.R.cont);
+fCorr(4) = corr(rAmp.S.trig, rAmp.S.cont);
 
 t = {'Ipsi Run', 'Ipsi Sleep', 'Cont Run', 'Cont Sleep'};
 
@@ -248,7 +260,7 @@ for i = 1:4
     
     img = 1 - repmat( img, [1 1 3] );
     imagesc(rAmpBins, rAmpBins, img, 'Parent', ax(i));
-    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, r(i) ), 'FontSize', 14);
+    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, fCorr(i) ), 'FontSize', 14);
     
     imwrite(img, sprintf('/data/bilateral/ripAmpDist2_img_%d.png', i), 'png');
     
@@ -278,10 +290,10 @@ swAmpDist{3} = hist3([sAmp.R.trig, sAmp.R.cont], {sAmpBins, sAmpBins});
 swAmpDist{4} = hist3([sAmp.S.trig, sAmp.S.cont], {sAmpBins, sAmpBins});
 
 t = {'Ipsi Run', 'Ipsi Sleep', 'Cont Run', 'Cont Sleep'};
-r(1) = cSAmp.R.ipsi;
-r(2) = cSAmp.S.ipsi;
-r(3) = cSAmp.R.cont;
-r(4) = cSAmp.S.cont;
+fCorr(1) = cSAmp.R.ipsi;
+fCorr(2) = cSAmp.S.ipsi;
+fCorr(3) = cSAmp.R.cont;
+fCorr(4) = cSAmp.S.cont;
 
 for i = 1:4
    
@@ -296,7 +308,7 @@ for i = 1:4
     
     img = 1 - repmat( img, [1 1 3] );
     imagesc(sAmpBins, sAmpBins, img, 'Parent', ax(i));
-    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, r(i) ), 'FontSize', 14);
+    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, fCorr(i) ), 'FontSize', 14);
     
     imwrite(img, sprintf('/data/bilateral/swAmpDist2_img_%d.png', i), 'png');
     
