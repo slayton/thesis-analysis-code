@@ -68,7 +68,7 @@ for i = 1:4
     
     line(freqBins, freqBins * b{i}(1) + b{i}(2), 'color', 'r', 'parent', ax(i));
     
-    title(ax(i),sprintf('%s  R^2:%3.3f',  t{i}, fCorr(i) ), 'FontSize', 14);
+    title(ax(i),sprintf('%s  r:%3.3f R^2:%3.3f',  t{i}, fCorr(i),  rSq{i}(1)), 'FontSize', 14);
     
     imwrite(img, sprintf('/data/bilateral/fig2_img_%d.png', i), 'png');
     

@@ -9,6 +9,9 @@ if ~exist('e', 'var') && nargin==0
 end
 
 runRecon = exp_reconstruct(e,'run', 'structures', {'lCA1', 'rCA1'});
+%%
+
+
 pdf1 = max(runRecon(1).pdf,[],3);
 pdf2 = max(runRecon(2).pdf,[],3);
 

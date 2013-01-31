@@ -21,21 +21,43 @@ fprintf(fid, '4\n');
 fprintf(fid, '%d\t%d\t%d\t%d\n', data(:, 1:4000) );
 fclose(fid);
 
-%% Cluster the small file
+%% Cluster the file file
 
-fileBase = 'small';
+fileBase = 'big';
 cmd = ['~/src/clustering/kk2.0/KlustaKwik ', basePath, fileBase, ' 1'];
 system(cmd);
 
-%%
-clear pts;
+
+%% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%            LOAD the clustered data from DISK
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+clear;
+
+basePath = '/data/clustering/';
+fileBase = 'big';
+
 clId = dlmread([basePath, fileBase, '.clu.1']);
-pts = [clId(1:4000), data(:, 1:4000)'];
-pts = double(pts);
+ 
+amp = importFeatureFile( [basePath, fileBase, '.fet.1']);
 
-nCl = max(clId);
+nClust = clId(1);
 
-b = find( diff(pts(:,1) )) ;
+clId = clId(2:end);
+%%
+close all;
+figure;
+% plot3(amp(:, 1), amp(:, 2), amp(:,3), 'k.', 'markersize', 20);
+
+cmap = colormap('hsv');
+cmap = interp1(1:size(cmap,1), cmap, 1:nClust);
+
+for i = 1:nClust
+   idx = clId == i;
+   line(amp(idx,1), amp(idx,2), amp(idx,4), 'marker','.', 'linestyle', 'none', 'color', cmap(i,:) );
+end
+
+lim = [0 1800];
+set(gca,'XLim', lim, 'YLim', lim, 'Zlim', lim);
 %%
 
 figure('Position', [1000 266 630 800]); 
