@@ -3,13 +3,17 @@ clear;
 
 eList = dset_list_epochs('Run');
 nEpoch = size(eList, 1);
-%%
 
-for i = 1:nEpoch
+[pReal, pShuf, mCorr, mCorrS] = deal( nan(10, 1) );
+
+parfor i = 1:nEpoch
     
     fprintf('\n');
     d = dset_load_all(eList{i,:});
-    [pReal(i), pShuf(i), mCorr(i), mCorrS(i), stats(i)] =...
+%     [pReal(i), pShuf(i), mCorr(i), mCorrS(i), stats(i)] =...
+%         calc_bilateral_run_decoding_stats_single(d);
+%     d = dset_load_all(eList{i,:});
+    [pReal(i), pShuf(i), mCorr(i), mCorrS(i)] =...
         calc_bilateral_run_decoding_stats_single(d);
 
 end

@@ -53,14 +53,28 @@ for a = 1:numel(anat)
     mu.fs = muDt^-1;
 end
 
-mu.ctx = mu.RSC;
+if isfield(mu, 'RSC')
+    mu.ctx = mu.RSC;
+    mu = rmfield(mu, 'RSC');
+end
+
 mu.hpc = mu.rCA1;
-mu = rmfield(mu, 'RSC');
 mu = rmfield(mu, 'rCA1');
 
+if isfield(mu, 'lCA1')
+    mu.hpc = mu.hpc + mu.lCA1;
+    mu = rmfield(mu, 'lCA1');
+end
 
-mu.hpc = smoothn(mu.hpc, standardArgs.smooth_dt, standardArgs.dt) .* mu.fs;
-mu.ctx = smoothn(mu.ctx, standardArgs.smooth_dt, standardArgs.dt) .* mu.fs;
+
+
+if isfield(mu,'hpc')
+    mu.hpc = smoothn(mu.hpc, standardArgs.smooth_dt, standardArgs.dt) .* mu.fs;
+end
+
+if isfield(mu,'ctx')
+    mu.ctx = smoothn(mu.ctx, standardArgs.smooth_dt, standardArgs.dt) .* mu.fs;
+end
 
 end
 
@@ -132,8 +146,9 @@ mu = single(multi_unit);
 function times = get_spike_times(file, thold)
     
     d = dir(file);
-    
     if d.bytes>15*1024^2
+            fprintf('%s\n', file);
+
         f = loadrange(mwlopen(file), fields, epoch_range, 'timestamp');
         warning off;
         ind = f.timestamp<=uint32(t_end*10000) & f.timestamp>=uint32(t_start*10000);

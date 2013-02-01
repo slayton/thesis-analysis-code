@@ -25,7 +25,7 @@ Fs = 1 / ( tbins(2) - tbins(1) );
 triggerTimes = (triggerTimes(:))';
 eventTimes = eventTimes(:);
 
-eventTrigTimeDiff = bsxfun(@minus, triggerTimes, eventTimes);
+eventTrigTimeDiff = bsxfun(@minus, eventTimes,triggerTimes);
 
 
 tbins = [tbins, tbins(end)+tbins(2)-tbins(1)];

@@ -1,11 +1,15 @@
 function stats = generateFigure5_eventCorr(ep)
 %%
+
 clear stats;
 
 eList = dset_list_epochs(ep);
 nEpoch = size(eList,1);
 
-for i = 1:nEpoch
+stats = struct('quantiles', [], 'realCorrQuantiles', [], 'shufCorrQuantiles', [], 'pVal', [], 'eventCorrVals', [], 'eventCorrValsShuf', []);
+stats = repmat(stats, 10, 1);
+
+parfor i = 1:nEpoch
     
     d = dset_load_all( eList{i,:} );
     

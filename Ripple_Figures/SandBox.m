@@ -1,17 +1,22 @@
 clear;
-day = [18, 22, 23, 24];
-ep = [3, 1, 1, 2];
+%{'spl11', 'spl11', 'spl11'}, [15 12 11], [2 1 2];
+base = {'gh-rsc1', 'gh-rsc2', 'spl11'};
+bId = [1 1 1 1 2 2 2 2 2];
+day = [18, 22, 23, 24, 22, 24, 25, 26];
+ep = [3, 1, 1, 2, 3, 3, 3, 3];
 
 C = [];
 H = [];
+hpcIPI = [];
+ctxIPI = [];
 fprintf('\n\n');
 
 for E = 1:4
     
     epoch = sprintf('sleep%d', ep(E));
-    edir = sprintf('/data/gh-rsc1/day%d', day(E));
+    edir = sprintf('/data/%s/day%d', base{bId(E)}, day(E));
     fName = sprintf('MU_HPC_RSC_%s.mat', upper(epoch));
-
+    fprintf('Loading:%s\n', fullfile(edir, fName));
     mu = load( fullfile(edir, fName) );
     mu = mu.mu;
 
@@ -21,7 +26,7 @@ for E = 1:4
 
     fprintf('Loaded %d bursts', nBurst); 
 
-    thold = [.1 ];
+    thold = [.25 ];
     
     if numel(thold)==1
         idx = find( bLen > thold(1) );
@@ -48,81 +53,86 @@ for E = 1:4
        hpcPkIdx = [hpcPkIdx, pk(1)];  %#ok
     end
 
+    isBurstingIdx = seg2binary(muBursts, mu.ts);
+    [~, allPksHPC] = findpeaks(mu.hpc .* isBurstingIdx);
+    hpcIPI = [hpcIPI, diff( mu.ts(allPksHPC) );];
+    
+    [~, allPksCTX] = findpeaks(mu.ctx .* isBurstingIdx);
+    ctxIPI = [ctxIPI, diff( mu.ts(allPksCTX) );];
+    
+    
     win = [-.5 .5];
-    [mHpc, ~, ts] = meanTriggeredSignal(mu.ts(hpcPkIdx), mu.ts, mu.hpc, win);
-    [mCtx, ~, ts] = meanTriggeredSignal(mu.ts(hpcPkIdx), mu.ts, mu.ctx, win);
+    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal(mu.ts(hpcPkIdx), mu.ts, mu.hpc, win);
+    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal(mu.ts(hpcPkIdx), mu.ts, mu.ctx, win);
 
-    C = [C; mCtx];
+    mHpc = mHpc ./ max(mu.hpc(isBurstingIdx));
+    mCtx = mCtx ./ max(mu.ctx(isBurstingIdx));
+    
     H = [H; mHpc];
-
+    C = [C; mCtx];
+    
+   
+    
 end
-%%
-figure;
-h = mean(H);
-c = mean(C);
 
-ax(1) = axes('Position', [.05 .475 .9 .425]);
-ax(2) = axes('Position', [.05 .05 .9 .425]);
-uistack(ax(1),'top');
+
+hpcIPI = hpcIPI(hpcIPI<.5);
+ctxIPI = ctxIPI(ctxIPI<.5);
+[fHPC, xHPC] = ksdensity(hpcIPI, 0:.005:.5);
+[fCTX, xCTX] = ksdensity(ctxIPI, 0:.005:.5);
+
+%%
+figure('Position', [300 500 800 300]);
+h = mean(H,1); h = h - min(h); h = h ./ max(h);
+c = mean(C,1); c = c - min(c); c = c ./ max(c)/3;
+
+ax(1) = axes('Position', [.05 .1 .6 .75]);
+ax(2) = axes('Position', [.7 .1 .25 .75]);
 
 line(ts, h, 'Color', 'r','Parent', ax(1));
-line(ts, c, 'Color', 'b','Parent', ax(2));
+line(ts2, c, 'Color', 'b','Parent', ax(1));
 
-set(ax(1), 'XtickLabel', {});
+line(xHPC, fHPC, 'Color', 'r', 'Parent', ax(2));
+line(xCTX, fCTX, 'Color', 'b', 'Parent', ax(2));
 
-set(ax,'Xlim', [-.5 .5],'YTick', [], 'Xtick', [-.5:.1:.5]);
 
+set(ax(1),'Xlim', [-.5 .5], 'YTick', [], 'Xtick', [-.5:.1:.5])
+set(ax(2),'Xlim', [0 .25]);
 
 title(ax(1), sprintf('Thold %dms - %dms', thold * 1000), 'fontSize', 16);
+%%
 
+clear;
+load /data/gh-rsc1/day18/sleep2.1500hz.mat
+T = ts;
+E = eeg(10,:);
+eeg = E;
 
-% %%
-% [~, ctxPkIdx] = findpeaks(mCtx);
-% dPk = [diff(ts(ctxPkIdx)), 0];
-% % close all;
-% figure('Position', [450 750 800 350]); 
-% 
-% ax1 = subplot(211);
-% [p,l] = error_area_plot(ts, mHpc, 1.96 * sHpc / sqrt( nBurst), 'parent', ax1);
-% set(p, 'FaceColor', 'r', 'EdgeColor', 'none');
-% set(l,'Color', 'k', 'LineWidth', 2);
-% 
-% for i = 1:numel(ctxPkIdx)
-%     if ts(ctxPkIdx(i))<-.1 || ts(ctxPkIdx(i))>.3
-%         continue
-%     end
-%     line( ts(ctxPkIdx(i)) * [1 1], [0 max(mHpc)], 'color', 'k');
-%     if i==numel(ctxPkIdx)
-%         continue;
-%     end
-%     text( mean( ts(ctxPkIdx([i,i+1]))) , max(mHpc) * 1.1, sprintf('%2.0f', 1000 * dPk(i)), 'fontsize', 16);
-% end
-% 
-% title(regexprep(fName, '_', '  '), 'fontsize', 16);
-% 
-% ax2 = subplot(212);
-% [p,l] = error_area_plot(ts, mCtx, 1.96 * sCtx / sqrt( nBurst), 'parent', ax2);
-% set(p, 'FaceColor', 'b', 'EdgeColor', 'none');
-% set(l,'Color', 'k', 'LineWidth', 2);
-% 
-% title(sprintf('thold:%2.0fms', thold*1000), 'fontsize', 16);
-% 
-% set( get(gcf,'Children'), 'XLim', win);
-% %%
-% 
-% 
-%    
-% 
-% 
-% 
-% %%
-% idx = seg2binary(muBursts, mu.ts);
-% line_browser(mu.ts, mu.hpc, 'color', 'k');
-% line_browser(mu.ts, mu.hpc.*idx, 'color', 'r', 'parent', gca');
-% 
-% 
-% %%
-% [xc, l] = xcorr(mu.hpc .* idx, mu.ctx.*idx, 200);
-% 
-% close all;
-% plot(l*5, xc);
+%%
+
+clear;
+load /data/gh-rsc1/day18/sleep3.1500hz.mat
+T = ts;
+E = eeg(10,:);
+eeg = E;
+
+Fs = 1500;
+X = double(E);
+
+%%
+
+clear;
+load /data/gh-rsc1/day18/sleep4.1500hz.mat
+T = ts;
+E = eeg(10,:);
+eeg = E;
+
+badIdx = isnan(E);
+T = T(~badIdx);
+E = E(~badIdx);
+
+Fs = 1500;
+X = double(E);
+
+%%
+

@@ -1,5 +1,6 @@
-function [corrHigh,  corrLow,  stats] = dset_compare_bilateral_pdf_by_n_mu_spike(d, r, PLOT)
-
+function [corrHigh,  corrLow,  stats] = dset_compare_bilateral_pdf_by_n_mu_spike(d, r1, r2, PLOT)
+r = r1;
+r(2) = r2;
 %%
 
 if nargin==2
