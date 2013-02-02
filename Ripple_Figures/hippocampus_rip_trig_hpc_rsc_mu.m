@@ -1,4 +1,4 @@
-clear;
+% clear;
 %{'spl11', 'spl11', 'spl11'}, [15 12 11], [2 1 2];
 base = {'gh-rsc1', 'gh-rsc2', 'spl11'};
 bId = [1 1 1 1 2 2 2 2];
@@ -10,7 +10,7 @@ win = [-.5 .5];
 [hpcRateAll, ctxRateAll] = deal([]);
 
 fprintf('\n\n');
-
+eventSetThold = [.5 .25 .15];
 for E = 1:8
     
     % LOAD THE DATA
@@ -26,47 +26,16 @@ for E = 1:8
     eeg = load( fullfile(edir, fName) );
     eeg = eeg.hpc;
     
-    % DETECT SWS, Ripples, and MU-Bursts
+    % DETECT SWS, Ripples
     [sws, ripTs] = classify_sleep(eeg.ripple, eeg.rippleEnv, eeg.ts);
-    muBursts = find_mua_bursts(mu);
-    nBurst = size(muBursts,1);
 
-    fprintf('Loaded %d MU-Bursts', nBurst); 
+    [tripIdx, singIdx] = filter_event_sets(ripTs, 2, eventSetThold);
+    tripTs = ripTs(tripIdx); 
+    singTs = ripTs(singIdx);
+    fprintf('Ripples detected: %d  Sets: %d\n', numel(ripTs), numel(tripIdx));
     
-    % Filter MU-Bursts
-    thold = .15;
-    burstLen = diff(muBursts, [], 2);
-    burstLenIdx = burstLen > thold;
-    
-    muBursts = muBursts(burstLenIdx,:);
-    nBurst = size(muBursts,1);
-    fprintf(', keeping %d\n', nBurst);
-
-    % Classify burst by SWS state
-    swsIdx = inseg(sws, muBursts, 'partial');
-
-    muPkIdx = [];
-
-    for i = 1:nBurst
-        
-       b = muBursts(i,:);
-
-       startIdx = find( b(1) == mu.ts, 1, 'first');
-
-       r = mu.hpc( mu.ts>=b(1) & mu.ts <= b(2) );
-
-       [~, pk] = findpeaks(r); % <------- FIRST LOCAL MAX
-%        [~, pk] = max(r);   % <------ GLOBAL MAX
-       
-       pk = pk + startIdx -1;
-       muPkIdx = [muPkIdx, pk(1)];  %#ok
-       
-    end
-    
-    
-    
-    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal( mu.ts( muPkIdx( swsIdx) ), mu.ts, mu.hpc, win);
-    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal( mu.ts( muPkIdx( swsIdx) ), mu.ts, mu.ctx, win);
+    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal( singTs, mu.ts, mu.hpc, win);
+    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal( singTs, mu.ts, mu.ctx, win);
      
     hpcRateAll = [hpcRateAll; mHpc];
     ctxRateAll = [ctxRateAll; mCtx];   

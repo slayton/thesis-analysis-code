@@ -11,7 +11,7 @@ win = [-.5 .5];
 
 fprintf('\n\n');
 
-for E = 1:8
+for E = 1%:8
     
     % LOAD THE DATA
     epoch = sprintf('sleep%d', ep(E));
@@ -29,12 +29,15 @@ for E = 1:8
     % DETECT SWS, Ripples, and MU-Bursts
     [sws, ripTs] = classify_sleep(eeg.ripple, eeg.rippleEnv, eeg.ts);
     muBursts = find_mua_bursts(mu);
+    cFrames = find_ctx_frames(mu);
     nBurst = size(muBursts,1);
 
+    muBursts = seg_and(muBursts, cFrames);
     fprintf('Loaded %d MU-Bursts', nBurst); 
     
+    
     % Filter MU-Bursts
-    thold = .15;
+    thold = .1;
     burstLen = diff(muBursts, [], 2);
     burstLenIdx = burstLen > thold;
     
@@ -55,8 +58,8 @@ for E = 1:8
 
        r = mu.hpc( mu.ts>=b(1) & mu.ts <= b(2) );
 
-       [~, pk] = findpeaks(r); % <------- FIRST LOCAL MAX
-%        [~, pk] = max(r);   % <------ GLOBAL MAX
+      [~, pk] = findpeaks(r); % <------- FIRST LOCAL MAX
+%       [~, pk] = max(r);   % <------ GLOBAL MAX
        
        pk = pk + startIdx -1;
        muPkIdx = [muPkIdx, pk(1)];  %#ok

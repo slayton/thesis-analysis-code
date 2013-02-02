@@ -9,7 +9,7 @@ function status = debuffer_eeg_file( eegfile, dest_file, varargin )
 %  pairs:
 %    epoch - 2 element vector specifying the start and end times of the
 %            epoch to process
-%    fs - new sampling rate of unbuffered eeg (default = min(2000,current
+%    fs - new sampling rate of unbuffered eeg (default = min(600,current
 %         rate))
 %
 %  status=DEBUFFER_EEG_FILE(...) returns structure with information
@@ -51,11 +51,7 @@ nsamples = get(f, 'nsamples');
   
 %find sampling rate and number of channels in header of file
 h = get(f, 'header');
-try
-    rate = str2num(getFirstParam(h,'rate')); %#ok
-catch
-    rate = 16000;
-end
+rate = str2num(getFirstParam(h,'rate')); %#ok
 nchan = str2num(getFirstParam(h,'nchannels')); %#ok
 samp_freq_orig = rate / nchan;
 
@@ -131,29 +127,18 @@ nf = closeHeader(nf);
     
 %calculate number of buffers to process
 nbuffers = diff(idx)+1;
-if nbuffers > 1e6
-    nloadbuffer = 32000;
-else
-    nloadbuffer = 500; %number of buffers to load each time
-end
-%compute number of complete loops to make
 
+%compute number of complete loops to make
+nloadbuffer = 5000; %number of buffers to load each time
 nloops = fix(nbuffers / nloadbuffer);
     
 gaps = [];
 
 status.buffers = idx;
 
-
 %process the data block-wise to prevent memory overflow
-if idx(2) > 5e5
-    idx(1) = 1e4;
-end
-
-fprintf('\n');
-for l = 1:(nloops-1)
+for l = 1:(nloops+1)
       
-  fprintf('\r%d of %d', l, nloops);
   %correctly deal with edge cases
   if l==(nloops+1) %last loop
     if nloops == nbuffers / nloadbuffer
@@ -196,18 +181,15 @@ for l = 1:(nloops-1)
   %length of filter is at least 30 cycles of highest remaining
   %frequency at original sampling frequency
   b = resample_filter( samp_freq_orig, Fs_new );
-  tmpData = double( reshape(data.data, nchan, nsamples*(buffers_loaded + start_ext + end_ext))' );
-  fprintf('\tbuffer size:%d %d', size(tmpData));
-  tmp_data = filtfilt( b, 1,  tmpData);
+  tmp_data = filtfilt( b, 1, double( reshape(data.data, nchan, nsamples*(buffers_loaded + start_ext + end_ext))' ) );
       
   %find indices
   Tidx = find( T>=data.timestamp(nsamples*start_ext+1) & T<=data.timestamp(end));
   %interpolate data
-  warning off;
-  D(Tidx,:) = int16( interp1( data.timestamp(3:end), tmp_data(3:end,:), T(Tidx), 'linear' ) );
-  warning on;
+  D(Tidx,:) = int16( interp1( data.timestamp, tmp_data, T(Tidx), 'linear' ) );
+      
 end
-fprintf('Done!\n');
+
 %save the new data
 nf = appendData(nf, cat(2,{T},mat2cell( D, size(D,1), ones(1,nchan)))); %#ok
     

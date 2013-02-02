@@ -1,21 +1,23 @@
-function [bursts] = find_mua_bursts(mu, varargin)
+function [bursts] = find_ctx_frames(mu, varargin)
 %DSET_FIND_MUA_BURSTS - finds burts in the multiunit activity
 
 args = dset_get_standard_args;
-args = args.mua_burst;
-args.fld = 'hpc';
 
-args = parseArgs(varargin, args)
+args.high_threshold = .5;
+args.low_threshold = .25;
+args.fld = 'ctx';
+
+args = parseArgs(varargin, args);
 
 
 args.velocity_threshold = 5;
 % if no position struct is specified then assume the animal is always stopped
 % or if the user specifies to not filter on velocity
-if isempty(args.pos_struct) || args.filter_on_velocity == 0
+% if isempty(args.pos_struct) || args.filter_on_velocity == 0
     vel = 0.*mu.ts;%isStopped = true(size(mu.ts));
-else
-    vel = interp1(args.pos_struct.ts, args.pos_struct.smooth_vel, mu.ts, 'nearest');
-end
+% else
+%     vel = interp1(args.pos_struct.ts, args.pos_struct.smooth_vel, mu.ts, 'nearest');
+% end
 
 isStopped = abs( vel ) < args.velocity_threshold;
 
@@ -36,6 +38,6 @@ low_seg =  logical2seg(mu.ts, mu.(args.fld) >= lowThreshold);
 
 bursts = low_seg(logical(n), :);
 
-bursts = bursts(diff(bursts,1,2)>args.min_burst_len, :);
+% bursts = bursts(diff(bursts,1,2)>args.min_burst_len, :);
 
 end
