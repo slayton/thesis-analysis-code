@@ -1,10 +1,10 @@
-function [bursts] = find_ctx_frames(mu, varargin)
+function [frames] = find_ctx_frames(mu, varargin)
 %DSET_FIND_MUA_BURSTS - finds burts in the multiunit activity
 
 args = dset_get_standard_args;
 
-args.high_threshold = .5;
-args.low_threshold = .25;
+args.thold_sd = .15;
+args.thold_mn = 0;
 args.fld = 'ctx';
 
 args = parseArgs(varargin, args);
@@ -21,22 +21,17 @@ args.velocity_threshold = 5;
 
 isStopped = abs( vel ) < args.velocity_threshold;
 
-fprintf('Excluding %d of %d samples during movement\n', nnz(~isStopped), numel(isStopped));
-meanMuRate = nanmean( mu.(args.fld)(isStopped) );
+% fprintf('Excluding %d of %d samples during movement\n', nnz(~isStopped), numel(isStopped));
 stdMuRate = nanstd( mu.(args.fld)(isStopped) );
-
+meanMuRate = nanmean( mu.(args.fld));
 
 mu.(args.fld)(~isStopped) = 0;
 
-highThreshold = meanMuRate + stdMuRate * args.high_threshold;
-lowThreshold = meanMuRate + stdMuRate * args.low_threshold;
+thold =  meanMuRate * args.thold_mn + stdMuRate * args.thold_sd;
 
-high_seg = logical2seg(mu.ts, mu.(args.fld) >= highThreshold);
-low_seg =  logical2seg(mu.ts, mu.(args.fld) >= lowThreshold);
+frames = logical2seg(mu.ts, mu.(args.fld) >= thold);
 
-[~, n] = inseg(low_seg, high_seg);
 
-bursts = low_seg(logical(n), :);
 
 % bursts = bursts(diff(bursts,1,2)>args.min_burst_len, :);
 

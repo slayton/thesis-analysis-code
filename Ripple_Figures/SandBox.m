@@ -10,68 +10,64 @@ win = [-.5 .5];
 [hpcRateAll, ctxRateAll] = deal([]);
 
 fprintf('\n\n');
-
 for E = 1:8
-    
+
     % LOAD THE DATA
     epoch = sprintf('sleep%d', ep(E));
     edir = sprintf('/data/%s/day%d', base{bId(E)}, day(E));
     fName = sprintf('MU_HPC_RSC_%s.mat', upper(epoch));
-    fprintf('Loading:%s\n', fullfile(edir, fName));
+    fprintf('Loading:%s\t', fullfile(edir, fName));
     mu = load( fullfile(edir, fName) );
     mu = mu.mu;
-    
+
     fName = sprintf('EEG_HPC_1500_%s.mat', epoch);
-    fprintf('Loading:%s\n', fullfile(edir, fName));
+    fprintf(', %s\n', fullfile(edir, fName));
     eeg = load( fullfile(edir, fName) );
     eeg = eeg.hpc;
-    
+
     % DETECT SWS, Ripples, and MU-Bursts
     [sws, ripTs] = classify_sleep(eeg.ripple, eeg.rippleEnv, eeg.ts);
     muBursts = find_mua_bursts(mu);
+    cFrames = find_ctx_frames(mu);
+    %  cFrames = cFrames( diff(cFrames,[],2) < 1 , : );
     nBurst = size(muBursts,1);
+    events = seg_and(sws, seg_and( cFrames, muBursts));
 
-    fprintf('Loaded %d MU-Bursts', nBurst); 
-    
-    % Filter MU-Bursts
-    thold = .15;
-    burstLen = diff(muBursts, [], 2);
-    burstLenIdx = burstLen > thold;
-    
-    muBursts = muBursts(burstLenIdx,:);
-    nBurst = size(muBursts,1);
-    fprintf(', keeping %d\n', nBurst);
+    minLen = .1;
 
-    % Classify burst by SWS state
-    swsIdx = inseg(sws, muBursts, 'partial');
+    events = events( diff( events,[],2 )>= minLen, : );
+
+    nEvent = size(events,1);
+
+    fprintf('Found %d events\n', nEvent);
+    if nEvent < 5
+        continue;
+    end
 
     muPkIdx = [];
+    for i = 1:nEvent
 
-    for i = 1:nBurst
-        
-       b = muBursts(i,:);
+       e = events(i,:);
 
-       startIdx = find( b(1) == mu.ts, 1, 'first');
+       startIdx = find( e(1) == mu.ts, 1, 'first');
 
-       r = mu.hpc( mu.ts>=b(1) & mu.ts <= b(2) );
+       r = mu.hpc( mu.ts>=e(1) & mu.ts <= e(2) );
+       r = mu.hpc( mu.ts>=e(1) & mu.ts <= e(2) );
 
-       [~, pk] = findpeaks(r); % <------- FIRST LOCAL MAX
-%        [~, pk] = max(r);   % <------ GLOBAL MAX
-       
+       [~, pk] = findpeaks(r); 
+
        pk = pk + startIdx -1;
        muPkIdx = [muPkIdx, pk(1)];  %#ok
-       
+
     end
-    
-    
-    
-    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal( mu.ts( muPkIdx( swsIdx) ), mu.ts, mu.hpc, win);
-    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal( mu.ts( muPkIdx( swsIdx) ), mu.ts, mu.ctx, win);
-     
+
+    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal( mu.ts( muPkIdx ), mu.ts, mu.hpc, win);
+    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal( mu.ts( muPkIdx ), mu.ts, mu.ctx, win);
+
     hpcRateAll = [hpcRateAll; mHpc];
     ctxRateAll = [ctxRateAll; mCtx];   
-         
-end
+end         
+
 %%
 figure('Position', [300 500 800 300]);
 ax(1) = axes('Position', [.1 .1 .8 .85]);

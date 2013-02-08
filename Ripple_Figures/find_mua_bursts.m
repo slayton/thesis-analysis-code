@@ -5,7 +5,7 @@ args = dset_get_standard_args;
 args = args.mua_burst;
 args.fld = 'hpc';
 
-args = parseArgs(varargin, args)
+args = parseArgs(varargin, args);
 
 
 args.velocity_threshold = 5;
@@ -19,7 +19,7 @@ end
 
 isStopped = abs( vel ) < args.velocity_threshold;
 
-fprintf('Excluding %d of %d samples during movement\n', nnz(~isStopped), numel(isStopped));
+% fprintf('Excluding %d of %d samples during movement\n', nnz(~isStopped), numel(isStopped));
 meanMuRate = nanmean( mu.(args.fld)(isStopped) );
 stdMuRate = nanstd( mu.(args.fld)(isStopped) );
 

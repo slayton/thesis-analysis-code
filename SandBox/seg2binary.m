@@ -1,5 +1,10 @@
 function v = seg2binary(seg, ts)
 
+segLen = diff(seg,[],2);
+
+badSeg = segLen == 0;
+seg = seg(~badSeg,:);
+
 ts = (ts(:))';
 v = 0 * ts;
 seg = interp1(ts, 1:numel(ts), seg,'nearest');
