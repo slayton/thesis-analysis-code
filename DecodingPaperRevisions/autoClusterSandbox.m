@@ -1,10 +1,54 @@
 %% Load the data
 clear
-fid = mwlopen('/data/examples/s11d15.t08.f.pxyabw');
+velThold = .05;
+ampThold = 125;
+baseDir = '/data/examples';
+baseFile = '/s11d15.t08';
+epoch = 'run';
 
-d = load(fid);
+[en et] = load_epochs(baseDir);
+et = et(strcmp( en, epoch),:);
+
+pxyFile = sprintf('%s/%s.pxyabw', baseDir, baseFile);
+ttFile =  sprintf('%s/%s.tt', baseDir, baseFile);
+posFile = sprintf('%s/run.lin_pos.p', baseDir);
+
+pxyFid = mwlopen(pxyFile);
+ttFid = mwlopen(ttFile);
+posFid = mwlopen(posFile);
+
+ttHead = loadheader(ttFile);
+probe = getFirstParam(ttHead,'Probe');
+
+if probe==0
+    gains = [...
+        str2double( getFirstParam(ttHead,'channel 0 ampgain')); ...
+        str2double( getFirstParam(ttHead,'channel 1 ampgain')); ...
+        str2double( getFirstParam(ttHead,'channel 2 ampgain')); ...
+        str2double( getFirstParam(ttHead,'channel 3 ampgain'))];
+             
+else
+    gains = [...
+        str2double( getFirstParam(ttHead,'channel 4 ampgain')); ...
+        str2double( getFirstParam(ttHead,'channel 5 ampgain')); ...
+        str2double( getFirstParam(ttHead,'channel 6 ampgain')); ...
+        str2double( getFirstParam(ttHead,'channel 7 ampgain'))];
+end
+
+d = load(pxyFid);
 data = [d.t_px; d.t_py; d.t_pa; d.t_pb];
-data = [data, [0;0;0;0]];
+
+p = load(posFid);
+spikeVel = abs( interp1(p.timestamp, p.lv, d.time, 'nearest') );
+
+epochIdx = d.time >= et(1) & d.time(2) <=et(2);
+movingIdx = spikeVel >= .05;
+ampIdx = min(data) >= ampThold;
+
+idx = epochIdx & movingIdx & ampIdx;
+
+data = data(:,idx);
+
 
 %% Save a complete file
 basePath = '/data/clustering/';
@@ -48,8 +92,8 @@ close all;
 figure;
 % plot3(amp(:, 1), amp(:, 2), amp(:,3), 'k.', 'markersize', 20);
 
-cmap = colormap('hsv');
-cmap = interp1(1:size(cmap,1), cmap, 1:nClust);
+cmap = colormap('jet');
+cmap = interp1(1:size(cmap,1), cmap, linspace(1, size(cmap,1), nClust), 'nearest');
 
 for i = 1:nClust
    idx = clId == i;
