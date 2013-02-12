@@ -1,9 +1,6 @@
 function [meanCount, ts, counts] = ...
     meanTriggeredEvent(triggerTimes, eventTimes, tbins)
 
-nBoot = 500;
-
-
 if ~isvector(eventTimes) || isscalar(eventTimes)
     error('Event times must be a vector');
 end 

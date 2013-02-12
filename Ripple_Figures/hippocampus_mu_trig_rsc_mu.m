@@ -5,12 +5,10 @@ bId = [1 1 1 1 2 2 2 2];
 day = [18, 22, 23, 24, 22, 24, 25, 26];
 ep = [3, 1, 1, 2, 3, 3, 3, 3];
 
-thold = .250;
-win = [-.25 .5];
 
-[hpcRateAll, ctxRateAll] = deal([]);
-
-fprintf('\n\n');
+fprintf('\nLOADING THE RAW DATA\n');
+mu = {};
+eeg = {};
 
 for E = 1:8
     
@@ -18,30 +16,52 @@ for E = 1:8
     epoch = sprintf('sleep%d', ep(E));
     edir = sprintf('/data/%s/day%d', base{bId(E)}, day(E));
     fName = sprintf('MU_HPC_RSC_%s.mat', upper(epoch));
-    fprintf('Loading\t:%s', fullfile(edir, fName));
-    mu = load( fullfile(edir, fName) );
-    mu = mu.mu;
+    fprintf('Loading: %s', fName );
+    tmp = load( fullfile(edir, fName) );
+    mu{E} = tmp.mu;
     
     fName = sprintf('EEG_HPC_1500_%s.mat', epoch);
-    fprintf('\t%s\n', fullfile(edir, fName));
-    eeg = load( fullfile(edir, fName) );
-    eeg = eeg.hpc;
+    fprintf(', %s\n', fName );
+    tmp = load( fullfile(edir, fName) );
+    eeg{E} = tmp.hpc;
+end
+
+fprintf('---------------DATA LOADED!---------------\n');
+%%
+
+clearvars -except mu eeg
+
+thold = [.25 .5];
+win = [-.25 .5];
+
+hpcRateAll = [];
+ctxRateAll = [];
+fprintf('\n');
+
+for E = 1:numel(mu)  
     
     % DETECT SWS, Ripples, and MU-Bursts
-    [sws, ripTs] = classify_sleep(eeg.ripple, eeg.rippleEnv, eeg.ts);
-    muBursts = find_mua_bursts(mu);
-    cFrames = find_ctx_frames(mu);
+    [sws, ripTs] = classify_sleep(eeg{E}.ripple, eeg{E}.rippleEnv, eeg{E}.ts);
+    muBursts = find_mua_bursts(mu{E});
+    cFrames = find_ctx_frames(mu{E});
     nBurst = size(muBursts,1);
 
-    muBursts = seg_and(muBursts, cFrames);
-    fprintf('Loaded %d MU-Bursts', nBurst); 
+    b = inseg(cFrames, muBursts, 'partial');
+    muBursts = muBursts(b,:);
+    
+%     muBursts = seg_and(muBursts, cFrames);
+    fprintf('Of %d MU-Bursts', nBurst); 
     
     
     % Filter MU-Bursts
     burstLen = diff(muBursts, [], 2);
-    burstLenIdx = burstLen > thold;
+    
+%     burstLenIdx = burstLen > thold;
+    burstLenIdx = tholdFn(thold, burstLen);
     
     muBursts = muBursts(burstLenIdx,:);
+    
+    
     nBurst = size(muBursts,1);
     fprintf(', keeping %d\n', nBurst);
     if nBurst < 2
@@ -49,7 +69,7 @@ for E = 1:8
     end
 
     % Classify burst by SWS state
-%     swsIdx = inseg(sws, muBursts, 'partial');
+    swsIdx = inseg(sws, muBursts, 'partial');
 
     muPkIdx = [];
 
@@ -57,12 +77,11 @@ for E = 1:8
         
        b = muBursts(i,:);
 
-       startIdx = find( b(1) == mu.ts, 1, 'first');
+       startIdx = find( b(1) == mu{E}.ts, 1, 'first');
 
-       r = mu.hpc( mu.ts>=b(1) & mu.ts <= b(2) );
+       r = mu{E}.hpc( mu{E}.ts>=b(1) & mu{E}.ts <= b(2) );
 
        [~, pk] = findpeaks(r); % <------- FIRST LOCAL MAX
-%       [~, pk] = max(r);   % <------ GLOBAL MAX
        
        if numel(pk)<1
            continue
@@ -70,47 +89,37 @@ for E = 1:8
        pk = pk + startIdx -1;
        muPkIdx = [muPkIdx, pk(1)];  %#ok
        
-    end
+    end    
     
-    
-    
-    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal( mu.ts( muPkIdx ), mu.ts, mu.hpc, win);
-    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal( mu.ts( muPkIdx ), mu.ts, mu.ctx, win);
+    [mHpc, ~, ts, sampHpc] = meanTriggeredSignal( mu{E}.ts( muPkIdx ), mu{E}.ts, mu{E}.hpc, win);
+    [mCtx, ~, ts2, sampCtx]= meanTriggeredSignal( mu{E}.ts( muPkIdx ), mu{E}.ts, mu{E}.ctx, win);
      
     hpcRateAll = [hpcRateAll; mHpc];
     ctxRateAll = [ctxRateAll; mCtx];   
          
 end
 
-
+fprintf('\n\t\t\tDONE!\n');
+beep;
 %%
-figure('Position', [300 500 800 300]);
-ax(1) = axes('Position', [.1 .15 .8 .75]);
-ax(2) = axes('Position', [.1 .15 .8 .75], 'color', 'none','yaxislocation', 'right');
 
-xlabel(ax(1),'Time(ms)');
-ylabel(ax(1), 'HPC Rate(Hz)');
-ylabel(ax(2), 'RSC Rate(Hz)');
+close all;
+[l, f, ax] = plotAverages(ts, mean(hpcRateAll), ts2, mean(ctxRateAll) );
 
-yTmp = minmax( mean(hpcRateAll) );
-line([0 0], yTmp,  'color', [.7 .7 .7], 'linestyle', '--', 'parent', ax(1));
-line(thold * [1000 1000], yTmp,  'color', [.7 .7 .7], 'linestyle', '--', 'parent', ax(1));
+legend(l, {'Hippocampus', 'Retrosplenial'});
+set(f,'Position', [300 500 800 300]);
+set(ax,'Position', [.1 .15 .8 .75]);
 
-
-l(1) = line(ts*1000, mean(hpcRateAll,1), 'Color', 'r','Parent', ax(1));
-l(2) = line(ts2*1000, mean(ctxRateAll,1), 'Color', 'b','Parent', ax(2));
+if numel(thold)==2
+   title( ax, sprintf('Event Dur: %d to %dms', thold * 1000), 'fontSize', 16); 
+else
+   title( ax, sprintf('Event Dur: %d to Inf', thold * 1000), 'fontSize', 16); 
+end
 
 
-legend(l(1:2), {'HPC', 'RSC'});
-
-% line(xHPC, fHPC, 'Color', 'r', 'Parent', ax(2));
-% line(xCTX, fCTX, 'Color', 'b', 'Parent', ax(2));
+fName = sprintf('/data/HPC_RSC/%s_%d_%d_2.svg', 'hippocampus_trig_mean_mu', thold(1)*1000, thold(2)*1000);
+plot2svg(fName, f);
 
 
-set(ax,'Xlim', win*1000, 'Xtick', [-250:250:500])
 
-% set(ax(2),'Xlim', [0 .25]);
-
-title(ax(1), sprintf('Thold %dms', thold * 1000), 'fontSize', 16);
-%%
 

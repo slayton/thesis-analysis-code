@@ -3,6 +3,7 @@ function [bursts] = find_mua_bursts(mu, varargin)
 
 args = dset_get_standard_args;
 args = args.mua_burst;
+args.high_threshold = 3;
 args.fld = 'hpc';
 
 args = parseArgs(varargin, args);

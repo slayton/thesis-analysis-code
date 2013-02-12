@@ -5,6 +5,9 @@ function [meanWave, stdWave,  sampTs, waveSamples, sampIdx] = ...
 % or
 % provide trigger times, timestamps, signal
 
+if isempty(triggerTimes)
+    error('No trigger times provided');
+end
 if nargin<1
     error('Must provide atleast 2 arguments');
 end
