@@ -40,7 +40,7 @@ end
 widths = {};
 
 for i=1:numel(tt_list)
-    disp(['Loading Amplitude data from tetrode:', tt_list{i}]);
+%     disp(['Loading Amplitude data from tetrode:', tt_list{i}]);
     
     file = fullfile(exp.edir, tt_list{i}, [tt_list{i}, '.tt']);
     [spikes widths] = load_spike_parameters(file, 'idx',[],'time_range', exp.(epoch).et);

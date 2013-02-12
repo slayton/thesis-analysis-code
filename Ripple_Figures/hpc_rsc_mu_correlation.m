@@ -5,7 +5,7 @@ bId = [1 1 1 1 2 2 2 2];
 day = [18, 22, 23, 24, 22, 24, 25, 26];
 ep = [3, 1, 1, 2, 3, 3, 3, 3];
 
-thold = .2;
+thold = .1;
 win = [-.25 .5];
 
 [hpcRateHC, hpcRateLC] = deal([]);
@@ -117,6 +117,9 @@ set(p, 'FaceAlpha', .2);
 set(l,'LineStyle', 'none');
 set(p(1),'FaceColor', 'r');
 set(p(2),'FaceColor', 'b');
+
+set(gca,'XLim', [-.25 .5]);
+legend(p, {'High Corr', 'Low Corr'});
 %%
 % close all;
 % figure;

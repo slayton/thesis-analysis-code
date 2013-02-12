@@ -8,16 +8,20 @@ if nargin==32673
     day = 21;
 end
 
-outBaseDir = sprintf('~/gilbert/01%02d13', day);
-inBaseDir = sprintf('/data/gh-rsc2/day%02d', day);
+% user = 'rsx';
+% ip = '10.121.43.163';
+% outBaseDir = sprintf('~/gilbertz/01%02d13', day);
+
+user = 'greghale';
+ip = '10.121.43.47';
+outBaseDir = sprintf('~/Data/caillou/11%02d12', day);
+
+inBaseDir = sprintf('/data/gh-rsc1/day%02d', day);
 
 if ~exist(inBaseDir,'dir')
     mkdir(inBaseDir);
 end
 
-
-user = 'rsx';
-ip = '10.121.43.163';
 
 cmd = sprintf('scp -r %s@%s:"', user, ip);
 for i = 1:30;
@@ -41,4 +45,5 @@ cmd = [cmd, fullfile(outBaseDir,'epoch.init')];
 cmd = [cmd,'" ' inBaseDir];
 fprintf('Executing command:\n%s\n', cmd);
 system(cmd);
+
 end

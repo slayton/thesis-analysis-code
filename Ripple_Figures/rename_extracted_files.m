@@ -6,7 +6,7 @@ elseif nargin==32673
     day = '21';
 end
 
-baseDir = ['/data/gh-rsc2/day', day];
+baseDir = ['/data/gh-rsc1/day', day];
 
 
 D = dir(fullfile(baseDir, ['*',day]));

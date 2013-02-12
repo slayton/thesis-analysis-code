@@ -33,9 +33,17 @@ end
 
 debuf_eeg(animal, day)
 % gh-rsc1
-dayList =[18 22 23 24];
-eegList = 'kkkk';
-chList = [7  7  7  7];
+dayList =[18 22 23 24 28];
+eegList = 'kkkkk';
+chList = [7  7  7  7  7];
+
+if ~any(day == dayList)
+    error('Invalid day specified');
+end
+
+if numel(dayList) ~= numel(eegList) || numel(dayList) ~= numel(chList)
+    error('Invalid day,eeg,ch specified');
+end
 
 % gh-rsc2
 % dayList =[22 24 25 26];
