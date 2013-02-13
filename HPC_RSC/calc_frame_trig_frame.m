@@ -61,6 +61,8 @@ legend(l, {'HPC Start - RSC Trig', 'RSC Start - HPC Trig'}, 'location', 'southea
 set(f,'Position', [300 400 800 300]);
 set(ax,'Position', [.1 .15 .8 .75]);
 
+plot2svg('/data/HPC_RSC/frame_start_trig_frame_starts.svg',gcf);
+
 [l, f, ax] = plotAverages(ts2, nanmean(hpcMuRate), ts2, nanmean(ctxMuRate));
 set(ax,'FontSize', 14);
 
@@ -69,11 +71,15 @@ legend(l, {'HPC Rate - RSC Trig', 'RSC Rate - HPC Trig'});
 set(f,'Position', [350 350 800 300]);
 set(ax,'Position', [.1 .15 .8 .75]);
 
-[l, f, ax] = plotAverages(ts3, nanmean(hpcEvent), ts3, nanmean(ctxEvent));
+plot2svg('/data/HPC_RSC/frame_start_trig_mu_rate.svg',gcf);
+
+[l, f, ax] = plotAverages(ts3, smoothn(nanmean(hpcEvent), 1.5, 'correct', 1), ts3, smoothn(nanmean(ctxEvent), 1.5, 'correct', 1));
 set(ax,'FontSize', 14);
 
 title('Mean Frame State Trig on Complementary Frame Start');
 legend(l, {'HPC Frame - RSC Trig', 'RSC Frame - HPC Trig'}, 'Location', 'southeast');
 set(f,'Position', [400 300 800 300]);
 set(ax,'Position', [.1 .15 .8 .75]);
+plot2svg('/data/HPC_RSC/frame_start_trig_binary_event.svg',gcf);
+
 

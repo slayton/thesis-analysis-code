@@ -51,21 +51,21 @@ title(ax(2), 'Ripple Triggered CTX MU Rate');
 
 
 set(ax,'XLim', win);
-
-
-figure('Position', [150 210 560 420]);
-ax(1) = subplot(211);
-ax(2) = subplot(212);
-set(ax,'FontSize', 14);
-
-line(ts, mean(hpcTrip) ./ max( mean(hpcTrip)), 'color', 'r', 'Parent', ax(1));
-line(ts, mean(ctxTrip) ./ max( mean(ctxTrip)), 'color', 'k', 'Parent', ax(1));
-title(ax(1),'Ripple-Set Triggered MU Rate');
-legend(ax(1), 'HPC', 'CTX');
-
-line(ts, mean(hpcSolo) ./ max( mean(hpcSolo)) , 'color', 'r', 'Parent', ax(2));
-line(ts, mean(ctxSolo) ./ max( mean(ctxSolo)) , 'color', 'k', 'Parent', ax(2));
-title(ax(2),'Solo-Ripple Triggered MU Rate');
-
-
-set(ax,'XLim', win);
+plot2svg('/data/HPC_RSC/ripple_triggered_mu_rate.svg',gcf);
+% 
+% figure('Position', [150 210 560 420]);
+% ax(1) = subplot(211);
+% ax(2) = subplot(212);
+% set(ax,'FontSize', 14);
+% 
+% line(ts, mean(hpcTrip) ./ max( mean(hpcTrip)), 'color', 'r', 'Parent', ax(1));
+% line(ts, mean(ctxTrip) ./ max( mean(ctxTrip)), 'color', 'k', 'Parent', ax(1));
+% title(ax(1),'Ripple-Set Triggered MU Rate');
+% legend(ax(1), 'HPC', 'CTX');
+% 
+% line(ts, mean(hpcSolo) ./ max( mean(hpcSolo)) , 'color', 'r', 'Parent', ax(2));
+% line(ts, mean(ctxSolo) ./ max( mean(ctxSolo)) , 'color', 'k', 'Parent', ax(2));
+% title(ax(2),'Solo-Ripple Triggered MU Rate');
+% 
+% 
+% set(ax,'XLim', win);

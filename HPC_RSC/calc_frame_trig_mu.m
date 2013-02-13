@@ -8,7 +8,7 @@ Fs = timestamp2fs(LFP{1}.ts);
 
 [hpcRate, ctxRate] = deal( nan(N, 151) );
 
-eventLenThold = [.2 .3 ]; %<============
+eventLenThold = [.2 .4 ]; %<============
 
 for i = 1 : N
     
@@ -75,4 +75,6 @@ if numel(eventLenThold)==2
 else
     title( ax, sprintf('Event Dur: %d to Inf', eventLenThold * 1000), 'fontSize', 16);
 end
+
+plot2svg('/data/HPC_RSC/frame_start_triggered)mu_rate.svg',gcf);
 

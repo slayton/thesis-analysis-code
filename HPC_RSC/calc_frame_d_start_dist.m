@@ -57,14 +57,18 @@ for i = 1 : N
 end
 fprintf('DONE!\n'); beep;
 
-%%
-h = dtH( abs(dtH) < .45 );
 
-figure;
-ksdensity(h, -.2:.005:.2, 'Support', [-.45 .45]);
 %%
+
 c = dtC( abs(dtC) < .35 );
 
 figure;
-ksdensity(c, -.3:.001:.3, 'Support', [-.35 .35]);
+ax = axes('FontSize', 14);
+ksdensity(c, -.3:.01:.3, 'Support', [-.35 .35]);
 set(gca,'XLim', [-.3 .3]);
+xlabel('Time (s)');
+ylabel('Probality');
+title('\DeltaTime between HPC & RSC Frame starts');
+
+
+plot2svg('/data/HPC_RSC/delta_frame_start_dist.svg',gcf);

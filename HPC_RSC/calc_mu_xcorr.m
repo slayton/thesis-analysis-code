@@ -21,8 +21,10 @@ ts = -1:.005:1;
 
 figure('Position', [360 440 580 260]);
 ax = axes('FontSize', 14, 'NextPlot', 'add');
-
+plot([0 0], minmax(mean(xcAll)), 'color', [.5 .5 .5]);
 plot(ts, mean( xcAll ));
 title('RSX - HPC MU XCorr');
 ylabel('Correlation Coefficient');
 xlabel('Time Lag (s)');
+
+plot2svg('/data/HPC_RSC/mu_rate_hpc_rsc_xcorr.svg',gcf);
