@@ -1,9 +1,9 @@
 clear;
 %{'spl11', 'spl11', 'spl11'}, [15 12 11], [2 1 2];
 base = {'gh-rsc1', 'gh-rsc2', 'spl11'};
-bId = [1 1 1 1 2 2 2 2];
-day = [18, 22, 23, 24, 22, 24, 25, 26];
-ep = [3, 1, 1, 2, 3, 3, 3, 3];
+bId = [1 1 1 1 1, 2 2 2 2];
+day = [18, 22, 23, 24, 28, 22, 24, 25, 26];
+ep = [3, 1, 1, 2, 3, 3, 3, 3, 3];
 
 C = [];
 H = [];
@@ -11,7 +11,7 @@ hpcIPI = [];
 ctxIPI = [];
 fprintf('\n\n');
 
-for E = 1:8
+for E = 5%1:8
     
     % LOAD THE DATA
     epoch = sprintf('sleep%d', ep(E));
@@ -36,7 +36,7 @@ for E = 1:8
      
         
     else
-        fprintf('File already fixed');
+        fprintf('File already fixed\n');
     end
     
     save( fullfile(edir, fName), 'hpc');
