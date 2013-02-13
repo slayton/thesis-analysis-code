@@ -1,6 +1,5 @@
 clear;
-%{'spl11', 'spl11', 'spl11'}, [15 12 11], [2 1 2];
-base = {'gh-rsc1', 'gh-rsc2', 'spl11'};
+base = {'gh-rsc1', 'gh-rsc2'};
 bId = [1 1 1 1 2 2 2 2];
 day = [18, 22, 23, 24, 22, 24, 25, 26];
 ep = [3, 1, 1, 2, 3, 3, 3, 3];
@@ -31,7 +30,7 @@ fprintf('---------------DATA LOADED!---------------\n');
 
 clearvars -except mu eeg
 
-thold = [.25 .5];
+thold = [.1 .4];
 win = [-.25 .5];
 
 hpcRateAll = [];
@@ -44,26 +43,18 @@ for E = 1:numel(mu)
     [sws, ripTs] = classify_sleep(eeg{E}.ripple, eeg{E}.rippleEnv, eeg{E}.ts);
     muBursts = find_mua_bursts(mu{E});
     cFrames = find_ctx_frames(mu{E});
-    nBurst = size(muBursts,1);
+    nBurstPre = size(muBursts,1);
 
     b = inseg(cFrames, muBursts, 'partial');
     muBursts = muBursts(b,:);
     
-%     muBursts = seg_and(muBursts, cFrames);
-    fprintf('Of %d MU-Bursts', nBurst); 
-    
-    
-    % Filter MU-Bursts
-    burstLen = diff(muBursts, [], 2);
-    
-%     burstLenIdx = burstLen > thold;
-    burstLenIdx = tholdFn(thold, burstLen);
-    
-    muBursts = muBursts(burstLenIdx,:);
-    
-    
+    muBursts = durationFilter(muBursts, thold);
     nBurst = size(muBursts,1);
-    fprintf(', keeping %d\n', nBurst);
+    
+    %     muBursts = seg_and(muBursts, cFrames);
+    fprintf('Keeping %d of %d MU-Bursts\n', nBurstPre, nBurst); 
+
+    
     if nBurst < 2
         continue;
     end
@@ -118,7 +109,7 @@ end
 
 
 fName = sprintf('/data/HPC_RSC/%s_%d_%d_2.svg', 'hippocampus_trig_mean_mu', thold(1)*1000, thold(2)*1000);
-plot2svg(fName, f);
+% plot2svg(fName, f);
 
 
 

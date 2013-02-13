@@ -3,7 +3,15 @@ function mv = ad2mv(signal, gain)
 %   Converts from AD units to millivolts.
 %   signal and gains must be the same size
     
+
+ if size(gain,2) == size(signal,1)
+        gain = gain';
+ end
+    
+ 
     % correct for 0 gains
+   
+    
     is_zero = (gain==0);
     signal(is_zero)=0;
     gain(is_zero)=1;
