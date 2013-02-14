@@ -32,54 +32,54 @@ function compareClusterPlots(baseDir, iTetrode)
         return;
     end
 
-    nCl = size(xc,1);
+    nLag = size(xc,2);
+    nAx = size(xc,1) ;
+    nCl = sqrt(nAx);
     fprintf('Plotting the correlations\n');
   
    % Render the xcorrs
     figure('Name', sprintf('%s - %s',baseDir, ttList{iTetrode}), 'Position', [0 300 900 800] );
     
-    nAx = nCl;
+
+    % xc = reshape(xc, nCl * nCl, 101);
     
-    axH = tight_subplot(nAx, nAx, [.03 .02],[.05 .01],[.01 .01]);
-    %         axH = reshape(axH, nAx, nAx);
+    axH = tight_subplot(nCl, nCl, [.03 .02],[.05 .01],[.01 .01]);
     axCount = 0;
 
-    x = [-50, linspace(-50, 50, size(xc,3)), 50];
+    x = [-50, linspace(-50, 50, size(xc,2)), 50];
 
-    for iAx = 1 : nAx
+    for iAx = 1 : nAx      
+         
+        ii = ceil( iAx / nCl);
+        jj = mod( iAx - 1,  nCl) + 1;
 
-        iCl = iAx;
+        axCount = axCount + 1;
         
-        for jAx = 1 : nAx
+        ax = axH(axCount);
+        
+         if jj < ii
+             delete( ax );
+         else
 
-            jCl = jAx;
-            
-
-            axCount = axCount + 1;
-            
-            ax = axH(axCount);
-            if jAx < iAx
-                delete( ax );
-            else
-               
-                y = squeeze( xc(jCl, iCl, :));
-                y = [min([y; 0]); y; min([y; 0])];
-                if any(isnan(y))
-                    continue;
-                end
-
-                patch(x, y, 'b', 'Parent', ax, 'hittest', 'off', 'EdgeColor', 'none')
-                
-                xlabel(ax, sprintf('%d x %d',jCl, iCl));
-                set(ax,'XTick', [-50 0 50],'YTick',[], 'XLim', [-50 50], 'YLim', minmax(y'));
-
-                set(ax,'UserData', [jCl, iCl]);
-                
-                set(ax, 'ButtonDownFcn', @axesSelected)
-
+           
+            y = squeeze( xc(axCount,:));
+            y = [min([y, 0]), y, min([y, 0])];
+            if any(isnan(y))
+                continue;
             end
-            % end
-        end
+
+            patch(x, y, 'b', 'Parent', ax, 'hittest', 'off', 'EdgeColor', 'none')
+            
+            xlabel(ax, sprintf('%d x %d',ii, jj));
+            set(ax,'XTick', [-50 0 50],'YTick',[], 'XLim', [-50 50], 'YLim', minmax(y));
+
+            set(ax,'UserData', [ii, jj]);
+            
+            set(ax, 'ButtonDownFcn', @axesSelected)
+
+  
+         end
+        % end
     end
 
     ch = [1; 2; 3; 4];
@@ -131,20 +131,23 @@ function compareClusterPlots(baseDir, iTetrode)
 
     function drawCorrelation()
 
+
         if isempty(selClId1) || isempty(selClId2)
             return;
         end
 
-        y = squeeze( xc(selClId1, selClId2, :));
-        y = [min([y; 0]); y; min([y; 0])];
+        iAx = (selClId1-1) * nCl + selClId2    
+        y = squeeze( xc(iAx, :));
+        y = [min([y, 0]), y, min([y, 0])];
         
         if any(isnan(y))
             return;
         end
 
         delete(get(corrAx,'Children'));
-        patch(x, y, 'b', 'Parent', corrAx, 'hittest', 'off', 'EdgeColor', 'none')
-        set(corrAx, 'YLim', minmax(y'));
+        patch(x, y, 'b', 'Parent', corrAx, 'hittest', 'off', 'EdgeColor', 'none');
+        line(x, y*0, 'color', 'k', 'linewidth', 2, 'parent', corrAx);
+        set(corrAx, 'YLim', minmax(y));
     end
             
     function axesSelected(src, e)

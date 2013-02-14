@@ -9,7 +9,7 @@ end
 
 if nTT < iTetrode
 	xc = [];
-	fprintf('Invalid tetrode specified!');
+	fprintf('Invalid tetrode number: %d\n', iTetrode);
 	return
 end
 
@@ -56,11 +56,9 @@ else
 	end
 
 	% Delete the 0 lag value correlations
-	nanmean(xc(:, nLag + 1))
 	xc(:,nLag + 1) = 0;
-	nanmean(xc(:, nLag + 1))
 
-	xc = reshape(xc, [nCl, nCl, nLag *2 + 1]);
+	% xc = reshape(xc, [nCl, nCl, nLag *2 + 1]);
 	fprintf('\n');
 
 end
