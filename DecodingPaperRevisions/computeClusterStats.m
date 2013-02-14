@@ -1,11 +1,16 @@
-function stats = computeClusterStats(baseDir)
+function stats = computeClusterStats(baseDir, ttList)
 %%
 [clId, data] = load_clusters_for_day(baseDir);
 
 nTT = numel(data);
 
-stats = repmat(struct( 'nSpike', [],'lRatio', []));
-for iTT = 1:nTT
+if nargin==1
+    ttList = 1:nTT
+end
+
+stats = repmat(struct( 'nSpike', [],'lRatio', []), 1, nTT);
+
+for iTT = ttList
     
     clustId = clId{iTT};
     amp = data{iTT}( :, 1:4 );
@@ -24,12 +29,16 @@ for iTT = 1:nTT
         if ns(iCl)<4
             continue;
         end
-        lr(iCl) = lRatio(amp, clustId == iCl);
+        [ lr(iCl) ] = lRatio(amp, clustId == iCl);
         
     end
     stats(iTT).nSpike = ns;
     stats(iTT).lRatio = lr;
     
 end
+
+
+stats = stats(ttList)
+
 %%
 end
