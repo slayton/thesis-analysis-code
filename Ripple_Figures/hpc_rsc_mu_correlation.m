@@ -5,10 +5,10 @@ bId = [1 1 1 1 2 2 2 2];
 day = [18, 22, 23, 24, 22, 24, 25, 26];
 ep = [3, 1, 1, 2, 3, 3, 3, 3];
 
-thold = .1;
+thold = .2;
 win = [-.25 .5];
 
-[hpcRateHC, hpcRateLC] = deal([]);
+[hpcRateHC, hpcRateLC, ctxRateHC, ctxRateLC] = deal([]);
 
 fprintf('\n\n');
 
@@ -68,7 +68,7 @@ for E = 1:8;
         
         pk = pk + startIdx -1;
         
-        corrThresh = .5;
+        corrThresh = .4;
         if eCorr(i) < -corrThresh 
             muPkIdxLC = [muPkIdxLC, pk(1)];  %#ok
         elseif eCorr(i) > corrThresh
@@ -89,6 +89,14 @@ for E = 1:8;
     
     hpcRateHC = [hpcRateHC; sampHpcHC];
     hpcRateLC = [hpcRateLC; sampHpcLC];
+    
+    
+ 
+    [mCtxHC, ~, ts, sampCtxHC] = meanTriggeredSignal( mu.ts( muPkIdxHC ), mu.ts, mu.ctx, win);
+    [mCtxLC, ~, ~ , sampCtxLC] = meanTriggeredSignal( mu.ts( muPkIdxLC ), mu.ts, mu.ctx, win);
+    
+    ctxRateHC = [ctxRateHC; sampCtxHC];
+    ctxRateLC = [ctxRateLC; sampCtxLC];
 end
 
 fprintf('\n\n\t\t\tDONE!\n'); beep;
@@ -96,7 +104,7 @@ fprintf('\n\n\t\t\tDONE!\n'); beep;
 %%
 
 figure;
-ax = axes;
+ax = subplot(211);
 
 mH = mean( hpcRateHC );
 sH = std( hpcRateHC );
@@ -114,7 +122,35 @@ nL = size( hpcRateLC, 1);
 [p(2), l(2)] = error_area_plot(ts, mL, sL * 1.96 / sqrt(nL), 'Parent', ax);
 
 set(p, 'FaceAlpha', .2);
-set(l,'LineStyle', 'none');
+set(p(1),'FaceColor', 'r');
+set(p(2),'FaceColor', 'b');
+
+set(l, 'linewidth', 2); 
+set(l(1), 'Color', 'r'); set(l(2),'Color', 'b');
+set(gca,'XLim', [-.25 .5]);
+legend(p, {'High Corr', 'Low Corr'});
+
+ax = subplot(212);
+
+mH = mean( ctxRateHC );
+sH = std( ctxRateHC );
+nH = size(ctxRateHC,1 );
+
+mL = mean( ctxRateLC );
+sL = std(  ctxRateLC );
+nL = size( ctxRateLC, 1);
+
+
+% line(ts, mH); 
+% line(ts, mL, 'color', 'k');
+
+[p(1), l(1)] = error_area_plot(ts, mH, sH * 1.96 / sqrt(nH), 'Parent', ax);
+[p(2), l(2)] = error_area_plot(ts, mL, sL * 1.96 / sqrt(nL), 'Parent', ax);
+set(l, 'linewidth', 2);
+set(l(1), 'Color', 'r'); set(l(2),'Color', 'b');
+
+set(p, 'FaceAlpha', .2);
+
 set(p(1),'FaceColor', 'r');
 set(p(2),'FaceColor', 'b');
 
