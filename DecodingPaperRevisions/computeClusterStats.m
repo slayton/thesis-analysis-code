@@ -5,7 +5,7 @@ function stats = computeClusterStats(baseDir, ttList)
 nTT = numel(data);
 
 if nargin==1
-    ttList = 1:nTT
+    ttList = 1:nTT;
 end
 
 stats = repmat(struct( 'nSpike', [],'lRatio', []), 1, nTT);
