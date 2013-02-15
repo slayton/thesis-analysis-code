@@ -1,6 +1,6 @@
 clearvars -except MultiUnit LFP
 
-win = [-.25 .25];
+win = [-.5 .5];
 
 N = numel(MultiUnit);
 Fs = timestamp2fs(LFP{1}.ts);
@@ -9,7 +9,7 @@ bins = win(1):.01:win(2);
 
 [hpcFrame, ctxFrame] = deal( nan(N, numel(bins)) );
 
-[hpcMuRate, hpcEvent, ctxMuRate, ctxEvent] = deal( nan(N, 101));
+[hpcMuRate, hpcEvent, ctxMuRate, ctxEvent] = deal( nan(N, 201));
 
 eventLenThold = .125;
 for i = 1 : N
@@ -23,16 +23,21 @@ for i = 1 : N
     cFrames = find_ctx_frames(mu);
     
     % Merge Frames within 50 ms of each other
-    muBursts = merge_frames(muBursts, .05);
-    cFrames = merge_frames(cFrames, .05);
+%     muBursts = merge_frames(muBursts, .05);
+%     cFrames = merge_frames(cFrames, .05);
 
     % Filter MU-Bursts
-    muBursts = durationFilter(muBursts, eventLenThold);
-    cFrames = durationFilter(cFrames, eventLenThold);
+%     muBursts = durationFilter(muBursts, eventLenThold);
+%     cFrames = durationFilter(cFrames, eventLenThold);
+    cFrames = durationFilter(cFrames, [0. .1]);
     
+    cFrames = merge_frames(cFrames, .1);
+    figure;
+    ksdensity( diff(cFrames,[],2));
     % Trigger on Start of FRAME
     hpcTrig = muBursts(:,1);
     ctxTrig = cFrames(:,1);
+    
     
 %     muBursts = muBursts( inseg(cFrames, muBursts, 'partial'), :);
 %     cFrames = cFrames( inseg(muBursts, cFrames, 'partial'),:);
@@ -60,7 +65,7 @@ title('HPC/RSC Frame Start Time Relationship');
 legend(l, {'HPC Start - RSC Trig', 'RSC Start - HPC Trig'}, 'location', 'southeast');
 set(f,'Position', [300 400 800 300]);
 set(ax,'Position', [.1 .15 .8 .75]);
-
+%%
 plot2svg('/data/HPC_RSC/frame_start_trig_frame_starts.svg',gcf);
 
 [l, f, ax] = plotAverages(ts2, nanmean(hpcMuRate), ts2, nanmean(ctxMuRate));
