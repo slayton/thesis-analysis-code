@@ -10,6 +10,7 @@ end
 
 stats = repmat(struct( 'nSpike', [],'lRatio', []), 1, nTT);
 
+warning off; %#ok suppress mahal warning about precision
 for iTT = ttList
     
     clustId = clId{iTT};
@@ -36,6 +37,7 @@ for iTT = ttList
     stats(iTT).lRatio = lr;
     
 end
+warning on; %#ok
 
 
 stats = stats(ttList);

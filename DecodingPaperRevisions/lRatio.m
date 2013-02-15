@@ -35,6 +35,7 @@ function [L, Lratio, df] = lRatio(Fet, ClusterSpikes, m)
 % L = sum(1-chi2cdf(m(NoiseSpikes),df));
 % Lratio = L/nClusterSpikes;
 
+
 m = mahal(Fet, Fet(ClusterSpikes,:));
 
 L = lratio(m, 4, { ClusterSpikes} );
