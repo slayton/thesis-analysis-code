@@ -24,7 +24,7 @@ in = setup_decoding_inputs(exp_in, ep);
 
 data = in.raw_amps;
 
-data = select_amps_by_feature(data, 'feature', 'col', 'col_num', 8, 'range', [18 40]);
+data = select_amps_by_feature(data, 'feature', 'col', 'col_num', 8, 'range', [12 40]);
 data = select_amps_by_feature(data, 'feature', 'amplitude', 'range', [125 inf]);
 data = select_amps_by_feature(data, 'feature', 'col',   'col_num', 7, 'range', [.05 Inf]);
 
