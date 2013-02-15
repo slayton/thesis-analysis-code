@@ -20,17 +20,17 @@ edir{12}= '/data/fabian/fk11/day08';
 open_pool;
 
 
-% for i = 1:12
-%     fprintf('\n---------- %s ----------\n', upper(edir{i}))
-%     autoClusterExp(edir{i});
-% end
-%%
 for i = 1:12
     fprintf('\n---------- %s ----------\n', upper(edir{i}))
-    for ii = 1:18
-    	computeClusterXCorr(edir{i}, ii);
-    end
+    autoClusterExp(edir{i});
 end
+%
+% for i = 1:12
+%     fprintf('\n---------- %s ----------\n', upper(edir{i}))
+%     for ii = 1:18
+%     	computeClusterXCorr(edir{i}, ii);
+%     end
+% end
 
 % %%
 % close all;
