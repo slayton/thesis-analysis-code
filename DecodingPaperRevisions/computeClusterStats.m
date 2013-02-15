@@ -38,7 +38,7 @@ for iTT = ttList
 end
 
 
-stats = stats(ttList)
+stats = stats(ttList);
 
 %%
 end

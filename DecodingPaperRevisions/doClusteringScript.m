@@ -20,10 +20,10 @@ edir{12}= '/data/fabian/fk11/day08';
 open_pool;
 
 
-for i = 1:12
-    fprintf('\n---------- %s ----------\n', upper(edir{i}))
-    autoClusterExp(edir{i});
-end
+% for i = 1:12
+%     fprintf('\n---------- %s ----------\n', upper(edir{i}))
+%     autoClusterExp(edir{i});
+% end
 %%
 for i = 1:12
     fprintf('\n---------- %s ----------\n', upper(edir{i}))
@@ -32,8 +32,8 @@ for i = 1:12
     end
 end
 
-%%
-close all;
-for i = 1:12
-    plotClusters(edir{i})
-end
+% %%
+% close all;
+% for i = 1:12
+%     plotClusters(edir{i})
+% end

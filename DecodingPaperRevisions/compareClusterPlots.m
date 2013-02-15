@@ -1,9 +1,13 @@
 function compareClusterPlots(baseDir, iTetrode)
 %%
-    selClId1 = [];
-    selClId2 = [];
+
+   
+
+    selClId = [];
 
     [cl, data, ttList] = load_clusters_for_day(baseDir);
+    
+
     nTT = numel(cl);
 
     if nTT < iTetrode
@@ -11,6 +15,7 @@ function compareClusterPlots(baseDir, iTetrode)
         fprintf('Invalid tetrode specified!');
         return;
     end
+
     amp = data{iTetrode}';
     clustId = cl{iTetrode};
 
@@ -20,11 +25,13 @@ function compareClusterPlots(baseDir, iTetrode)
 
     if ~exist(xcFile,'file')
         fprintf('%s file does not exist, creating it\n', xcFile)
-        % computeClusterXCorr(baseDir, iTetrode);
+        computeClusterXCorr(baseDir, iTetrode);
     end
 
     d = load(xcFile);
     xc = d.xc;
+
+
     clear d;
 
     if isempty(xc)
@@ -32,23 +39,44 @@ function compareClusterPlots(baseDir, iTetrode)
         return;
     end
 
+
+
     nLag = size(xc,2);
-    nAx = size(xc,1) ;
-    nCl = sqrt(nAx);
+    nCl = sqrt( size(xc,1) );
+    xc = reshape(xc, [nCl, nCl, nLag] );
+
+
+    stats = computeClusterStats(baseDir, iTetrode);
+
+    maxLRatio = .05;
+    idx = find( [stats.lRatio] <= maxLRatio );
+
+    xc = xc( idx, idx, :);
+
+
+    stats.nSpike = stats.nSpike(idx);
+    stats.lRatio = stats.lRatio(idx);
+
+    nCl = size(xc,1);
+    xc = reshape(xc, [nCl * nCl, nLag] );
+    nAx = nCl * nCl;
+
+    % idx =  ismember(clustId, find(idx) ) ;
+    % clustId = clustId(idx);
+    % ampCl = amp(:, idx);
+
     fprintf('Plotting the correlations\n');
   
    % Render the xcorrs
     figure('Name', sprintf('%s - %s',baseDir, ttList{iTetrode}), 'Position', [0 300 900 800] );
     
-
-    % xc = reshape(xc, nCl * nCl, 101);
     
     axH = tight_subplot(nCl, nCl, [.03 .02],[.05 .01],[.01 .01]);
     axCount = 0;
 
     x = [-50, linspace(-50, 50, size(xc,2)), 50];
 
-    for iAx = 1 : nAx      
+    for iAx = 1 : nAx
          
         ii = ceil( iAx / nCl);
         jj = mod( iAx - 1,  nCl) + 1;
@@ -70,10 +98,10 @@ function compareClusterPlots(baseDir, iTetrode)
 
             patch(x, y, 'b', 'Parent', ax, 'hittest', 'off', 'EdgeColor', 'none')
             
-            xlabel(ax, sprintf('%d x %d',ii, jj));
+            xlabel(ax, sprintf('%d x %d',idx(ii), idx(jj)));
             set(ax,'XTick', [-50 0 50],'YTick',[], 'XLim', [-50 50], 'YLim', minmax(y));
 
-            set(ax,'UserData', [ii, jj]);
+            set(ax,'UserData', [idx(ii), idx(jj), ii, jj]);
             
             set(ax, 'ButtonDownFcn', @axesSelected)
 
@@ -115,28 +143,32 @@ function compareClusterPlots(baseDir, iTetrode)
 
     function drawClusterPoints()
         
-        if isempty(selClId1) || isempty(selClId2)
+        if isempty(selClId)
             return;
         end
        
-        idx1 = clustId == selClId1;
-        idx2 = clustId == selClId2;
+        fprintf('Plotting %d %d %d %d\n', selClId);
+        idx1 = clustId == selClId(1);
+        idx2 = clustId == selClId(2);
 
-        set(l(2), 'XData', amp(ch(1),idx1), 'YData', amp(ch(2),idx1), 'ZData', amp(ch(3),idx1));
-        set(l(3), 'XData', amp(ch(1),idx2), 'YData', amp(ch(2),idx2), 'ZData', amp(ch(3),idx2));
 
-        title(ampAx, sprintf('Cyan-%d Yellow-%d', selClId1, selClId2) );
+        set( l(2), 'XData', amp(ch(1),idx1), 'YData', amp(ch(2),idx1), 'ZData', amp(ch(3),idx1) );
+        set( l(3), 'XData', amp(ch(1),idx2), 'YData', amp(ch(2),idx2), 'ZData', amp(ch(3),idx2) );
+         % set( l(3), 'XData', amp(ch(1),idx1), 'YData', amp(ch(2),idx1), 'ZData', amp(ch(3),idx1) );
+
+
+        title(ampAx, sprintf('Cyan-%d Yellow-%d', selClId(1), selClId(2)) );
 
     end
 
     function drawCorrelation()
 
 
-        if isempty(selClId1) || isempty(selClId2)
+        if isempty(selClId)
             return;
         end
 
-        iAx = (selClId1-1) * nCl + selClId2    
+        iAx = (selClId(3)-1) * nCl + selClId(4);    
         y = squeeze( xc(iAx, :));
         y = [min([y, 0]), y, min([y, 0])];
         
@@ -152,11 +184,7 @@ function compareClusterPlots(baseDir, iTetrode)
             
     function axesSelected(src, e)
         
-        ids = get(src, 'UserData');
-        selClId1 = ids(1);
-        selClId2 = ids(2);
-        
-
+        selClId = get(src, 'UserData');
         % fprintf('Selecting clusters %d %d\n', selClId1, selClId2);
 
         drawClusterPoints();
@@ -178,9 +206,8 @@ function compareClusterPlots(baseDir, iTetrode)
         tbl = uitable('Parent', gcf,'Units', 'normal', 'Position', [.05 .52 .15 .28], 'rowname', [], 'CellSelectionCallback', @tableCallbackFcn  );
 
         names = {'Cl', 'nSpk', 'lRat'};
-        stats = computeClusterStats(baseDir, iTetrode);
 
-        data = [ (1:nCl)', stats.nSpike, stats.lRatio * 100];
+        data = [ idx, stats.nSpike, stats.lRatio * 100];
 
         set(tbl, 'ColumnName', names, 'Data',data , 'ColumnWidth', {25, 40, 60},...
          'columnformat', {'numeric', 'numeric', 'bank'}, 'columneditable', [false false false]);
@@ -189,8 +216,11 @@ function compareClusterPlots(baseDir, iTetrode)
 
     function tableCallbackFcn(src, e)
 
-        selClId1 = e.Indices(1);
-        selClId2 = e.Indices(1);
+
+        id2= e.Indices(1);
+        id = idx(id2);
+        
+        selClId = [ id id id2 id2];
 
         drawClusterPoints();
         drawCorrelation();
