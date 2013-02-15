@@ -1,0 +1,19 @@
+Comparison between Clustered Decoder and Feature Decoder:
+
+Feature files are clustered automatically with KlustaKwik
+
+Clusters are dropped if:
+    - They contain fewer than 50 spikes during RUN
+    - They have an lRatio greater than .05
+
+
+In EVERY case the feature decoder capture more mutual information and has a
+smaller median error.
+
+Significance:
+
+MEDIAN ERROR
+    tTest:0.04676	ranksum:0.063011	signrank:0.00024414
+
+NORMALIZED MI
+    tTest:0.031119	ranksum:0.023193	signrank:0.00024414
