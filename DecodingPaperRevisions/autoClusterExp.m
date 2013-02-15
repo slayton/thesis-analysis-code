@@ -26,7 +26,7 @@ data = in.raw_amps;
 
 data = select_amps_by_feature(data, 'feature', 'col', 'col_num', 8, 'range', [12 40]);
 data = select_amps_by_feature(data, 'feature', 'amplitude', 'range', [125 inf]);
-data = select_amps_by_feature(data, 'feature', 'col',   'col_num', 7, 'range', [.05 Inf]);
+data = select_amps_by_feature(data, 'feature', 'col',   'col_num', 7, 'range', [.15 Inf]);
 
 %% Save a complete file
 
