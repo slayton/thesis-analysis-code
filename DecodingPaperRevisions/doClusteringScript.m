@@ -22,7 +22,7 @@ open_pool;
 
 for i = 1:12
     fprintf('\n---------- %s ----------\n', upper(edir{i}))
-    autoClusterExp(edir{i});
+    autoCluster_dataset(edir{i});
 end
 
 % 
