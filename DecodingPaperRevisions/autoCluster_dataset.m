@@ -10,19 +10,19 @@ end
 
 
 klustDir = fullfile(baseDir, 'kKlust');
-if exist(klustDir, 'dir')
-    fprintf('Removing previously created dir: %s\n', klustDir);
-    rmdir(klustDir,'s');
+if ~exist(klustDir, 'dir')
+%     fprintf('Removing previously created dir: %s\n', klustDir);
+%     rmdir(klustDir,'s');
+    mkdir(klustDir);
 end
-mkdir(klustDir);
+
 
 ep = 'amprun';
 
-exp_in = exp_load(baseDir, 'epochs', ep, 'data_types', {'pos'});
-in = setup_decoding_inputs(exp_in, ep);
-%%
-
-data = in.raw_amps;
+% exp_in = exp_load(baseDir, 'epochs', ep, 'data_types', {'pos'});
+% in = setup_decoding_inputs(exp_in, ep);
+data = load_dataset_waveforms(baseDir, ep);
+% data = in.raw_amps;
 
 data = select_amps_by_feature(data, 'feature', 'col', 'col_num', 8, 'range', [12 40]);
 data = select_amps_by_feature(data, 'feature', 'amplitude', 'range', [125 inf]);
