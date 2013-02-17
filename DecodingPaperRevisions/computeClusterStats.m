@@ -30,6 +30,7 @@ for iTT = ttList
         if ns(iCl)<4
             continue;
         end
+        [iCl  nnz(clustId==iCl) size(amp)]
         [ lr(iCl) ] = lRatio(amp, clustId == iCl);
         
     end

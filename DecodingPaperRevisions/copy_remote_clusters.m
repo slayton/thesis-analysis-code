@@ -31,6 +31,9 @@ for iExp = 1:nExp
         cmd = sprintf('mkdir -p %s', kDir);
         fprintf('Creating directory: %s\n', kDir);
         system( cmd );
+    else
+        cmd = sprintf('rm %s/*', kDir);
+        [s,w] = unix(cmd);
     end
     
     cmd = sprintf('scp %s@%s:%s/* %s', user, host, kDir, kDir);

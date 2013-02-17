@@ -28,7 +28,7 @@ input.ep = ep;
 
 %%%%%%%%%%%% DECODING PARAMETERS %%%%%%%%%%%%
 maxLRatio = .05;
-minNSpike = 50;
+minNSpike = 0;
 decodeDT = .25;
 decodeDP = .1;
 minVelocity = .15;
@@ -47,48 +47,72 @@ clear en et;
 [cl, data, ttList] = load_clusters_for_day(baseDir);
 stats = computeClusterStats(baseDir);
 
-clAmp = data;
+ampSorted = data;
 
-% filter the spikes for only spikes that were clustered
+% Groups Spikes by TETRODE excluding UN SORTED
 for iTT = 1:numel(cl)
     idx = false( size( data{iTT}, 1),1);
+    
     for iCl = 1:max(cl{iTT})
         if stats(iTT).nSpike(iCl) > minNSpike && stats(iTT).lRatio(iCl) <= maxLRatio
             idx = idx | iCl == cl{iTT};
         end
     end
-    clAmp{iTT} = clAmp{iTT}(idx,:);
-end
-clAmp = clAmp( ~cellfun(@isempty, clAmp));
 
-clust = {};
-% Group the spikes by clusters instead of by tetrode
+    ampSorted{iTT} = ampSorted{iTT}(idx,:);
+end
+ampSorted = ampSorted( ~cellfun(@isempty, ampSorted));
+
+
+% Groups Spikes by CLUSTER including a NULL cluster
+clAll = {};
 for iTT = 1:numel(cl)
     for iCl = 1:max(cl{iTT})
+        
+        nullClIdx = true( size(data{iTT}, 1),1);
         if stats(iTT).nSpike(iCl) > minNSpike && stats(iTT).lRatio(iCl) <= maxLRatio
+            
             idx = iCl == cl{iTT};
-            clust{end+1} = data{iTT}(idx,:);
+            nullClIdx (idx) = false;
+            clAll{end+1} = data{iTT}(idx,:);
+        end
+        clAll{end+1} = data{iTT}(nullClIdx,:);
+    end
+end
+
+% Groups Spikes by CLUSTER excluding a NULL cluster
+clSorted = {};
+for iTT = 1:numel(cl)
+    for iCl = 1:max(cl{iTT})
+        
+        nullClIdx = true( size(data{iTT}, 1));
+        if stats(iTT).nSpike(iCl) > minNSpike && stats(iTT).lRatio(iCl) <= maxLRatio
+            
+            idx = iCl == cl{iTT};
+            nullClIdx (idx) = false;
+            clSorted{end+1} = data{iTT}(idx,:);
         end
     end
 end
+
 clear iCl iTT idx stats;
 
 % Configure Inputs
 input.data{1} = data;
-input.data{2} = clAmp;
-input.data{3} = clust;
-input.data{4} = clust;
+input.data{2} = ampSorted;
+input.data{3} = clAll;
+input.data{4} = clSorted;
 clear data clAmp clust cl;
 
 input.resp_col{1} = [1 2 3 4];
 input.resp_col{2} = [1 2 3 4];
 input.resp_col{3} = [];
-input.resp_col{4} = [1 2 3 4];
+input.resp_col{4} = [[]];
 
-input.method{1} = 'All Spikes - Feature';
-input.method{2} = 'Sorted Spikes - Feature';
-input.method{3} = 'Sorted Spikes - Identity';
-input.method{4} = 'Sorted Spikes - Identity + Feature';
+input.method{1} = 'Feature - All';
+input.method{2} = 'Feature - Sorted';
+input.method{3} = 'Identify - All';
+input.method{4} = 'Identity - Sorted';
 
 %%%%%%%%%%%%%% Construct the Inputs for the Decoder %%%%%%%%%%%%%%
 isMovingIdx = abs(pos.lv) > minVelocity;
