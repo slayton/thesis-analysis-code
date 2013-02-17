@@ -25,12 +25,13 @@ for i = 1:12
     autoClusterExp(edir{i});
 end
 
-for i = 1:12
-     fprintf('\n---------- %s ----------\n', upper(edir{i}))
-     for ii = 1:18
-     	computeClusterXCorr(edir{i}, ii);
-     end
-end
+% 
+% for i = 1:12
+%      fprintf('\n---------- %s ----------\n', upper(edir{i}))
+%      for ii = 1:18
+%      	computeClusterXCorr(edir{i}, ii);
+%      end
+% end
 
 % %%
 % close all;
