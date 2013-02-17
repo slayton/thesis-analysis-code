@@ -1,4 +1,4 @@
-function [out width waves] = load_spike_parameters(file, varargin)
+function [out, width, waveforms] = load_spike_parameters(file, varargin)
 
 args.idx = [];
 args.time_range = [];
@@ -25,7 +25,7 @@ else
 end
 
 if logical(args.anti_idx)
-    
+    error('Anti-IDX loading removed');
     if isempty(args.time_range)
         error('no time range specified');
     end
@@ -42,34 +42,38 @@ end
 
 
 
+waveforms = double(f.waveform);
+
 gains = get_gains(file);    
+waveforms = ad2mv(waveforms, gains);
+% gains(gains==0) = inf;
+% gains = repmat(gains,size(maxes,2),1)';
+% u_volts = (10*double(maxes)./2048)./gains*1e6;
 
-maxes = max(f.waveform, [], 2);
-maxes = squeeze(maxes);
-gains(gains==0) = inf;
-gains = repmat(gains,size(maxes,2),1)';
 
-u_volts = (10*double(maxes)./2048)./gains*1e6;
-
-u_volts(u_volts>1000) = 0;
 times = double(f.timestamp)/10000;  
 
-out = [u_volts', times(:)];
+width = calc_waveform_width( double( f.waveform) );
 
-width = get_spike_width(f.waveform);
-waves = f.waveform;
+maxes = squeeze( max(waveforms, [], 2) );
+% maxes = squeeze(maxes);
+
+out = [maxes', times(:)];
+
     
 end
-
-function w = get_spike_width(wave)
-	mw = squeeze(mean(wave));
-    [mx mxind] = max(mw(5:12,:));
-    mxind = mxind + 4;
-    [mx mnind] = min(mw(13:end,:));
-    mnind = mnind +12;
-
-    w = (mnind - mxind);% * 3.2e-5;
-end
+% 
+% function w = get_spike_width(wave)
+% 
+%     mw = squeeze(mean(wave));
+%     [mx mxind] = max(mw(5:12,:));
+%     mxind = mxind + 4;
+%     [mx mnind] = min(mw(13:end,:));
+%     mnind = mnind +12;
+% 
+%     w = (mnind - mxind);% * 3.2e-5;
+%     
+% end
 
 function gains = get_gains(file)
 
@@ -88,5 +92,10 @@ function gains = get_gains(file)
         str(j,:) = [strA, num2str(chans(j)), strB];
         gains(j) = str2double(head(2).(str(j,:)));
     end
-end        
+end     
+
+
+
+
+
 

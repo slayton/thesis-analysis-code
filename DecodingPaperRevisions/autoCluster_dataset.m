@@ -1,4 +1,4 @@
-function autoClusterExp(baseDir, plot)
+function autoCluster_dataset(baseDir, plot)
 
 if nargin==1
     plot = 0;
@@ -41,7 +41,7 @@ for iTetrode = 1:numel(data)
     fid = fopen(featFile, 'w+');
     
     % Write the number of features
-    fprintf(fid, '4\n');
+    fprintf(fid, '4\n'); 
     % Write the feature matrix
     fprintf(fid, '%3.4f\t%3.4f\t%3.4f\t%3.4f\n', outData);
     

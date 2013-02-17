@@ -1,4 +1,4 @@
-function [w times width] = loadTetrodeFileWaveforms(file, varargin)
+function [waveforms, times, height, width] = load_tt_waveforms(file, varargin)
 
 args.idx = [];
 args.time_range = [];
@@ -11,6 +11,7 @@ width = [];
 fields = {'waveform', 'timestamp'};
   
 d = dir(file);
+
 if d.bytes < 10000
     return;
 end
@@ -25,14 +26,15 @@ else
 end
 
 if logical(args.anti_idx)
-    
+    error('Anti-IDX loading removed');
+
     if isempty(args.time_range)
         error('no time range specified');
     end
     
     f2 = loadrange(mwlf, fields, args.time_range*10000, 'timestamp');
     
-    [ignore,int_idx] = intersect(f2.timestamp, f.timestamp);
+    [ignore, int_idx] = intersect(f2.timestamp, f.timestamp);
     idx = logical(f2.timestamp);
     idx(int_idx) = 0;
     f.timestamp = f2.timestamp(idx);
@@ -40,32 +42,35 @@ if logical(args.anti_idx)
     
 end
 
+waveforms = double(f.waveform);
 
 gains = get_gains(file);    
-
-w = double(f.waveform);
-
-gains(gains==0) = inf;
-gains = repmat(gains, size(w,2),1)';
-gains = repmat(gains, [1 1 size(w,3)]);
-
-w = (10*double(w)./2048)./gains*1e6;
+waveforms = ad2mv(waveforms, gains);
+% gains(gains==0) = inf;
+% gains = repmat(gains, size(waveforms,2),1)'; % gains = repmat(gains, [1 1 size(waveforms,3)]);
+% u_volts = (10*double(maxes)./2048)./gains*1e6;
 
 times = double(f.timestamp)/10000;  
 
-width = get_spike_width(w);
+height = squeeze( max(waveforms, [], 2) );
+width = calc_waveform_width(waveforms);
     
 end
 
-function w = get_spike_width(wave)
-	mw = squeeze(mean(wave));
-    [mx mxind] = max( mw(5:12,:) );
-    mxind = mxind + 4;
-    [mx mnind] = min(mw(13:end,:));
-    mnind = mnind + 12;
 
-    w = (mnind - mxind);% * 3.2e-5;
-end
+% 
+% 
+% function w = get_spike_width(wave)
+% 
+%     mw = squeeze(mean(wave));
+%     [mx mxind] = max( mw(5:12,:) );
+%     mxind = mxind + 4;
+%     [mx mnind] = min(mw(13:end,:));
+%     mnind = mnind + 12;
+% 
+%     w = (mnind - mxind);% * 3.2e-5;
+%     
+% end
 
 function gains = get_gains(file)
 
@@ -84,5 +89,9 @@ function gains = get_gains(file)
         str(j,:) = [strA, num2str(chans(j)), strB];
         gains(j) = str2double(head(2).(str(j,:)));
     end
-end        
+end      
+
+
+
+
 

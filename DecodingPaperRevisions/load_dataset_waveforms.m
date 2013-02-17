@@ -1,4 +1,4 @@
-function [out tt_list ] = load_exp_amplitudes(exp, epoch, varargin)
+function [out, tt_list] = load_dataset_waveforms(edir, epoch, varargin)
 %MAKE_TETRODE_MAPS creates spike amplitude by position vector for each
 %tetrode in the experiment. 
 %
@@ -20,42 +20,58 @@ function [out tt_list ] = load_exp_amplitudes(exp, epoch, varargin)
 %
 % see also decode_amplitudes decode_clusters convert_cl_to_kde_format
 
+MIN_VEL = .15;
+MIN_WIDTH = 12;
+MIN_AMP = 125;
 
-p = exp.(epoch).pos;
+% p = exp.(epoch).pos;
 
-tt_dir = dir(fullfile(exp.edir,'t*'));
+tt_dir = dir(fullfile(edir,'t*'));
 tt_list = {};
 
 for i=1:numel(tt_dir)
     if tt_dir(i).isdir
-        if exist(fullfile(exp.edir, tt_dir(i).name, [tt_dir(i).name, '.tt']))
+        if exist(fullfile(edir, tt_dir(i).name, [tt_dir(i).name, '.tt']))
             tt_list{end+1} = tt_dir(i).name;
         end
     end
 end
 
+
 %out = cell(size(unique({exp.(epoch).cl.tt})));
 
+[en, et] = load_epochs(edir);
+et = et( strcmp(epoch, en), :);
+
+out = {};
+
+p = load_exp_pos(edir, epoch);
 
 for i=1:numel(tt_list)
 %     disp(['Loading Amplitude data from tetrode:', tt_list{i}]);
+    file = fullfile(edir, tt_list{i}, [tt_list{i}, '.tt']);
+    [~, ts, pk, w] = load_tt_waveforms(file, 'idx',[],'time_range', et); 
     
-    file = fullfile(exp.edir, tt_list{i}, [tt_list{i}, '.tt']);
-%     [spikes widths] = load_spike_parameters(file, 'idx',[],'time_range', exp.(epoch).et);
-    [~, ts, pk, w] = load_tt_waveforms(file, 'idx',[],'time_range', exp.(epoch).et);
-%     ts = spikes(:,5);
-    warning off;
-    pos = interp1(p.ts, p.lp, ts, 'nearest');
-    vel = interp1(p.ts, p.lv, ts, 'nearest');
-    warning on;
+    warning off; %#ok
+    lp = interp1(p.ts, p.lp, ts, 'nearest');
+    lv = interp1(p.ts, p.lv, ts, 'nearest');
+    warning on; %#ok
     
-    validIdx = ~isnan(pos) & ~isnan(vel);
+    validIdx = ~isnan(lp) & ~isnan(lv);
+   
+    runIdx = abs(lv) >= MIN_VEL;
+    wideIdx = w .* true;% >= MIN_WIDTH;
+    ampIdx = max(pk) >= MIN_AMP;
     
-    o = [pk',ts',pos',vel',w'];
-    out{i} = o(valid_ind,:);
+    validIdx = runIdx & wideIdx & ampIdx & validIdx;
+
+    o = [pk',ts',lp',lv',w'];
+    out{i} = o(validIdx,:);
+    
     
 end 
-       
+      
+fprintf('\n');
 end
 
 

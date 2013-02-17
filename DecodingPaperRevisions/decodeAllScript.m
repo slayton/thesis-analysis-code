@@ -44,9 +44,14 @@ mi = reshape(mi, 4, numel(mi)/4)';
 idx = [1 3];
 er = er(:, idx);
 mi = mi(:, idx);
-M = in{1}.method(idx);
+M = {'All:Feat', 'Sorted:Feat', 'Sorted:ID', 'Sorted:F+ID'};
+% M = in{1}.method(idx);
+M = M(idx);
 
 figure;
+subplot(121);
+set(gca,'FontSize', 14);
+
 boxplot( er ); hold on;
 plot(1:numel(idx), er, 'color', [.7 .7 .7]);
 set(gca,'XTick', 1:numel(idx), 'XTickLabel', M);
@@ -58,9 +63,12 @@ pS = signrank(er(:,1), er(:,2), .05, 'tail', 'left');
 
 fprintf('\t\tMEDIAN ERROR\n');
 fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
+title('Decoder Comparison');
+ylabel('Median Error(m)');
 
+subplot(122);
+set(gca,'FontSize', 14);
 
-figure;
 boxplot( mi ); hold on;
 plot(1:numel(idx), mi, 'color', [.7 .7 .7]);
 set(gca,'XTick', 1:numel(idx), 'XTickLabel', M);
@@ -72,4 +80,7 @@ pS = signrank(mi(:,1), mi(:,2), .05, 'tail', 'right');
 
 fprintf('\t\tNORMALIZED MI\n');
 fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
+title('Decoder Comparison');
+ylabel('Mutual Information (Normalized)');
 
+save_new_decoding_figures('feature_vs_cluster_accuracy', gcf);

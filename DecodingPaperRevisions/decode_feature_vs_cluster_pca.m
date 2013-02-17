@@ -1,18 +1,21 @@
 
-function [P, E, input] = decode_feature_vs_cluster(baseDir, ep, methods)
+function [P, E, input] = decode_feature_vs_cluster_pca(baseDir, ep, methods, varargin)
+args.stim_bw = 5;
+args.resp_bw = 1;
+args = parseArgs(varargin, args);
+
 %% Load DATA
 
 if nargin == 1 || isempty(ep)
     ep = 'amprun';
 elseif nargin > 20000
     ep = 'amprun';
-    baseDir = '/data/spl11/day14';
+    baseDir = '/data/spl11/day13';
 end
 
 if nargin<3
     methods = true(4,1);
 end
-
 
 if ~exist(baseDir,'dir');
     error('Invalid directory specified');
@@ -25,17 +28,16 @@ end
 input.description = baseDir;
 input.ep = ep;
 
-
 %%%%%%%%%%%% DECODING PARAMETERS %%%%%%%%%%%%
 maxLRatio = .05;
 minNSpike = 50;
 decodeDT = .25;
 decodeDP = .1;
 minVelocity = .15;
-stimulusBandwidth = .1;
-responseBandwidth = 30;
+stimulusBandwidth = args.stim_bw;
+responseBandwidth = args.resp_bw;
 timeSplit = 0; % MUST BE 0 or 1
-
+nChanPCA = 4;
 
 %%%%%%%%%%%%     LOAD THE DATA    %%%%%%%%%%%%
 pos = load_exp_pos(baseDir, ep);
@@ -44,8 +46,8 @@ pos = load_exp_pos(baseDir, ep);
 input.et = et( strcmp(en, input.ep), :);
 clear en et;
 
-[cl, data, ttList] = load_clusters_for_day(baseDir);
-stats = computeClusterStats(baseDir);
+[cl, data, ttList] = load_pca_clusters_for_day(baseDir, nChanPCA);
+stats = computePCAClusterStats(baseDir, [], nChanPCA);
 
 clAmp = data;
 
@@ -109,7 +111,6 @@ isMovingIdx = logical( interp1(pos.ts, double(isMovingIdx), mean(tbins,2), 'near
 
 tbins = tbins(isMovingIdx, :);
 
-
 posGrid = min(pos.lp):decodeDP:max(pos.lp);
 
 encodingSegments = [];
@@ -158,6 +159,10 @@ for ii = 1:numel(input.data)
 
     emptyIdx = false(numel(d),1);
     for jj = 1:numel(d)
+        if isempty(d{jj})
+            emptyIdx(jj) = true;
+            continue;
+        end
         st{jj} = d{jj}(:, 5);
         sp{jj} = d{jj}(:, 6); %interp1(stimTimestamp, stimulus, st{jj}, 'nearest');
         sf{jj} = d{jj}(:, input.resp_col{ii});

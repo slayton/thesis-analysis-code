@@ -7,17 +7,19 @@ function mv = ad2mv(signal, gain)
  if size(gain,2) == size(signal,1)
         gain = gain';
  end
-    
+
+ mv = zeros(size(signal));
+ for i = 1:size(signal,3)
  
     % correct for 0 gains
-   
-    
+  
     is_zero = (gain==0);
     signal(is_zero)=0;
-    gain(is_zero)=1;
+    gain(is_zero)=Inf;
+   
+    tmp = squeeze( double(signal(:,:,i))./4096 .* 10 .* 1e6 );
     
-    
-    mv = double(signal)./4096 .* 10 .* 1e6;
-    mv = bsxfun(@rdivide, mv, gain);
+    mv(:,:,i) = bsxfun(@rdivide, tmp, gain);
+ end
     
 end

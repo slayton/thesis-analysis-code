@@ -1,4 +1,4 @@
-function copy_remote_pos_files(host, user)
+function copy_remote_tt_files(host, user)
 %%
 
 if nargin < 2 || nargin > 1000
@@ -23,8 +23,9 @@ edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
 nExp = numel(edir);
-for iExp = 12%:nExp
+for iExp = [2 4 5 6 7 8 9 10 11]%:nExp
    d = edir{iExp};
+   fprintf('Copying all .tt files from: %s\n', d);
     
     if ~exist(d,'dir')
         cmd = sprintf('mkdir -p %s', d);
