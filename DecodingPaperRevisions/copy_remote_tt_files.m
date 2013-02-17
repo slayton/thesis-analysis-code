@@ -23,7 +23,7 @@ edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
 nExp = numel(edir);
-for iExp = 1%:nExp
+for iExp = 12%:nExp
    d = edir{iExp};
     
     if ~exist(d,'dir')
