@@ -21,7 +21,7 @@ ep = 'amprun';
 
 % exp_in = exp_load(baseDir, 'epochs', ep, 'data_types', {'pos'});
 % in = setup_decoding_inputs(exp_in, ep);
-data = load_dataset_waveforms(baseDir, ep);
+[data, ttList] = load_dataset_waveforms(baseDir, ep);
 % data = in.raw_amps;
 
 data = select_amps_by_feature(data, 'feature', 'col', 'col_num', 8, 'range', [12 40]);
@@ -30,7 +30,7 @@ data = select_amps_by_feature(data, 'feature', 'col',   'col_num', 7, 'range', [
 
 %% Save a complete file
 
-ttList = in.amp_names;
+% ttList = in.amp_names;
 
 fprintf('Saving feature files... ');
 for iTetrode = 1:numel(data)
