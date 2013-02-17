@@ -23,7 +23,7 @@ open_pool;
 for i = 1:12
     fprintf('\n---------- %s ----------\n', upper(edir{i}))
     autoClusterPCAExp(edir{i}, 1);
-    autoClusterPCAExp(edir{i}, 2);
+    autoClusterPCAExp(edir{i}, 4);
 end
 
 for i = 1:12
