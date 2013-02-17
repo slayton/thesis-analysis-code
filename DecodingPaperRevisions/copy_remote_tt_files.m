@@ -23,7 +23,7 @@ edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
 nExp = numel(edir);
-for iExp = 1:nExp
+for iExp = 1%:nExp
    d = edir{iExp};
     
     if ~exist(d,'dir')
@@ -33,7 +33,22 @@ for iExp = 1:nExp
     end
     
     for i = 1:30
-        tt = sprintf('%02d', i)
+        tt = sprintf('t%02d', i);
+        
+        ttDir = sprintf('%s/%s', d, tt);
+        
+        if ~exist(ttDir,'dir')
+            mkdir(ttDir);
+        end
+        
+        cmd = sprintf('scp %s@%s:%s/%s.tt %s', user, host, ttDir, tt, ttDir);
+        [s,w] = unix(cmd);
+        fprintf('%s\n', cmd);
+        
+        if numel(dir(ttDir)) == 2
+            rmdir(ttDir);
+        end
+        
     end
 %     
 %         ttDir = sprintf( '%s/
