@@ -15,5 +15,6 @@ edir{12}= '/data/fabian/fk11/day08';
 
 for i = 1:numel(edir)
     baseDir = edir{i}; 
+    fprintf('\n---------------------- %s ----------------------\n', baseDir);
     process_data_set(baseDir);
 end
