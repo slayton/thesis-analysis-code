@@ -11,8 +11,6 @@ end
 
 klustDir = fullfile(baseDir, 'kKlust');
 if ~exist(klustDir, 'dir')
-%     fprintf('Removing previously created dir: %s\n', klustDir);
-%     rmdir(klustDir,'s');
     mkdir(klustDir);
 end
 

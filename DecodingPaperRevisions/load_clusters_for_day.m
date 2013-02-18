@@ -14,34 +14,33 @@ if ~exist(klustDir, 'dir')
     error('Dir %s does not exist, has autoCluster been run?', klustDir);
 end
 
-data = load( fullfile(klustDir, 'spike_file.mat'));
+spikesFile = fullfile(klustDir, 'spikes.mat');
+if ~exist(spikesFile, 'file')
+    convert_tt_files(baseDir);
+end
+
+data = load( fullfile(klustDir, 'spikes.mat'));
 data = data.data;
 
 ttList = load( fullfile(klustDir, 'ttMap.mat') );
 ttList = ttList.ttList;
 
-
-% ttFiles = dir(fullfile(klustDir, '*.clu.*'));
-
-% Sort the files so that the order is 1,2,...,10 rather than 1,10,2,...
-% fileNum = cellfun(@str2double, regexprep( names, 'tt.clu.', ''));
-% [~, fileOrder] = sort(fileNum);
-% ttFiles = ttFiles(fileOrder);
-
+ttFiles = dir(fullfile(klustDir, '*.clu.*'));
+if numel(ttFiles)==0
+    cluster_feature_files(baseDir);
+end
 
 nAmp = numel(data);
 % nTT = numel(ttFiles);
+% fprintf('%d %d\n', nAmp, nTT);
 
 id = {};
 
 for iTetrode = 1:nAmp
 
         clFile = fullfile( klustDir, sprintf('tt.clu.%d', iTetrode ));
-        [nCl, clId] = loadClusterIdentities(clFile);
+        [~, clId] = loadClusterIdentities(clFile);
         id{iTetrode} = clId;
 end
-
-
-
 
 end

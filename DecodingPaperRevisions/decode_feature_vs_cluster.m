@@ -13,7 +13,6 @@ if nargin<3
     methods = true(4,1);
 end
 
-
 if ~exist(baseDir,'dir');
     error('Invalid directory specified');
 end

@@ -2,6 +2,7 @@ function stats = computeClusterStats(baseDir, ttList)
 %%
 [clId, data] = load_clusters_for_day(baseDir);
 
+
 nTT = numel(data);
 
 if nargin==1
@@ -30,7 +31,6 @@ for iTT = ttList
         if ns(iCl)<4
             continue;
         end
-        [iCl  nnz(clustId==iCl) size(amp)]
         [ lr(iCl) ] = lRatio(amp, clustId == iCl);
         
     end

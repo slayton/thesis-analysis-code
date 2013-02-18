@@ -47,8 +47,9 @@ out = {};
 
 p = load_exp_pos(edir, epoch);
 
+fprintf('Loading data for:');
 for i=1:numel(tt_list)
-%     disp(['Loading Amplitude data from tetrode:', tt_list{i}]);
+    fprintf('%s ', tt_list{i});
     file = fullfile(edir, tt_list{i}, [tt_list{i}, '.tt']);
     [~, ts, pk, w] = load_tt_waveforms(file, 'idx',[],'time_range', et); 
     
@@ -60,7 +61,7 @@ for i=1:numel(tt_list)
     validIdx = ~isnan(lp) & ~isnan(lv);
    
     runIdx = abs(lv) >= MIN_VEL;
-    wideIdx = w .* true;% >= MIN_WIDTH;
+    wideIdx = w >= MIN_WIDTH;
     ampIdx = max(pk) >= MIN_AMP;
     
     validIdx = runIdx & wideIdx & ampIdx & validIdx;
@@ -70,8 +71,8 @@ for i=1:numel(tt_list)
     
     
 end 
-      
 fprintf('\n');
+
 end
 
 
