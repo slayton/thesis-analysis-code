@@ -30,7 +30,7 @@ end
 
 
 pcaFiles = dir( fullfile(klustDir, 'tt.pca.fet.*') );
-if numberl(pcaFiles) == 0
+if numel(pcaFiles) == 0
     save_pca_feature_files(baseDir);
 else
     fprintf('PCA feature files already saved, skipping\n');
