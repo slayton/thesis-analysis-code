@@ -10,16 +10,16 @@ cd(klustDir);
 
 
 fprintf('Clustering... ');
-nFetFile = numel( dir( fullfile(klustDir, 'tt.pca.fet.*')) );
+nFetFile = numel( dir( fullfile(klustDir, 'pca.fet.*')) );
 
 if nFetFile==0
-    error('No feature files found, have you called:save_pca_feature_files.m?');
+    error('No feature files found, have save_pca_feature_files.m been called?');
 end
 
 parfor iTetrode = 1:nFetFile
  
-    cmd = sprintf('~/src/clustering/kk2.0/KlustaKwik tt %d -Screen 0 -Log 0', iTetrode )
-    system(cmd);
+    cmd = sprintf('~/src/clustering/kk2.0/KlustaKwik pca %d -Screen 0 -Log 0', iTetrode )
+    [s,w] =  unix(cmd);
     
 end  
 

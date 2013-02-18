@@ -26,11 +26,10 @@ pcaFeatures = {};
 
 fprintf('Computing pca waveform features\n');
 for iTT = 1:nTT
-    
     d = [];
     wf = waveform{iTT};
     
-    if isempty(wf)
+    if isempty(wf) || numel(wf)<= (32 * 4);
         pcaFeatures{iTT} = [];
         continue;
     end
@@ -52,7 +51,7 @@ end
 fprintf('Saving pca feature files:\n');
 for iTetrode = 1:numel(pcaFeatures)
     
-    pcaFile = sprintf('%s/%s%d', klustDir, 'tt.pca.fet.', iTetrode);
+    pcaFile = sprintf('%s/%s%d', klustDir, 'pca.fet.', iTetrode);
     fprintf('\t%s\n', pcaFile);
     
     data = pcaFeatures{iTetrode};

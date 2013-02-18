@@ -8,7 +8,7 @@ end
 klustDir = fullfile(baseDir, 'kKlust');
 
 % Create kKlust directory
-if ~exist(klustDir);
+if ~exist(klustDir, 'dir');
     fprintf('Creating:%s\n', klustDir);
     mkdir(klustDir);
 end
@@ -29,7 +29,7 @@ else
 end
 
 
-pcaFiles = dir( fullfile(klustDir, 'tt.pca.fet.*') );
+pcaFiles = dir( fullfile(klustDir, 'pca.fet.*') );
 if numel(pcaFiles) == 0
     save_pca_feature_files(baseDir);
 else
@@ -37,9 +37,9 @@ else
 end
 
 
-clFiles = dir( fullfile(klustdir', 'tt.pca.clu.*' ));
+clFiles = dir( fullfile(klustDir, 'pca.clu.*' ));
 if numel(clFiles) == 0
-    cluster_feature_files(baseDir, 'tt.pca.clu');
+    cluster_feature_files(baseDir);
 else
     fprintf('PCA clusters already saved, skipping\n');
 end
