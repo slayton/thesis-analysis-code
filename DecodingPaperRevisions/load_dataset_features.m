@@ -22,10 +22,13 @@ for i = 1:nTT
     fFile = sprintf('%s/tt.fet.%d', klustDir, i);
     feat = load_feature_file(fFile);
     
-    if isnan(feat)
+    if any(isnan(feat(:))) || numel(feat) < 8
         amp{i} = [];
         continue;
     end
+    
+    size(feat)
+    size(spikes{i}(:,5:8))
     amp{i} = [feat, spikes{i}(:, 5:8)];
     
 end
