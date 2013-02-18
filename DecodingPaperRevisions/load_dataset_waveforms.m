@@ -22,33 +22,16 @@ et = et( strcmp(epoch, en), :);
 % p = load_exp_pos(edir, epoch);
 
 fprintf('Loading data for:');
-for i=1:numel(tt_list)
+for i = 1 : numel(tt_list)
     
     fprintf('%s ', tt_list{i});
     file = fullfile(edir, tt_list{i}, [tt_list{i}, '.tt']);
-    [waves, ts, pk, w] = load_tt_waveforms(file, 'idx',[],'time_range', et); 
-    
-%     warning off; %#ok
-%     lp = interp1(p.ts, p.lp, ts, 'nearest');
-%     lv = interp1(p.ts, p.lv, ts, 'nearest');
-%     warning on; %#ok
-%     
-%     validIdx = ~isnan(lp) & ~isnan(lv);
-%    
-%     runIdx = abs(lv) >= MIN_VEL;
-%     wideIdx = w >= MIN_WIDTH;
-%     ampIdx = max(pk) >= MIN_AMP;
-%     
-%     validIdx = runIdx & wideIdx & ampIdx & validIdx;
-% 
-%     o = [pk',ts',lp',lv',w'];
-%     out{i} = o(validIdx,:);
-    
+    [waves, ts, pk, w] = load_tt_file_waveforms(file, 'idx',[],'time_range', et);  
 
     T{i} = ts';
     A{i} = pk';
     W{i} = w';
-    WF{i} = waves;
+    WF{i} = waves; 
     
 end 
 fprintf('\n');

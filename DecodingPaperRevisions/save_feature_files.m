@@ -1,4 +1,4 @@
-function write_feature_files(baseDir)
+function save_feature_files(baseDir)
 
 if ~exist(baseDir, 'dir')
     error('Dir %s does not exist', baseDir)
@@ -41,7 +41,7 @@ for iTetrode = 1:numel(data)
     
     fclose(fid);
     
-     fprintf('%s:%d ', ttList{iTetrode}, iTetrode);
+    fprintf('%s:%d ', ttList{iTetrode}, iTetrode);
 end
 fprintf('\n');
 

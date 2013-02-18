@@ -8,14 +8,13 @@ end
 curDir = pwd;
 cd(klustDir);
 
+
 fprintf('Clustering... ');
-nFetFile = numel( dir( fullfile(klustDir, 'tt.fet.*')) );
+nFetFile = numel( dir( fullfile(klustDir, 'tt.pca.fet.*')) );
 
 if nFetFile==0
-    write_feature_files(baseDir);
-    nFetFile = numel( dir( fullfile(klustDir, 'tt.fet.*')) );
+    error('No feature files found, have you called:save_pca_feature_files.m?');
 end
-
 
 parfor iTetrode = 1:nFetFile
  
