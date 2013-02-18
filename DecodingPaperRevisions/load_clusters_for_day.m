@@ -11,7 +11,6 @@ end
 
 klustDir = fullfile(baseDir, 'kKlust');
 if ~exist(klustDir, 'dir')
-    error('Dir %s does not exist, has autoCluster been run?', klustDir);
     convert_tt_files(baseDir);
 end
 
