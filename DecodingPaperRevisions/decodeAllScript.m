@@ -23,7 +23,7 @@ edir{end+1}= '/data/fabian/fk11/day08';
 
 nDset = numel(edir);
 
-for i = 2:10%nDset
+for i = 1:nDset
     
  
     fprintf('--------------- %s ---------------\n', upper(edir{i}));
