@@ -1,4 +1,4 @@
-function [amps n_spikes] = select_amps_by_feature(amps, varargin)
+function [amps, n_spikes] = select_amps_by_feature(amps, varargin)
 
 % sub selects spikes from the amps cell array that fall within a feature
 % range
@@ -12,8 +12,6 @@ args = parseArgsLite(varargin, args);
 if strcmp(args.feature, 'col') && args.col_num==-1
     error('Must specify col_num');
 end
-    
-
 
 n_spikes = 0;
 for i=1:numel(amps)

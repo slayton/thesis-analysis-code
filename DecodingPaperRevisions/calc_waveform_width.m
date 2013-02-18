@@ -1,11 +1,24 @@
-function w = calc_waveform_width(wave)
+function [w, highIdx, lowIdx] = calc_waveform_width(wave)
 
-    mw = squeeze(mean(wave));
-    [mx mxind] = max( mw(5:12,:) );
-    mxind = mxind + 4;
-    [mx mnind] = min(mw(13:end,:));
-    mnind = mnind + 12;
+    highIdx = [];
+    lowIdx = [];
+    
+    if ndims(wave)==3
+        
+        for i = 1:size(wave,1)
+            
+            W = squeeze( wave(i,:,:));
 
-    w = (mnind - mxind);% * 3.2e-5;
+            [~, highIdx(i,:)] = max( W(5:12,:) );
+            [~, lowIdx(i,:)] = min( W(13:32,:) );
+            
+        end
+            
+    end
+    
+    highIdx = highIdx + 4;
+    lowIdx = lowIdx + 12;
+    w = lowIdx - highIdx;
+    
     
 end

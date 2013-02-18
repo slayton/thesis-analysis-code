@@ -76,6 +76,7 @@ for iTT = 1:numel(cl)
             clAll{end+1} = data{iTT}(idx,:);
         end
         clAll{end+1} = data{iTT}(nullClIdx,:);
+        input.null{iTT} = data{iTT}(nullClIdx,:);
     end
 end
 
