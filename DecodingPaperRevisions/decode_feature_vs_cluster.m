@@ -110,7 +110,7 @@ input.resp_col{4} = [[]];
 
 input.method{1} = 'Feature - All';
 input.method{2} = 'Feature - Sorted';
-input.method{3} = 'Identify - All';
+input.method{3} = 'Identity - All';
 input.method{4} = 'Identity - Sorted';
 
 %%%%%%%%%%%%%% Construct the Inputs for the Decoder %%%%%%%%%%%%%%

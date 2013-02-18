@@ -52,7 +52,7 @@ for i=1:numel(tt_list)
     validIdx = ~isnan(pos) & ~isnan(vel);
     
     o = [pk',ts',pos',vel',w'];
-    out{i} = o(valid_ind,:);
+    out{i} = o(validIdx,:);
     
 end 
        

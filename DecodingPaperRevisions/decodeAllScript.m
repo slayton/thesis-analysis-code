@@ -41,10 +41,10 @@ er = reshape(er, 4, numel(er)/4)';
 mi = [E.mutual_info_unbiased_normalized];
 mi = reshape(mi, 4, numel(mi)/4)';
 
-idx = [1 3];
+idx = [1 3 2 4];
 er = er(:, idx);
 mi = mi(:, idx);
-M = {'All:Feat', 'Sorted:Feat', 'Sorted:ID', 'Sorted:F+ID'};
+M = {'All:Feat', 'Clust:Feat', 'All:Iden', 'Sorted:Iden'};
 % M = in{1}.method(idx);
 M = M(idx);
 
@@ -84,3 +84,17 @@ title('Decoder Comparison');
 ylabel('Mutual Information (Normalized)');
 
 save_new_decoding_figures('feature_vs_cluster_accuracy', gcf);
+
+%%
+
+% in = cell2mat(in);
+data = {in.data};
+
+totalSpike = [];
+sortedSpike = [];
+for i = 1:numel(data)
+    d = data{i};
+    totalSpike(i) = sum(cellfun(@(x)(size(x,1)), d{1}));
+    sortedSpike(i) = sum(cellfun(@(x)(size(x,1)), d{2}));
+end
+
