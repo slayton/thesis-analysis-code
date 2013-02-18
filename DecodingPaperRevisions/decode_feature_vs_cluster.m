@@ -24,9 +24,8 @@ end
 input.description = baseDir;
 input.ep = ep;
 
-
 %%%%%%%%%%%% DECODING PARAMETERS %%%%%%%%%%%%
-maxLRatio = .05;
+maxLRatio = Inf;
 minNSpike = 0;
 decodeDT = .25;
 decodeDP = .1;
@@ -35,22 +34,27 @@ stimulusBandwidth = .1;
 responseBandwidth = 30;
 timeSplit = 0; % MUST BE 0 or 1
 
-
 %%%%%%%%%%%%     LOAD THE DATA    %%%%%%%%%%%%
+
 pos = load_exp_pos(baseDir, ep);
 
 [en, et] = load_epochs(baseDir);
 input.et = et( strcmp(en, input.ep), :);
 clear en et;
 
-[cl, data, ttList] = load_clusters_for_day(baseDir);
-stats = computeClusterStats(baseDir);
+cl = load_dataset_clusters(baseDir);
+amp = load_dataset_features(baseDir);
+pc = load_dataset_pca_features(baseDir);
 
-ampSorted = data;
+stats = computeClusterStats(cl,amp);
 
-% Groups Spikes by TETRODE excluding UN SORTED
+ampSorted = amp;
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SORTED spikes grouped by TETRODE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 for iTT = 1:numel(cl)
-    idx = false( size( data{iTT}, 1),1);
+    idx = false( size( amp{iTT}, 1),1);
     
     for iCl = 1:max(cl{iTT})
         if stats(iTT).nSpike(iCl) > minNSpike && stats(iTT).lRatio(iCl) <= maxLRatio
@@ -63,34 +67,37 @@ end
 ampSorted = ampSorted( ~cellfun(@isempty, ampSorted));
 
 
-% Groups Spikes by CLUSTER including a NULL cluster
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SORTED spikes grouped by CLUSTER + HASH
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clAll = {};
 for iTT = 1:numel(cl)
     for iCl = 1:max(cl{iTT})
         
-        nullClIdx = true( size(data{iTT}, 1),1);
+        nullClIdx = true( size(amp{iTT}, 1),1);
         if stats(iTT).nSpike(iCl) > minNSpike && stats(iTT).lRatio(iCl) <= maxLRatio
-            
             idx = iCl == cl{iTT};
             nullClIdx (idx) = false;
-            clAll{end+1} = data{iTT}(idx,:);
+            clAll{end+1} = amp{iTT}(idx,:);
         end
-        clAll{end+1} = data{iTT}(nullClIdx,:);
-        input.null{iTT} = data{iTT}(nullClIdx,:);
+        clAll{end+1} = amp{iTT}(nullClIdx,:);
+        input.null{iTT} = amp{iTT}(nullClIdx,:);
     end
 end
 
-% Groups Spikes by CLUSTER excluding a NULL cluster
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SORTED spikes grouped by CLUSTER - HASH
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clSorted = {};
 for iTT = 1:numel(cl)
     for iCl = 1:max(cl{iTT})
         
-        nullClIdx = true( size(data{iTT}, 1));
+        nullClIdx = true( size(amp{iTT}, 1));
         if stats(iTT).nSpike(iCl) > minNSpike && stats(iTT).lRatio(iCl) <= maxLRatio
             
             idx = iCl == cl{iTT};
             nullClIdx (idx) = false;
-            clSorted{end+1} = data{iTT}(idx,:);
+            clSorted{end+1} = amp{iTT}(idx,:);
         end
     end
 end
@@ -98,7 +105,7 @@ end
 clear iCl iTT idx stats;
 
 % Configure Inputs
-input.data{1} = data;
+input.data{1} = amp;
 input.data{2} = ampSorted;
 input.data{3} = clAll;
 input.data{4} = clSorted;
@@ -107,7 +114,7 @@ clear data clAmp clust cl;
 input.resp_col{1} = [1 2 3 4];
 input.resp_col{2} = [1 2 3 4];
 input.resp_col{3} = [];
-input.resp_col{4} = [[]];
+input.resp_col{4} = [];
 
 input.method{1} = 'Feature - All';
 input.method{2} = 'Feature - Sorted';
@@ -182,6 +189,12 @@ for ii = 1:numel(input.data)
 
     emptyIdx = false(numel(d),1);
     for jj = 1:numel(d)
+      
+        if numel(d{jj}) == 0
+            emptyIdx(jj) = true;
+            continue;
+        end
+        
         st{jj} = d{jj}(:, 5);
         sp{jj} = d{jj}(:, 6); %interp1(stimTimestamp, stimulus, st{jj}, 'nearest');
         sf{jj} = d{jj}(:, input.resp_col{ii});
@@ -211,5 +224,4 @@ for ii = 1:numel(input.data)
     else
         P{ii} = z.compute(decodingSegments);
     end
-    
 end

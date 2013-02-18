@@ -1,4 +1,4 @@
-function tt = load_feature_file(filename, startRow, endRow)
+function tt = load_pca_feature_file(filename, startRow, endRow)
 %IMPORTFILE Import numeric data from a text file as a matrix.
 %   TT = IMPORTFILE(FILENAME) Reads data from text file FILENAME for the
 %   default selection.
@@ -30,7 +30,7 @@ end
 %   column3: double (%f)
 %	column4: double (%f)
 % For more information, see the TEXTSCAN documentation.
-formatSpec = '%f%f%f%f%[^\n\r]';
+formatSpec = '%f%f%f%f%f%f%f%f%f%f%f%f%[^\n\r]';
 
 %% Open the text file.
 fileID = fopen(filename,'r');

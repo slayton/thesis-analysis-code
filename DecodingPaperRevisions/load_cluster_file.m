@@ -1,4 +1,4 @@
-function [nClust, id] = loadClusterIdentities(clFile)
+function [nClust, id] = load_cluster_file(clFile)
 
 
 if exist(clFile, 'file')
