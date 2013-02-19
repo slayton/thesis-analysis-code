@@ -12,7 +12,6 @@ klustDir = fullfile(baseDir, 'kKlust');
 
 % Create kKlust directory
 if ~exist(klustDir, 'dir');
-    
     fprintf('Creating:%s\n', klustDir);
     mkdir(klustDir);
     

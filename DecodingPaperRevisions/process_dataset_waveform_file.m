@@ -42,9 +42,10 @@ for i = 1:numel(ts)
     p = lp{i}; %#ok
     v = lv{i}; %#ok
     
+    
     pc{i} = calc_waveform_princom(wf); 
     
-    if isempty(t) || isempty(a) || isempty(w) || isempty(wf)
+    if isempty(t) || isempty(a) || isempty(w) || isempty(wf) || size(wf,3) < 25
         
         data{i} = [];
         pc{i} = [];
@@ -81,12 +82,5 @@ fprintf('Saving %s\n', f2);
 
 save( f1, 'data');
 save( f2, 'pc');
-
-
-
-return;
-
-
-
 
 end
