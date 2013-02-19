@@ -115,7 +115,7 @@ for iTT = 1:numel(clPca)
         end
     end
     
-    clPcaSorted{end+1} = amp{iTT}(nullIdx,:);
+    clPcaAll{end+1} = amp{iTT}(nullIdx,:);
     ampClPca{end+1} = amp{iTT}(~nullIdx,:);
     
 end
