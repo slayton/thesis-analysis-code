@@ -2,7 +2,6 @@ function stats = computeClusterStats(clId, data)
 %%
 
 nTT = numel(clId);
-
 stats = repmat(struct( 'nSpike', [],'lRatio', []), 1, nTT);
 
 warning off; %#ok suppress mahal warning about precision
@@ -13,7 +12,11 @@ for iTT = 1:nTT
     end
     
     clustId = clId{iTT};
-    feat = data{iTT}( :, 1:4 );
+    if size(data{iTT}, 2) == 12
+        feat = data{iTT};
+    else
+        feat = data{iTT}( :, 1:4 );
+    end
     
     nClust = max(clustId);
    
@@ -29,7 +32,12 @@ for iTT = 1:nTT
         if ns(iCl)<4
             continue;
         end
-        [ lr(iCl) ] = lRatio(feat, clustId == iCl);
+       
+        if  nnz(clustId == iCl) > size(feat,2)
+            lr(iCl) = lRatio(feat, clustId == iCl);
+        else
+            lr(iCl) = nan;
+        end
         
     end
     

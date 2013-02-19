@@ -2,13 +2,13 @@ function process_dataset_waveform_file(baseDir, minVel, minAmp)
 
 if nargin<2 || isempty(minVel)
     minVel = 0;
-elseif ~isscalar(minVel) 
+elseif ~isscalar(minVel)
     error('MinVel must be a scalalr');
 end
 
 if nargin<3 || isempty(minAmp)
     minAmp = 75;
-elseif ~isscalar(minAmp) 
+elseif ~isscalar(minAmp)
     error('MinVel must be a scalalr');
 end
 
@@ -16,24 +16,22 @@ end
 klustDir = fullfile(baseDir, 'kKlust');
 
 if ~exist( fullfile(klustDir, 'dataset_ts.mat'), 'file');
-    
     save_dataset_waveforms(baseDir);
-    
 else
     
     vars = {'ts', 'lp', 'lv', 'amp', 'wide', 'waveform', 'ttList'};
-    for iVar = 1:numel(vars)   
+    for iVar = 1:numel(vars)
         fn =  sprintf('%s/dataset_%s.mat', klustDir, vars{iVar} );
         in = load( fn ); %#ok
         eval( sprintf('%s = in.%s;', vars{iVar}, vars{iVar} ));
     end
     
 end
-   
-data = repmat({}, size(ts)); %#ok
-pc = repmat({}, size(ts)); 
 
-for i = 1:numel(ts) 
+data = repmat({}, size(ts)); %#ok
+pc = repmat({}, size(ts));
+
+for i = 1:numel(ts)
     
     t = ts{i};
     a = amp{i}; %#ok
@@ -43,7 +41,6 @@ for i = 1:numel(ts)
     v = lv{i}; %#ok
     
     
-    pc{i} = calc_waveform_princom(wf); 
     
     if isempty(t) || isempty(a) || isempty(w) || isempty(wf) || size(wf,3) < 25
         
@@ -51,24 +48,24 @@ for i = 1:numel(ts)
         pc{i} = [];
         
     else
-        
-        
+        pc{i} = calc_waveform_princom(wf); % compute PCA on all spikes not just clustered spikes
+
         
         nanIdx = isnan(p) | isnan(v);
         runIdx = abs(v) >= minVel;
         ampIdx = max(a,[],2) >= minAmp;
         
         idx = ~nanIdx & runIdx & ampIdx;
-
+        
         a = a(idx,:);
         t = t(idx);
         p = p(idx);
         v = v(idx);
         w = w(idx);
         wf = wf(:,:, idx); %#ok<NASGU>
-
-        data{i} = [a, t, p, v, w];
         
+        data{i} = [a, t, p, v, w];
+       
         pc{i} = pc{i}(idx,:);
         
     end

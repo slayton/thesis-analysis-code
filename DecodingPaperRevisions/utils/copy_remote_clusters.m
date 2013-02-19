@@ -23,7 +23,7 @@ edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
 nExp = numel(edir);
-for iExp = 1:nExp
+for iExp = 4%1:nExp
    
     kDir = fullfile(edir{iExp}, 'kKlust');
     

@@ -1,8 +1,10 @@
 function d = calc_waveform_princom(wf)
 
     if ndims(wf)<3
+    
         error('Invalid waveforms');
     end
+    
     nChan = size(wf,1);
 
     d = [];
