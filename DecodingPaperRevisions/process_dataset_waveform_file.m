@@ -1,37 +1,28 @@
-function save_waveform_files(baseDir)
-
-MIN_VEL = .15;
-MIN_WIDTH = 12;
-MIN_AMP = 125;
-
-if nargin==1
-    plot = 0;
-end
-
-if ~exist(baseDir, 'dir')
-    error('Dir %s does not exist', baseDir)
-end
+function process_dataset_waveform_file(baseDir)
 
 klustDir = fullfile(baseDir, 'kKlust');
-if ~exist(klustDir, 'dir')
-    mkdir(klustDir);
+
+dsetFile = fullfile(klustDir, 'dataset.mat');
+
+if ~exist( dsetFile, 'file')
+    save_dataset_waveforms(baseDir);
+else
+    in = load(dsetFile);
+    ts = in.ts;
+    amp = in.amp;
+    width = in.width;
+    waveform = in.waveform;
 end
-%%
-ep = 'amprun';
 
-p = load_exp_pos(baseDir, ep);
 
-[ts, amp, width, waveform, ttList] = load_dataset_waveforms(baseDir, ep);
-%%
-
-data = repmat({}, size(ts));
-
+   
 for i = 1:numel(ts)
     
     t = ts{i};
     a = amp{i};
     w = width{i};
     wf = waveform{i};
+    pc{i} = calc_waveform_princom(wf{i});
     
     if isempty(t) || isempty(a) || isempty(w) || isempty(wf)
         data{i} = [];
@@ -46,30 +37,31 @@ for i = 1:numel(ts)
         runIdx = abs(lv) >= MIN_VEL;
         wideIdx = sum(w >= MIN_WIDTH,2) >= 2;% spikes where at least 2 channels are wider than MIN_WIDTH
         ampIdx = max(a,[],2) >= MIN_AMP;
-
+        
         idx = ~nanIdx & runIdx & wideIdx & ampIdx;
 
+        
         a = a(idx,:);
         t = t(idx);
         lp = lp(idx);
         lv = lv(idx);
         w = w(idx);
-
         wf = wf(:,:, idx);
 
         data{i} = [a, t, lp, lv, w];
 
         waveform{i} = wf;
+        pc{i} = pc{i}(idx,:);
     end
 end
-%%
-   
 save(fullfile(klustDir, 'spikes.mat'), 'data');
 save(fullfile(klustDir, 'waveforms.mat'), 'waveform');
 save(fullfile(klustDir, 'ttMap.mat'), 'ttList');
+save(fullfile(klustDir, 'princomp.mat'), 'pc');
 
 return;
 
 
 
 
+end

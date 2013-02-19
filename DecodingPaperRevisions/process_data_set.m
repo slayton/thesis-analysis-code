@@ -14,9 +14,15 @@ if ~exist(klustDir, 'dir');
 end
 
 
+if ~exist( fullfile(klustDir, 'dataset.mat'), 'file')
+    save_dataset_waveforms(baseDir);
+else
+    fprintf('dataset.mat already saved, skipping\n');
+end
+
 % load .tt files and save s spikes.mat and waveforms.mat
 if ~exist( fullfile(klustDir, 'spikes.mat'), 'file') || ~exist( fullfile(klustDir, 'waveforms.mat'))
-    save_waveform_files(baseDir);
+	process_dataset_waveform_file(baseDir);    
 else
     fprintf('spike.mat and waveforms.mat already saved, skipping\n');
 end
