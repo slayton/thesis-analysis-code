@@ -27,7 +27,13 @@ for iExp = 1:nExp
    
     kDir = fullfile(edir{iExp}, 'kKlust');
     
-    cmd = sprintf('rm %s/*', kDir);
+    cmd = sprintf('rm %s/pca*', kDir);
+    [s,w] = unix(cmd);
+    
+    cmd = sprintf('rm %s/tt*', kDir);
+    [s,w] = unix(cmd);
+    
+    cmd = sprintf('rm %s/spike*', kDir);
     [s,w] = unix(cmd);
     
 end

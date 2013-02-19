@@ -1,4 +1,13 @@
-function cluster_feature_files(baseDir)
+function cluster_feature_files(baseDir, prefix)
+
+if nargin == 1 || isempty(prefix);
+    prefix = 'tt';
+end
+
+if ~ischar(prefix)
+    error('Prefix must be either: tt or pca');
+end
+
 
 klustDir = fullfile(baseDir, 'kKlust');
 if ~exist(klustDir, 'dir');
@@ -8,21 +17,39 @@ end
 curDir = pwd;
 cd(klustDir);
 
+in = load( fullfile(klustDir, 'dataset_ttList.mat'));
+ttList = in.ttList;
 
-fprintf('Clustering... ');
-nFetFile = numel( dir( fullfile(klustDir, 'pca.fet.*')) );
+nTT = numel(ttList);
 
-if nFetFile==0
-    error('No feature files found, have save_pca_feature_files.m been called?');
-end
+fprintf('Clustering...\n');
 
-parfor iTetrode = 1:nFetFile
+
+for iTetrode = 1:nTT
  
-    cmd = sprintf('~/src/clustering/kk2.0/KlustaKwik pca %d -Screen 0 -Log 0', iTetrode )
-    [s,w] =  unix(cmd);
+    featFile = sprintf('%s/%s.fet.%d', klustDir, prefix, iTetrode);
+    
+    if ~exist( featFile, 'file');
+        fprintf('%s does not exist, skipping it\n', featFile);
+        continue;
+    end
+    
+    fprintf('\t%s ', featFile);
+    
+    cmd = sprintf('~/src/clustering/kk2.0/KlustaKwik %s %d -Screen 0 -Log 0',prefix, iTetrode );
+    [s, w] =  unix(cmd);
+    
+    fprintf('\n');
+
+    clFile = sprintf('%s/%s.clu.%d', klustDir, prefix, iTetrode);
+    
+    if ~exist(clFile, 'file');
+        fprintf('%s not written, creating dummy file\n');
+        [s, w] = unix( sprintf( 'touch %s', clFile) );
+    end
     
 end  
 
 cd(curDir)
 
-fprintf('DONE!\n');
+fprintf('Done!\n');

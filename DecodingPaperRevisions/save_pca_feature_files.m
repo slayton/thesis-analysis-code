@@ -6,63 +6,50 @@ end
 
 klustDir = fullfile(baseDir, 'kKlust');
 if ~exist(klustDir, 'dir')
-    error('%s does not exist!', klustDir);
+    mkdir(klustDir);
 end
 
-waveFile = fullfile(klustDir, 'waveforms.mat');
-
-if ~exist(waveFile)
+spikesFile = fullfile(klustDir, 'spike_params_pca.mat');
+if ~exist(spikesFile)
     fprintf('Spikes file does not exist, creating it\n');
-    save_tt_waveforms(baseDir);
+    convert_tt_files(baseDir);
 end
 
-waveform = load(waveFile);
-waveform = waveform.waveform;
+in = load(spikesFile);
+pc = in.pc;
 
-nTT = numel(waveform);
-nChan = size(waveform{1},1);
-
-pcaFeatures = {};
-
-fprintf('Computing pca waveform features\n');
-for iTT = 1:nTT
-    d = [];
-    wf = waveform{iTT};
-    
-    if isempty(wf) || numel(wf)<= (32 * 4);
-        pcaFeatures{iTT} = [];
-        continue;
-    end
-    
-    for iChan = 1:nChan
-        w = squeeze(waveform{iTT}(iChan,:,:))';
-        
-        [~, s] = pca(w, 'NumComponents', 3);
-        d = [d, s];
-        
-    end
-    pcaFeatures{iTT} = d;
-end
+ttListFile = fullfile(klustDir, 'dataset_ttList.mat');
+in = load(ttListFile);
+ttList = in.ttList;
 
 %% Save a complete file
 
 % ttList = in.amp_names;
 
-fprintf('Saving pca feature files:\n');
-for iTetrode = 1:numel(pcaFeatures)
+fprintf('Saving feature files:\n');
+for iTetrode = 1:numel(pc)
+       
+    featFile = fullfile( klustDir, sprintf('pca.fet.%d', iTetrode) );
+    fprintf('\t%s\n', featFile);
+
+    d = pc{iTetrode};
+    if isempty(d) || numel(d) == 0
+        
+        [s,w] = unix( sprintf('touch %s', featFile) );
+        continue;
     
-    pcaFile = sprintf('%s/%s%d', klustDir, 'pca.fet.', iTetrode);
-    fprintf('\t%s\n', pcaFile);
-    
-    data = pcaFeatures{iTetrode};
-    
-    % Open the file
-    fid = fopen(pcaFile, 'w+');
-    % Write the number of features
-    fprintf(fid, '12\n');
-    % Write the feature matrix
-    fprintf(fid, '%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\t%3.4f\n', data);
-    fclose(fid);
+    else
+        
+        d = d(:,1:12)';
+        % Open the file
+        fid = fopen(featFile, 'w+');    
+        % Write the number of features
+        fprintf(fid, '4\n'); 
+        % Write the feature matrix
+        fprintf(fid, '%3.4f\t%3.4f\t%3.4f\t%3.4f%3.4f\t%3.4f\t%3.4f\t%3.4f%3.4f\t%3.4f\t%3.4f\t%3.4f\n', d);
+        fclose(fid);
+        
+    end
     
 end
 fprintf('\n');

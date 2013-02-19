@@ -1,10 +1,11 @@
-function d = compute_pc_for_waves(wf)
+function d = calc_waveform_princom(wf)
 
-    if ndim(wf)<3
+    if ndims(wf)<3
         error('Invalid waveforms');
     end
     nChan = size(wf,1);
 
+    d = [];
     for iChan = 1:nChan
             w = squeeze(wf(iChan,:,:))';
 
