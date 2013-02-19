@@ -16,5 +16,18 @@ edir{12}= '/data/fabian/fk11/day08';
 for i = 1:numel(edir)
     baseDir = edir{i}; 
     fprintf('\n---------------------- %s ----------------------\n', baseDir);
-    process_data_set(baseDir);
+    save_dataset_waveforms(baseDir);
+end
+
+for i = 1:numel(edir)
+    baseDir = edir{i};
+    fprintf('\n---------------------- %s ----------------------\n', baseDir);
+
+    process_dataset_waveform_file(baseDir, MIN_VEL, MIN_AMP);    
+
+    save_feature_files(baseDir);
+    save_pca_feature_files(baseDir);
+
+    cluster_feature_files(baseDir);
+    cluster_feature_files(baseDir, 'pca');
 end
