@@ -33,6 +33,7 @@ for iTetrode = 1:numel(pc)
     fprintf('\t%s\n', featFile);
 
     d = pc{iTetrode};
+    
     if isempty(d) || numel(d) == 0
         
         [s,w] = unix( sprintf('touch %s', featFile) );

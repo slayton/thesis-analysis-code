@@ -1,4 +1,4 @@
-function copy_remote_pos_files(host, user)
+function copy_remote_epoch_files(host, user)
 %%
 
 if nargin < 2 || nargin > 1000
@@ -31,15 +31,11 @@ for iExp = 1:nExp
         fprintf('Creating directory: %s\n', d);
         system( cmd );
     end
-    
-    for i = 1:30
-        tt = sprintf('%02d', i)
-    end
-%     
-%         ttDir = sprintf( '%s/
-%     cmd = sprintf('scp -r %s@%s:%s/ %s', user, host, d, d);
-%     fprintf('Executing cmd:%s\n', cmd);
-%     [s, w] = unix(cmd);
+
+
+    cmd = sprintf('scp -r %s@%s:%s/epochs.def %s', user, host, d, d);
+    fprintf('Executing cmd:%s\n', cmd);
+    [s, w] = unix(cmd);
     
     
     

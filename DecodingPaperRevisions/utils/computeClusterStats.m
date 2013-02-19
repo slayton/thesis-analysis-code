@@ -1,18 +1,25 @@
-function stats = computeClusterStats(clId, data)
+function stats = computeClusterStats(clId, data, pcaFlag)
 %%
+
+if nargin==2
+    pcaFlag = 0;
+end
 
 nTT = numel(clId);
 stats = repmat(struct( 'nSpike', [],'lRatio', []), 1, nTT);
 
 warning off; %#ok suppress mahal warning about precision
 for iTT = 1:nTT
-    
-    if isempty(clId{iTT})
+   
+    if isempty(clId{iTT}) || isempty(data{iTT})
+        stats(iTT).lRatio = nan;
+        stats(iTT).nSpike = nan;
         continue;
     end
     
     clustId = clId{iTT};
-    if size(data{iTT}, 2) == 12
+    
+    if pcaFlag
         feat = data{iTT};
     else
         feat = data{iTT}( :, 1:4 );

@@ -1,19 +1,17 @@
 
-function [P, E, input] = decode_feature_vs_cluster(baseDir, ep, methods)
+function [P, E, input] = decode_feature_vs_cluster(baseDir, methods)
 %% Load DATA
 
 if nargin > 20000
     clear;
-    ep = 'amprun';
     baseDir = '/data/spl11/day13';
     methods = true(7,1);
-elseif nargin == 1 || isempty(ep)
-    ep = 'amprun';    
+elseif nargin == 1 || isempty(methods)
+     methods = true(7,1);   
 end
 
-if nargin<3
-    methods = true(7,1);
-end
+ep = 'amprun';
+
 
 if ~exist(baseDir,'dir');
     error('Invalid directory specified');
@@ -24,10 +22,11 @@ if ~any( strcmp( load_epochs(baseDir), ep) )
 end
 
 input.description = baseDir;
-input.ep = ep;
+input.methods = methods;
 
 %%%%%%%%%%%% DECODING PARAMETERS %%%%%%%%%%%%
-maxLRatio = .1;
+ampMaxLR = .1;
+pcaMaxLR = .2;
 minNSpike = 0;
 decodeDT = .25;
 decodeDP = .1;
@@ -41,7 +40,7 @@ timeSplit = 0; % MUST BE 0 or 1
 pos = load_exp_pos(baseDir, ep);
 
 [en, et] = load_epochs(baseDir);
-input.et = et( strcmp(en, input.ep), :);
+input.et = et( strcmp(en, ep), :);
 clear en et;
 
 
@@ -51,117 +50,76 @@ clPca = load_dataset_clusters(baseDir, 'pca');
 
 
 statsAmp = computeClusterStats(clAmp, amp);
-statsPca = computeClusterStats(clPca, pc);
-%%
+statsPca = computeClusterStats(clPca, pc, 1);
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                   SETUP INPUTS FOR THE DECODER
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%% All Spikes grouped by tetrode
 % amp = amp; % <--- Not required but AMP is the first input
-
+fprintf('Preparing data for: Feature-All Spikes\n');
 %%%%%%%%%%%%%%%%%%%%% AMP Clustered spikes, grouped by Tetrode
-ampClAmp = amp;
-for iTT = 1:numel(clAmp)
-    idx = false( size( amp{iTT}, 1),1);
-    
-    for iCl = 1:max(clAmp{iTT})
-        if statsAmp(iTT).nSpike(iCl) > minNSpike && statsAmp(iTT).lRatio(iCl) <= maxLRatio
-            idx = idx | iCl == clAmp{iTT};
-        end
-    end
 
-    ampClAmp{iTT} = ampClAmp{iTT}(idx,:);
-end
-ampClAmp = ampClAmp( ~cellfun(@isempty, ampClAmp));
+ampClAmp = {};
+ampClPca = {};
 
-%%%%%%%%%%%%%%%%%%%%% PCA Clustered spikes, grouped by Tetrode
-ampClPca = amp;
-for iTT = 1:numel(clPca)
-    idx = false( size( amp{iTT}, 1),1);
-    
-    for iCl = 1:max(clPca{iTT})
-        if statsPca(iTT).nSpike(iCl) > minNSpike && statsPca(iTT).lRatio(iCl) <= maxLRatio
-            idx = idx | iCl == clPca{iTT};
-        end
-    end
-
-    ampClPca{iTT} = ampClPca{iTT}(idx,:);
-end
-ampClPca = ampClPca( ~cellfun(@isempty, ampClPca));
-
-
-%%%%%%%%%%%%%%%%%%%%% AMP Clustered spikes, grouped by Clusters + HASH
-clAmpAll = {};
-for iTT = 1:numel(clAmp)
-    for iCl = 1:max(clAmp{iTT})
-        
-        nullClIdx = true( size(amp{iTT}, 1),1);
-        if statsAmp(iTT).nSpike(iCl) > minNSpike && statsAmp(iTT).lRatio(iCl) <= maxLRatio
-            idx = iCl == clAmp{iTT};
-            nullClIdx (idx) = false;
-            clAmpAll{end+1} = amp{iTT}(idx,:);
-        end
-        
-        clAmpAll{end+1} = amp{iTT}(nullClIdx,:);
-        input.null{iTT} = amp{iTT}(nullClIdx,:);
-        
-    end
-end
-
-%%%%%%%%%%%%%%%%%%%%% AMP Clustered spikes, grouped by Clusters
+fprintf('Preparing data for:Identity Amp Sorted+/- Hash\n');
 
 clAmpSorted = {};
-for iTT = 1:numel(clAmp)
-    for iCl = 1:max(clAmp{iTT})
-        
-        nullClIdx = true( size(amp{iTT}, 1));
-        if statsAmp(iTT).nSpike(iCl) > minNSpike && statsAmp(iTT).lRatio(iCl) <= maxLRatio
+clAmpAll = {};
+
+for iTT = 1:numel(clAmp) % for each tt
+    
+    nullIdx = true( size(amp{iTT}, 1), 1); 
+    
+    for iCl = 1:max(clAmp{iTT}) % for each cluster    
+       
+        if statsAmp(iTT).nSpike(iCl) >= minNSpike && statsAmp(iTT).lRatio(iCl) <= ampMaxLR
             
             idx = iCl == clAmp{iTT};
-            nullClIdx (idx) = false;
+            
             clAmpSorted{end+1} = amp{iTT}(idx,:);
+            clAmpAll{end+1} = amp{iTT}(idx,:);
             
+            nullIdx (idx) = false;
+
         end
     end
+    
+    clAmpAll{end+1} = amp{iTT}(nullIdx,:);
+    ampClAmp{end+1} = amp{iTT}(~nullIdx,:);
 end
 
-%%%%%%%%%%%%%%%%%%%%% PCA Clustered spikes, grouped by Clusters + HASH
+%%%%%%%%%%%%%%%%%%%%% PCA Clustered spikes
+fprintf('Preparing data for:Identity Pca Sorted+/- Hash\n');
+
 clPcaAll = {};
-for iTT = 1:numel(clPca)
-    for iCl = 1:max(clPca{iTT})
-        
-        nullClIdx = true( size(amp{iTT}, 1),1);
-        if statsPca(iTT).nSpike(iCl) > minNSpike && statsPca(iTT).lRatio(iCl) <= maxLRatio
-            idx = iCl == clPca{iTT};
-            nullClIdx (idx) = false;
-            clPcaAll{end+1} = amp{iTT}(idx,:);
-        end
-        
-        clPcaAll{end+1} = amp{iTT}(nullClIdx,:);
-        input.null{iTT} = amp{iTT}(nullClIdx,:);
-        
-    end
-end
-
-%%%%%%%%%%%%%%%%%%%%% PCA Clustered spikes, grouped by Clusters
-
 clPcaSorted = {};
+
 for iTT = 1:numel(clPca)
+    
+    nullIdx = true( size(amp{iTT}, 1), 1); 
+    
     for iCl = 1:max(clPca{iTT})
         
-        nullClIdx = true( size(amp{iTT}, 1));
-        if statsPca(iTT).nSpike(iCl) > minNSpike && statsPca(iTT).lRatio(iCl) <= maxLRatio
+        if statsPca(iTT).nSpike(iCl) >= minNSpike && statsPca(iTT).lRatio(iCl) <= pcaMaxLR
             
             idx = iCl == clPca{iTT};
-            nullClIdx (idx) = false;
-            clPcaSorted{end+1} = amp{iTT}(idx,:);
             
+            clPcaSorted{end+1} = amp{iTT}(idx,:);
+            clPcaAll{end+1} = amp{iTT}(idx,:);
+            
+            nullIdx (idx) = false;
+
         end
     end
+    
+    clPcaSorted{end+1} = amp{iTT}(nullIdx,:);
+    ampClPca{end+1} = amp{iTT}(~nullIdx,:);
+    
 end
 
-clear iCl iTT idx stats;
 
 % Configure Inputs
 input.data{1} = amp;            % <- Feature decoding all spikes
@@ -172,11 +130,14 @@ input.data{5} = clAmpSorted;    % <- Cluster decoding Amp Sorted
 input.data{6} = clPcaAll;       % <- Cluster decoding PCA Sorted + Hash
 input.data{7} = clPcaSorted;    % <- Cluster decoding PCA Sorted
 
+input.nSpike = cellfun(@sum, cellfun( @(x) (cellfun(@(y)(size(y,1)), x)), input.data,'uniformoutput', 0));
+
 clear data clAmp clust cl;
 
 input.resp_col{1} = [1 2 3 4];
 input.resp_col{2} = [1 2 3 4];
 input.resp_col{3} = [1 2 3 4];
+input.resp_col{4} = [];
 input.resp_col{5} = [];
 input.resp_col{6} = [];
 input.resp_col{7} = [];
@@ -286,7 +247,7 @@ for ii = 1:numel(input.data)
         'response_kernel', 'gaussian', ...
         'response_bandwidth', responseBandwidth );
         
-    if nargout > 1
+    if nargout > 1 || nargin > 2000
         [P{ii}, E(ii)] = z.compute(decodingSegments);
     else
         P{ii} = z.compute(decodingSegments);

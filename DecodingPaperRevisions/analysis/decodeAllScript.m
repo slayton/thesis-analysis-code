@@ -27,7 +27,7 @@ for i = 1:nDset
     
  
     fprintf('--------------- %s ---------------\n', upper(edir{i}));
-    [p{i}, e{i}, in{i}] = decode_feature_vs_cluster(edir{i},'amprun', [1 1 1 1]);
+    [p{i}, e{i}, in{i}] = decode_feature_vs_cluster(edir{i});
     fprintf('\n');
     
 end
@@ -36,12 +36,12 @@ end
 E = [e{:}];
 
 er = [E.summary_error];
-er = reshape(er, 4, numel(er)/4)';
+er = reshape(er, 7, numel(er)/7)';
 
 mi = [E.mutual_info_unbiased_normalized];
-mi = reshape(mi, 4, numel(mi)/4)';
+mi = reshape(mi, 7, numel(mi)/7)';
 
-idx = [1 3 2 4];
+idx = [1 3 2 4 5 6 7];
 er = er(:, idx);
 mi = mi(:, idx);
 M = {'All:Feat', 'Clust:Feat', 'All:Iden', 'Sorted:Iden'};
@@ -49,7 +49,7 @@ M = {'All:Feat', 'Clust:Feat', 'All:Iden', 'Sorted:Iden'};
 M = M(idx);
 
 figure;
-subplot(121);
+subplot(211);
 set(gca,'FontSize', 14);
 
 boxplot( er ); hold on;
@@ -66,7 +66,7 @@ fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
 title('Decoder Comparison');
 ylabel('Median Error(m)');
 
-subplot(122);
+subplot(212);
 set(gca,'FontSize', 14);
 
 boxplot( mi ); hold on;
