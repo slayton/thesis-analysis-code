@@ -13,6 +13,9 @@ edir{10}= '/data/greg/esm/day02';
 edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
+MIN_VEL = .1;
+MIN_AMP = 75;
+
 for i = 1:numel(edir)
     baseDir = edir{i}; 
     fprintf('\n---------------------- %s ----------------------\n', baseDir);
@@ -30,4 +33,5 @@ for i = 1:numel(edir)
 
     cluster_feature_files(baseDir);
     cluster_feature_files(baseDir, 'pca');
+    
 end
