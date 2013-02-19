@@ -12,17 +12,16 @@ klustDir = fullfile(baseDir, 'kKlust');
 if ~exist(klustDir, 'dir')
     mkdir(klustDir);
 end
-%%
-ep = 'amprun';
-
-p = load_exp_pos(baseDir, ep);
-
 
 %% - Save complete data file
 
 dsetFileTs = sprintf('%s/dataset_ts.mat');
 dsetFileTemplate = fullfile(klustDir, 'dataset_%s.mat');
 if ~exist(dsetFileTs, 'file')
+    
+    ep = 'amprun';
+
+    p = load_exp_pos(baseDir, ep);
     
     [ts, amp, width, waveform, ttList] = load_dataset_waveforms(baseDir, ep);
 
