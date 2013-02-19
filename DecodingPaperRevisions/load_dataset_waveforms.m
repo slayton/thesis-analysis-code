@@ -22,7 +22,7 @@ et = et( strcmp(epoch, en), :);
 % p = load_exp_pos(edir, epoch);
 
 fprintf('Loading data for:');
-parfor i = 1 : numel(tt_list)
+for i = 1 : numel(tt_list)
     
     fprintf('%s ', tt_list{i});
     file = fullfile(edir, tt_list{i}, [tt_list{i}, '.tt']);
