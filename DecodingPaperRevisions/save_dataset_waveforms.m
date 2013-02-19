@@ -15,8 +15,7 @@ end
 
 %% - Save complete data file
 
-dsetFileTs = sprintf('%s/dataset_ts.mat');
-dsetFileTemplate = fullfile(klustDir, 'dataset_%s.mat');
+dsetFileTs = fullfile(klustDir, 'dataset_ts.mat');
 if ~exist(dsetFileTs, 'file')
     
     ep = 'amprun';
