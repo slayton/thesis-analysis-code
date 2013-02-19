@@ -12,9 +12,9 @@ edir{end+1} = '/data/spl11/day13';
 edir{end+1} = '/data/spl11/day14';
 edir{end+1} = '/data/spl11/day15';
 edir{end+1} = '/data/spl11/day16';
-% edir{end+1} = '/data/jun/rat1/day01';
+edir{end+1} = '/data/jun/rat1/day01';
 edir{end+1} = '/data/jun/rat1/day02';
-% edir{end+1} = '/data/jun/rat2/day01';
+edir{end+1} = '/data/jun/rat2/day01';
 edir{end+1} = '/data/jun/rat2/day02';
 edir{end+1} = '/data/greg/esm/day01';
 edir{end+1}= '/data/greg/esm/day02';
@@ -24,13 +24,14 @@ edir{end+1}= '/data/fabian/fk11/day08';
 nDset = numel(edir);
 
 for i = 1:nDset
-    
- 
+   
     fprintf('--------------- %s ---------------\n', upper(edir{i}));
     [p{i}, e{i}, in{i}] = decode_feature_vs_cluster(edir{i});
     fprintf('\n');
     
 end
+
+
 %%
 
 E = [e{:}];
