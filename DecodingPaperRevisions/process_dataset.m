@@ -1,12 +1,11 @@
-function process_data_set(baseDir)
+function process_dataset(baseDir)
 
-MIN_VEL = .12;
+MIN_VEL = .05;
 MIN_AMP =  75;
 
 if ~exist(baseDir, 'dir')
     error('%s does not exist!\n', baseDir);
 end
-
 
 klustDir = fullfile(baseDir, 'kKlust');
 

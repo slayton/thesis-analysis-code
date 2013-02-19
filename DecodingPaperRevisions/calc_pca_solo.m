@@ -1,4 +1,4 @@
-function d = calc_waveform_princom(wf)
+function d = calc_pca_solo(wf)
 
     if ndims(wf)<3
     

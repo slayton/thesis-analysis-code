@@ -48,7 +48,8 @@ for i = 1:numel(ts)
         pc{i} = [];
         
     else
-        pc{i} = calc_waveform_princom(wf); % compute PCA on all spikes not just clustered spikes
+        pc{i} = calc_pca_solo(wf); % compute PCA on all spikes not just clustered spikes
+%         pc2{i} = calc_pca_grouped(wf);
 
         
         nanIdx = isnan(p) | isnan(v);
@@ -67,17 +68,21 @@ for i = 1:numel(ts)
         data{i} = [a, t, p, v, w];
        
         pc{i} = pc{i}(idx,:);
+%         pc2{i} = pc2{i}(idx,:);
         
     end
 end
 
 f1 = sprintf('%s/spike_params.mat', klustDir);
 f2 = sprintf('%s/spike_params_pca.mat', klustDir);
+f3 = sprintf('%s/spike_params_pca_grouped.mat', klustDir);
 
 fprintf('Saving %s\n', f1);
 fprintf('Saving %s\n', f2);
+fprintf('Saving %s\n', f3);
 
 save( f1, 'data');
 save( f2, 'pc');
+save( f3, 'pc');
 
 end

@@ -235,7 +235,7 @@ for ii = 1:numel(input.data)
     
     st = st(~emptyIdx);
     sp = sp(~emptyIdx);
-    sf = sf(~emptyIdx);
+    sf = sf(~emptyIdx);    
     
     z = kde_decoder(stimTimestamp, stimulus, st, sp, sf, ...
         'encoding_segments', encodingSegments, ...
