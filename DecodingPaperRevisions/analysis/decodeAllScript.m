@@ -22,31 +22,34 @@ edir{end+1}= '/data/greg/saturn/day02';
 edir{end+1}= '/data/fabian/fk11/day08';
 
 nDset = numel(edir);
+[PR, ER, IN] = deal( repmat({}, nDset,1) );
 
 for i = 1:nDset
    
     fprintf('--------------- %s ---------------\n', upper(edir{i}));
-    [p{i}, e{i}, in{i}] = decode_feature_vs_cluster(edir{i});
+    [PR{i}, ER{i}, IN{i}] = decode_feature_vs_cluster(edir{i});
     fprintf('\n');
     
 end
 
+save( '/data/amplitude_decoding/NEW_FIGURES/decodingResults.mat', 'PR', 'ER', 'IN');
+
 
 %%
 
-E = [e{:}];
+e = [ER{:}];
 
-er = [E.summary_error];
+er = [e.summary_error];
 er = reshape(er, 7, numel(er)/7)';
 
-mi = [E.mutual_info_unbiased_normalized];
+mi = [e.mutual_info_unbiased_normalized];
 mi = reshape(mi, 7, numel(mi)/7)';
 
-idx = [1 5];
+idx = [1 4 2 5];
 er = er(:, idx);
 mi = mi(:, idx);
 %M = {'All:Feat', 'Clust:Feat', 'All:Iden', 'Sorted:Iden'};
-M = in{1}.method(idx);
+M = IN{1}.method(idx);
 
 close all;
 figure;
@@ -89,6 +92,7 @@ save_new_decoding_figures('feature_vs_cluster_accuracy', gcf);
 %%
 
 % in = cell2mat(in);
+in = cell2mat(IN);
 data = {in.data};
 
 totalSpike = [];

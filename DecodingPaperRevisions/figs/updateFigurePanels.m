@@ -1,5 +1,5 @@
 clear;
-load decodeData.mat;
+load '/data/amplitude_decoding/NEW_FIGURES/decodingResults.mat';
 outDir = '/data/amplitude_decoding/NEW_FIGURES/';
 
 % IN = in;\\
@@ -10,12 +10,12 @@ sumError = [];
 nSpike = [];
 nTT = [];
 nUnit = [];
-for i = 1:numel(e)
+for i = 1:numel(ER)
     
-    sumError = [ sumError; e{i}.summary_error];
-    nSpike = [nSpike; in{i}.nSpike(1:2)]; 
-    nTT(i) = sum( ~cellfun(@isempty, in{i}.data{1}));
-    nUnit(i) = numel( in{i}.data{5});
+    sumError = [ sumError; ER{i}.summary_error];
+    nSpike = [nSpike; IN{i}.nSpike(1:2)]; 
+    nTT(i) = sum( ~cellfun(@isempty, IN{i}.data{1}));
+    nUnit(i) = numel( IN{i}.data{5});
 end
 
 
@@ -28,7 +28,7 @@ writeTable(cName, rName, tbl,  fullfile(outDir, 'table1.csv'));
 
 %% Figure 2-C
 
-E = e{2};
+E = ER{2};
 
 [f1,x1] = ecdf(E(1).estimation_error);
 [f2,x2] = ecdf(E(5).estimation_error);

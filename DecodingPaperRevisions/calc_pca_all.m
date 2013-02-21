@@ -1,4 +1,4 @@
-function d = calc_pca_solo(wf)
+function d = calc_pca_all(wf)
 
     if ndims(wf)<3
     
@@ -11,7 +11,7 @@ function d = calc_pca_solo(wf)
     for iChan = 1:nChan
             w = squeeze(wf(iChan,:,:))';
 
-            [~, s] = pca(w, 'NumComponents', 12);
+            [~, s] = pca(w, 'NumComponents', 3);
             d = [d, s];
     end
 

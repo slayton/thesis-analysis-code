@@ -8,7 +8,7 @@ if nargin==1 || isempty(prefix) || ~ischar(prefix)
     prefix = 'tt';
 end
 
-if ~any(strcmp(prefix, {'tt', 'pca'}))
+if ~any(strcmp(prefix, {'tt', 'pca', 'pca.solo'}))
     error('Invalid cluster file prefix:%s', prefix);
 end
 

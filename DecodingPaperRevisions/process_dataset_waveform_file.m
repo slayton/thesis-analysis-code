@@ -29,7 +29,7 @@ else
 end
 
 data = repmat({}, size(ts)); %#ok
-pc = repmat({}, size(ts));
+[pc, pcSolo] = deal( repmat({}, size(ts)) );
 
 for i = 1:numel(ts)
     
@@ -46,11 +46,11 @@ for i = 1:numel(ts)
         
         data{i} = [];
         pc{i} = [];
+        pcSolo{i} = [];
         
     else
-        pc{i} = calc_pca_solo(wf); % compute PCA on all spikes not just clustered spikes
-%         pc2{i} = calc_pca_grouped(wf);
-
+        pc{i} = calc_pca_all(wf); % compute PCA on all spikes not just clustered spikes
+        pcSolo{i} = calc_pca_single(wf);
         
         nanIdx = isnan(p) | isnan(v);
         runIdx = abs(v) >= minVel;
@@ -66,23 +66,24 @@ for i = 1:numel(ts)
         wf = wf(:,:, idx); %#ok<NASGU>
         
         data{i} = [a, t, p, v, w];
-       
+
         pc{i} = pc{i}(idx,:);
-%         pc2{i} = pc2{i}(idx,:);
+        pcSolo{i} = pcSolo{i}(idx,:);
         
     end
 end
 
 f1 = sprintf('%s/spike_params.mat', klustDir);
 f2 = sprintf('%s/spike_params_pca.mat', klustDir);
-f3 = sprintf('%s/spike_params_pca_grouped.mat', klustDir);
+f3 = sprintf('%s/spike_params_pca_solo.mat', klustDir);
 
 fprintf('Saving %s\n', f1);
-fprintf('Saving %s\n', f2);
-fprintf('Saving %s\n', f3);
-
 save( f1, 'data');
+
+fprintf('Saving %s\n', f2);
 save( f2, 'pc');
-save( f3, 'pc');
+
+fprintf('Saving %s\n', f3);
+save( f3, 'pcSolo');
 
 end

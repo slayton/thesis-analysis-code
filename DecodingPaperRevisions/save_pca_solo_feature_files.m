@@ -1,4 +1,4 @@
-function save_pca_feature_files(baseDir)
+function save_pca_solo_feature_files(baseDir)
 
 if ~exist(baseDir, 'dir')
     error('Dir %s does not exist', baseDir)
@@ -9,14 +9,14 @@ if ~exist(klustDir, 'dir')
     mkdir(klustDir);
 end
 
-spikesFile = fullfile(klustDir, 'spike_params_pca.mat');
+spikesFile = fullfile(klustDir, 'spike_params_pca_solo.mat');
 if ~exist(spikesFile)
     fprintf('Spikes file does not exist, creating it\n');
     convert_tt_files(baseDir);
 end
 
-in = load(spikesFile);
-pc = in.pc;
+in = load(spikesFile)
+pc = in.pcSolo;
 
 ttListFile = fullfile(klustDir, 'dataset_ttList.mat');
 in = load(ttListFile);
@@ -26,14 +26,14 @@ ttList = in.ttList;
 
 % ttList = in.amp_names;
 
-nFeature = 12;
+nFeature = 4;
 formatString = repmat( '%3.4f\t', 1, nFeature);
 formatString(end) = 'n';
 
 fprintf('Saving feature files:\n');
 for iTetrode = 1:numel(pc)
        
-    featFile = fullfile( klustDir, sprintf('pca.fet.%d', iTetrode) );
+    featFile = fullfile( klustDir, sprintf('pca.solo.fet.%d', iTetrode) );
     fprintf('\t%s\n', featFile);
 
     d = pc{iTetrode};
