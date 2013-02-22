@@ -30,6 +30,7 @@ for i = 1:numel(edir)
 
     save_feature_files(baseDir);
     save_pca_feature_files(baseDir);
+    save_pca_solo_feature_files(baseDir);
 
     cluster_feature_files(baseDir);
     cluster_feature_files(baseDir, 'pca');
