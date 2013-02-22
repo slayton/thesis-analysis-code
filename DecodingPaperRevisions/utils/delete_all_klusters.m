@@ -30,12 +30,9 @@ for iExp = 1:nExp
     cmd = sprintf('rm %s/pca*', kDir);
     [s,w] = unix(cmd);
     
-    cmd = sprintf('rm %s/tt*', kDir);
+    cmd = sprintf('rm %s/amp*', kDir);
     [s,w] = unix(cmd);
-    
-    cmd = sprintf('rm %s/spike*', kDir);
-    [s,w] = unix(cmd);
-    
+      
 end
 
 
