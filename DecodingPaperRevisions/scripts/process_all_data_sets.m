@@ -15,25 +15,26 @@ edir{12}= '/data/fabian/fk11/day08';
 
 MIN_VEL = .1;
 MIN_AMP = 75;
+MIN_WIDTH = 12;
 
 for i = 1:numel(edir)
     baseDir = edir{i}; 
     fprintf('\n---------------------- %s ----------------------\n', baseDir);
-    save_dataset_waveforms(baseDir);
+    process_dataset(edir{i}, MIN_VEL, MIN_AMP, MIN_WIDTH);
 end
-
-for i = 1:numel(edir)
-    baseDir = edir{i};
-    fprintf('\n---------------------- %s ----------------------\n', baseDir);
-
-    process_dataset_waveform_file(baseDir, MIN_VEL, MIN_AMP);    
-
-    save_feature_files(baseDir);
-    save_pca_feature_files(baseDir);
-    save_pca_solo_feature_files(baseDir);
-
-    cluster_feature_files(baseDir);
-    cluster_feature_files(baseDir, 'pca');
-    cluster_feature_files(baseDir, 'pca.solo');
-    
-end
+% 
+% for i = 1:numel(edir)
+%     baseDir = edir{i};
+%     fprintf('\n---------------------- %s ----------------------\n', baseDir);
+% 
+%     process_dataset_waveform_file(baseDir, MIN_VEL, MIN_AMP);    
+% 
+%     save_feature_files(baseDir);
+%     save_pca_feature_files(baseDir);
+%     save_pca_solo_feature_files(baseDir);
+% 
+%     cluster_feature_files(baseDir);
+%     cluster_feature_files(baseDir, 'pca');
+%     cluster_feature_files(baseDir, 'pca.solo');
+%     
+% end
