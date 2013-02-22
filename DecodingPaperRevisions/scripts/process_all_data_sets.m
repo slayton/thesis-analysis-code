@@ -33,5 +33,6 @@ for i = 1:numel(edir)
 
     cluster_feature_files(baseDir);
     cluster_feature_files(baseDir, 'pca');
+    cluster_feature_files(baseDir, 'pca.solo');
     
 end
