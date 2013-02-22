@@ -1,28 +1,25 @@
-function [amp, pc] = load_dataset_features(baseDir)
-
-if nargin==1
-    plot = 0;
-end
+function [a, pc] = load_dataset_features(baseDir, nChan)
 
 klustDir = fullfile(baseDir, 'kKlust');
 
 
-spFile = fullfile(klustDir, 'spike_params.mat');
-pcFile = fullfile(klustDir, 'spike_params_pca.mat');
+dsetFile = sprintf('%s/dataset_%dch.mat', klustDir, nChan);
+in = load(dsetFile);
 
-if ~exist(spFile, 'file')
-    error('%s does not exist', spFile);
-end
-
-if ~exist(pcFile, 'file')
-    error('%s does not exist', pcFile);
-end
-
-
-in = load( spFile );
-amp = in.data;
-
-in = load( pcFile );
+ts = in.ts;
+amp = in.amp;
+lp = in.lp;
+lv = in.lv;
+w = in.width;
 pc = in.pc;
+
+a = {};
+for i = 1:numel(ts)
+   
+    data = [amp{i}, ts{i}, lp{i}, lv{i}, w{i}(:)];
+    a{end+1} = data;
+end
+    
+
 
 end

@@ -65,6 +65,9 @@ if ~exist(dsetFile, 'file')
        
     end
     
+    if size(width,2) == size(ts,1)
+        width = width';
+    end
     
     fprintf('Saving %s\n', dsetFile); 
     save( dsetFile, 'ts', 'lp', 'lv', 'amp', 'width', 'waveform', 'ttList', 'pc');
