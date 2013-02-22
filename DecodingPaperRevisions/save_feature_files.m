@@ -1,29 +1,26 @@
 function save_feature_files(baseDir, nChan)
 
-if ~exist(baseDir, 'dir')
-    error('Dir %s does not exist', baseDir)
+%% Check input arguments
+if ~ischar(baseDir) || ~exist(baseDir, 'dir')
+    error('baseDir must a string and valid directory');
+end
+
+if ~isnumeric(nChan) || ~isscalar(nChan) || ~inrange(nChan, [1 4])
+    error('nChan must be a numberic scalar between 1 and 4');
 end
 
 klustDir = fullfile(baseDir, 'kKlust');
 if ~exist(klustDir, 'dir')
     mkdir(klustDir);
 end
- 
-if nargin == 1
-    nChan = 4;
-end
 
+
+%% Load the dataset file
 nPcaFeat = nChan * 3;
-
-% spikesFile = fullfile(klustDir, 'spike_params.mat');
-% if ~exist(spikesFile)
-%     fprintf('Spikes file does not exist, creating it\n');
-%     convert_tt_files(baseDir);
-% end
 
 dsetFile = sprintf('%s/dataset_%dch.mat', klustDir, nChan);
 if ~exist(dsetFile, 'file')
-    error('Required dataset file does not exist, run save_dataset_file.m first');
+    error('Required dataset file not found, has save_dataset_file been called?');
 end
 
 in = load(dsetFile, 'amp', 'pc');

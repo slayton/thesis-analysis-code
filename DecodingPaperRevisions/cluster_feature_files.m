@@ -1,15 +1,15 @@
 function cluster_feature_files(baseDir, prefix, nChan)
 
-if nargin <2 || isempty(prefix);
-    prefix = 'amp';
-end
-
-if nargin < 3 || isempty(nChan)
-    nChan = 4;
+if ~ischar(baseDir) || ~exist(baseDir, 'dir')
+    error('baseDir must be a string and valid directory');
 end
 
 if ~ischar(prefix) || ~any( strcmp( prefix, {'amp', 'pca'} ) )
     error('Prefix must be string containing either: amp or pca');
+end
+
+if ~isnumeric(nChan) || ~isscalar(nChan) || ~inrange(nChan, [1 4]);
+    error('nChan must be a numeric scalar between 1 and 4');
 end
 
 
