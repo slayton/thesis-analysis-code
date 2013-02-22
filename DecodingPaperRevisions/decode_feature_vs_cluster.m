@@ -154,26 +154,27 @@ end
 %     ampClAmp{end+1} = amp{iTT}(~nullIdx,:);
 % end
 
-
 % Configure Inputs
 input.data{1} = amp;             % <- Feature decoding all spikes
 input.data{2} = ampClPca4;       % <- Feature decoding PCA4 Sorted Spikes
-input.data{3} = ampClPca1;       % <- Feature decoding PCA1 sorted Spikes
-input.data{4} = clPca4All;       % <- Cluster decoding PCA4 Sorted + Hash
-input.data{5} = clPca1Sorted;    % <- Cluster decoding PCA1 Sorted
-input.data{6} = clPca1All;       % <- Cluster decoding PCA1 Sorted + Hash
-input.data{7} = clPca1Sorted;    % <- Cluster decoding PCA1 Sorted
+input.data{3} = amp;             % <- Feature decoding all spikes - 1 Channel
+input.data{4} = ampClPca1;       % <- Feature decoding PCA1 sorted Spikes
+input.data{5} = clPca4All;       % <- Cluster decoding PCA4 Sorted + Hash
+input.data{6} = clPca1Sorted;    % <- Cluster decoding PCA1 Sorted
+input.data{7} = clPca1All;       % <- Cluster decoding PCA1 Sorted + Hash
+input.data{8} = clPca1Sorted;    % <- Cluster decoding PCA1 Sorted
 
 input.nSpike = cellfun(@sum, cellfun( @(x) (cellfun(@(y)(size(y,1)), x)), input.data,'uniformoutput', 0));
 
 
 input.resp_col{1} = [1 2 3 4];
 input.resp_col{2} = [1 2 3 4];
-input.resp_col{3} = [1];
-input.resp_col{4} = [];
+input.resp_col{3} = [1]
+input.resp_col{4} = [1];
 input.resp_col{5} = [];
 input.resp_col{6} = [];
 input.resp_col{7} = [];
+input.resp_col{8} = [];
 
 
 input.method{1} = 'F - All';

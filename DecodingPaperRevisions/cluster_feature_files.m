@@ -1,11 +1,15 @@
-function cluster_feature_files(baseDir, prefix)
+function cluster_feature_files(baseDir, prefix, nChan)
 
-if nargin == 1 || isempty(prefix);
-    prefix = 'tt';
+if nargin <2 || isempty(prefix);
+    prefix = 'amp';
 end
 
-if ~ischar(prefix)
-    error('Prefix must be either: tt or pca');
+if nargin < 3 || isempty(nChan)
+    nChan = 4;
+end
+
+if ~ischar(prefix) || ~any( strcmp( prefix, {'amp', 'pca'} ) )
+    error('Prefix must be string containing either: amp or pca');
 end
 
 
@@ -17,17 +21,16 @@ end
 curDir = pwd;
 cd(klustDir);
 
-in = load( fullfile(klustDir, 'dataset_ttList.mat'));
+in = load( sprintf('%s/dataset_%dch.mat', klustDir, nChan), 'ttList');
 ttList = in.ttList;
 
 nTT = numel(ttList);
 
 fprintf('Clustering...\n');
 
-
 for iTetrode = 1:nTT
  
-    featFile = sprintf('%s/%s.fet.%d', klustDir, prefix, iTetrode);
+    featFile = sprintf('%s/%s.%dch.fet.%d', klustDir, prefix, nChan, iTetrode);
     
     if ~exist( featFile, 'file');
         fprintf('%s does not exist, skipping it\n', featFile);
@@ -36,16 +39,17 @@ for iTetrode = 1:nTT
     
     fprintf('\t%s ', featFile);
     
-    cmd = sprintf('~/src/clustering/kk2.0/KlustaKwik %s %d -Screen 0 -Log 0',prefix, iTetrode );
+    cmd = sprintf('~/src/clustering/kk2.0/KlustaKwik %s.%dch %d -Screen 0 -Log 0',prefix, nChan, iTetrode );
     [s, w] =  unix(cmd);
     
     fprintf('\n');
 
-    clFile = sprintf('%s/%s.clu.%d', klustDir, prefix, iTetrode);
+    
+    clFile = sprintf('%s/%s.%dch.clu.%d', klustDir, prefix, nChan, iTetrode);
     
     if ~exist(clFile, 'file');
-        fprintf('%s not written, creating dummy file\n');
-        [s, w] = unix( sprintf( 'touch %s', clFile) );
+%         fprintf('%s not written, creating dummy file\n', clFile);
+         [s, w] = unix( sprintf( 'touch %s', clFile) );
     end
     
 end  

@@ -20,5 +20,9 @@ function [w, highIdx, lowIdx] = calc_waveform_width(wave)
     lowIdx = lowIdx + 12;
     w = lowIdx - highIdx;
     
+    if size( wave, 1) == 1
+        w = w';
+    end
+    
     
 end

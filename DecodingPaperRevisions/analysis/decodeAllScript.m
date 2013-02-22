@@ -8,7 +8,7 @@ dTypes = {'pos'};
 
 edir = {};
 
-edir{end+1} = '/data/spl11/day13';
+edir{end+1} = '/data/spl11lo/day13';
 edir{end+1} = '/data/spl11/day14';
 edir{end+1} = '/data/spl11/day15';
 edir{end+1} = '/data/spl11/day16';
@@ -45,7 +45,7 @@ er = reshape(er, 7, numel(er)/7)';
 mi = [e.mutual_info_unbiased_normalized];
 mi = reshape(mi, 7, numel(mi)/7)';
 
-idx = [1 4 2 5];
+idx = [1 2 3 4 5 6 7];
 er = er(:, idx);
 mi = mi(:, idx);
 %M = {'All:Feat', 'Clust:Feat', 'All:Iden', 'Sorted:Iden'};

@@ -1,4 +1,4 @@
-function save_pca_feature_files(baseDir)
+function save_pca_feature_files(baseDir, nChan)
 
 if ~exist(baseDir, 'dir')
     error('Dir %s does not exist', baseDir)
@@ -9,34 +9,36 @@ if ~exist(klustDir, 'dir')
     mkdir(klustDir);
 end
 
-spikesFile = fullfile(klustDir, 'spike_params_pca.mat');
-if ~exist(spikesFile)
-    fprintf('Spikes file does not exist, creating it\n');
-    convert_tt_files(baseDir);
+if nargin==1
+    nChan = 4;
 end
 
-in = load(spikesFile);
-pc = in.pc;
+dsetFile = sprintf('%s/dataset_%dch.mat', klustDir, nChan);
+in = load(dsetFile, 'amp');
 
-ttListFile = fullfile(klustDir, 'dataset_ttList.mat');
-in = load(ttListFile);
-ttList = in.ttList;
+pComp = in.( sprintf('pc%d', nChan) );
+
+nFeature = 3 * nChan;
+sprintf('pComp size[%d %d], nFeat %d\n', size( pComp{1},1), size( pComp{1},2), nFeature);
+
+if size(pComp{1},1) ~= nFeature
+    error('Invalid data matrix size:%d', size(pComp{1}, 1));
+end
 
 %% Save a complete file
 
 % ttList = in.amp_names;
 
-nFeature = 12;
 formatString = repmat( '%3.4f\t', 1, nFeature);
 formatString(end) = 'n';
 
 fprintf('Saving feature files:\n');
-for iTetrode = 1:numel(pc)
+for iTetrode = 1:numel(pComp)
        
-    featFile = fullfile( klustDir, sprintf('pca.fet.%d', iTetrode) );
+    featFile = sprintf('%s/pca.%dch.fet.%d',klustDir, nChan, iTetrode);
     fprintf('\t%s\n', featFile);
 
-    d = pc{iTetrode};
+    d = pComp{iTetrode};
     
     if isempty(d) || numel(d) == 0
         
@@ -46,11 +48,9 @@ for iTetrode = 1:numel(pc)
     else
         
         d = d(:,1:nFeature)';
-        % Open the file
+        
         fid = fopen(featFile, 'w+');    
-        % Write the number of features
         fprintf(fid, '%d\n', nFeature); 
-        % Write the feature matrix
         fprintf(fid, formatString, d);
         fclose(fid);
         

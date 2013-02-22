@@ -51,10 +51,7 @@ waveforms = ad2mv(waveforms, gains);
 % u_volts = (10*double(maxes)./2048)./gains*1e6;
 
 times = double(f.timestamp)/10000;  
-
-height = squeeze( max(waveforms, [], 2) );
-width = calc_waveform_width(waveforms);
-    
+   
 end
 
 
