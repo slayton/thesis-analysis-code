@@ -1,7 +1,10 @@
 function [waveforms, ts] = import_waveforms_from_tt_file(file, varargin)
 
 if ~exist(file,'file')
-    error('%s file does not exist');
+    warning('%s file does not exist', file);
+    waveforms = [];
+    ts =[];
+    return;
 end
 
 args.idx = [];

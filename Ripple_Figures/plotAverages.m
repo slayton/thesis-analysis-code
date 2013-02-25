@@ -1,7 +1,7 @@
 function [l, f, ax] = plotAverages(varargin)
     
     cols = 'rbgkcm';
-    tmpFun = @(x) ([min(x), mean(x), max(x)]);
+    tmpFun = @(x) ([nanmin(x), nanmean(x), nanmax(x)]);
 
     nVar = numel(varargin);
 

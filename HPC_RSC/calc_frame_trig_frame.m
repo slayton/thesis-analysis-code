@@ -32,8 +32,8 @@ for i = 1 : N
     cFrames = durationFilter(cFrames, [0. .1]);
     
     cFrames = merge_frames(cFrames, .1);
-    figure;
-    ksdensity( diff(cFrames,[],2));
+%     figure;
+%     ksdensity( diff(cFrames,[],2));
     % Trigger on Start of FRAME
     hpcTrig = muBursts(:,1);
     ctxTrig = cFrames(:,1);

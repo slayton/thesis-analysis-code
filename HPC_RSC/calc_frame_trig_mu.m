@@ -19,12 +19,7 @@ for i = 1 : N
     [sws, ripTs] = classify_sleep(eeg.ripple, eeg.rippleEnv, eeg.ts);
     muBursts = find_mua_bursts(mu);
     cFrames = find_ctx_frames(mu);
-    
-    % Filter MU-Bursts
-%     muBursts = durationFilter(muBursts, eventLenThold);
-%     cFrames = durationFilter(cFrames, eventLenThold);
-%     events = muBursts( inseg(cFrames, muBursts, 'partial') , : );
-    
+     
     events = seg_and(muBursts, cFrames);
     events = durationFilter(events, eventLenThold);
   

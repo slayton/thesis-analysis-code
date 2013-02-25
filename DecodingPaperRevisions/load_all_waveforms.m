@@ -8,17 +8,24 @@ ep = 'amprun';
 
 tt_dir = dir(fullfile(baseDir,'t*'));
 
+
 nTT = numel(tt_dir);
 
 ttList = cell(nTT, 1);
 
 for i = 1 : nTT
     if tt_dir(i).isdir
-        if exist( fullfile(baseDir, tt_dir(i).name, [tt_dir(i).name, '.tt']), 'file')
+        ttFile = sprintf('%s/%s/%s.tt', baseDir, tt_dir(i).name, tt_dir(i).name);
+        if exist( ttFile, 'file')
             ttList{i} = tt_dir(i).name;
         end
     end
 end
+
+% remove un used cells due created by the dir command above
+ttList = ttList( ~cellfun(@isempty, ttList ));
+nTT = numel(ttList);
+
 
 if numel(ttList) == 0
     error('No .tt files found in %s', baseDir);
@@ -38,8 +45,9 @@ fprintf('Loading data for:');
 for i = 1 : nTT
     
     fprintf('%s ', ttList{i});
-    file = sprintf('%s/%s/%s.tt', baseDir, ttList{i}, ttList{i});
-    [waves, ts] = import_waveforms_from_tt_file(file, 'idx',[],'time_range', et);  
+    ttFile = sprintf('%s/%s/%s.tt', baseDir, ttList{i}, ttList{i});
+%     fprintf('\t%s\n', file);
+    [waves, ts] = import_waveforms_from_tt_file(ttFile, 'idx',[],'time_range', et);  
 
     T{i} = ts';
     WF{i} = waves; 

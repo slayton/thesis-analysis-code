@@ -1,4 +1,4 @@
-function delete_all_klusters()
+function delete_all_dataset_files()
 %%
 
 if nargin < 2
@@ -21,6 +21,15 @@ edir{9} = '/data/greg/esm/day01';
 edir{10}= '/data/greg/esm/day02';
 edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
+
+go = input('Delete ALL dataset files? [y/N]', 's');
+
+
+if ~strcmp(go,'y');
+    fprintf('Aborting!\n');
+    return;
+end
+
 
 nExp = numel(edir);
 for iExp = 1:nExp

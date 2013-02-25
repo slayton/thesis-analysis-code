@@ -1,4 +1,4 @@
-function process_data_set(animal, day)
+function process_dset(animal, day)
 
 if nargin>32000
     animal = 'gh-rsc1'; 

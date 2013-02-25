@@ -17,7 +17,7 @@ for i = 1 : N
     
     ripTs = eeg.ts(ripIdx);
       
-    [setIdx, soloIdx] = filter_event_sets(ripTs, 3, [.5 .25 .5]);
+    [setIdx, soloIdx] = filter_event_sets(ripTs, 3, [1 .2 1]);
     
     fprintf(' %d\t->\t%d\t:\t%d\n', numel(ripTs), numel(setIdx), numel(soloIdx));
     
