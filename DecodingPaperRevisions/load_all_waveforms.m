@@ -42,7 +42,7 @@ et = et( strcmp(ep, en), :);
 % p = load_exp_pos(edir, epoch);
 
 fprintf('Loading data for:');
-for i = 1 : nTT
+for i = 1 : 10%nTT
     
     fprintf('%s ', ttList{i});
     ttFile = sprintf('%s/%s/%s.tt', baseDir, ttList{i}, ttList{i});
