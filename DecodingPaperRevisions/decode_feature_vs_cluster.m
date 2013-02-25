@@ -64,41 +64,31 @@ cl = {};  % Clustered on PCA space + HASH
 
 for iTT = 1:numel(clId)
     
-    nullIdx = true( size(amp{iTT}, 1), 1); 
+%     nullIdx = true( size(amp{iTT}, 1), 1); 
     
     for iCl = 1:max(clId{iTT}) % clId 1 is the noise cluster
         
-%         if statsPca(iTT).nSpike(iCl) >= minNSpike && statsPca(iTT).lRatio(iCl) <= pcaMaxLR
             idx = iCl == clId{iTT};
             cl{end+1} = amp{iTT}(idx,:);
-%             clPca4Sorted{end+1} = amp{iTT}(idx,:);
-             nullIdx (idx) = false;
+%              nullIdx (idx) = false;
 %         end
     end
-    if nnz(nullIdx) > 0
-        cl{end+1} = amp{iTT}(nullIdx,:);
-    end
-%     ampClPca4{end+1} = amp{iTT}(~nullIdx,:);
+%     if nnz(nullIdx) > 0
+%         cl{end+1} = amp{iTT}(nullIdx,:);
+%     end
 end
 
 
 input.data{1} = amp;             % <- Feature decoding all spikes
-% input.data{2} = ampClPca4;       % <- Feature decoding PCA4 Sorted Spikes
 input.data{2} = cl;       % <- Cluster decoding PCA4 Sorted + Hash
-% input.data{4} = clPca4Sorted;    % <- Cluster decoding PCA1 Sorted
 
 input.nSpike = cellfun(@sum, cellfun( @(x) (cellfun(@(y)(size(y,1)), x)), input.data,'uniformoutput', 0));
 
-
 input.resp_col{1} = 1:nChan;
-% input.resp_col{2} = [1 2 3 4];
 input.resp_col{2} = [];
-% input.resp_col{4} = [];
 
 input.method{1} = 'Feature';
-% input.method{2} = 'F - Sorted:Pca4';
 input.method{2} = 'Identity';
-% input.method{4} = 'I - Pca4';
 
 %%%%%%%%%%%%%% Construct the Inputs for the Decoder %%%%%%%%%%%%%%
 isMovingIdx = abs(pos.lv) > minVelocity;
