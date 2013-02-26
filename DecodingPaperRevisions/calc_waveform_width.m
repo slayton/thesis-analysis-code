@@ -1,8 +1,4 @@
 function [w, highIdx, lowIdx] = calc_waveform_width(wave)
-    
-    if ndims(wave)~=3
-        error('wave must be a MxNxP matrix');
-    end
 
     highIdx = [];
     lowIdx = [];
@@ -10,7 +6,15 @@ function [w, highIdx, lowIdx] = calc_waveform_width(wave)
     for i = 1:size(wave,1)
 
         W = squeeze( wave(i,:,:));
-
+        
+        % if only 1 waveform was detected then we need to transpose W for
+        % the math to work
+        if ismatrix(wave)
+            W = W';
+        end
+            
+        
+        
         [~, highIdx(i,:)] = max( W(5:12,:) );
         [~, lowIdx(i,:)] = min( W(13:32,:) );
 

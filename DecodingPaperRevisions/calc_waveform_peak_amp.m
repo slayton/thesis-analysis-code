@@ -1,8 +1,4 @@
 function pk = calc_waveform_peak_amp(waveform)
-
-    if ndims(waveform) ~= 3
-        error('waveform must be a MxNxP matrix')
-    end
     
     pk = squeeze( max(waveform, [], 2) );
     

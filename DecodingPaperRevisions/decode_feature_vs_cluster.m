@@ -43,7 +43,6 @@ clId = load_dataset_clusters(baseDir, 'pca', nChan);
 cl = {}; 
 
 for iTT = 1:numel(clId)    
-    iTT
     for iCl = 1:max(clId{iTT})
         
         cl{end+1} = amp{iTT}( iCl == clId{iTT}, : );
