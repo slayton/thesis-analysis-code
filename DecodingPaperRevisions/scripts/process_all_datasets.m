@@ -17,7 +17,7 @@ MIN_VEL = .15;
 MIN_AMP = 75;
 MIN_WIDTH = 12;
 
-for i = 12:numel(edir)
+for i = 1:numel(edir)
     baseDir = edir{i}; 
     fprintf('\n---------------------- %s ----------------------\n', baseDir);
     process_dataset(edir{i}, MIN_VEL, MIN_AMP, MIN_WIDTH);
