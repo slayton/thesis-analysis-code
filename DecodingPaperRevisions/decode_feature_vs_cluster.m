@@ -43,7 +43,9 @@ clId = load_dataset_clusters(baseDir, 'pca', nChan);
 cl = {}; 
 
 for iTT = 1:numel(clId)    
+    iTT
     for iCl = 1:max(clId{iTT})
+        
         cl{end+1} = amp{iTT}( iCl == clId{iTT}, : );
     end
 end
@@ -112,7 +114,7 @@ clear E;
 
 for ii = 1:numel(input.data)
    
-    fprintf('Decoding %s:%s --- %s\n', baseDir, ep, input.method{ii});
+    fprintf('Decoding %s --- %s\n', baseDir, input.method{ii});
     
     clear z; % clear any previously existing decoder from memory
     
@@ -124,7 +126,6 @@ for ii = 1:numel(input.data)
     % Structure inputs for the KDE_Decoder object
     emptyIdx = false(numel(d),1);
     for jj = 1:numel(d)
-      
         if numel( d{jj} ) == 0
             emptyIdx(jj) = true;
             continue;
@@ -135,7 +136,7 @@ for ii = 1:numel(input.data)
         sf{jj} = d{jj}(:, input.resp_col{ii}); % Spike Features
         
         emptyIdx(jj) = nnz( inseg( encodingSegments, st{jj} ) ) < 1 || nnz( inseg( decodingSegments, st{jj} ) ) < 1;
- 
+        
     end
     
     % remove spike groups without any spikes

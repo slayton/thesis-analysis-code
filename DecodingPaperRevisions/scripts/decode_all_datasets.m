@@ -27,8 +27,9 @@ nDset = numel(edir);
 for i = 1:nDset
    
     fprintf('--------------- %s ---------------\n', upper(edir{i}));
-    [P1{i}, E1{i}, I1{i}] = decode_feature_vs_cluster(edir{i}, 1);
     [P4{i}, E4{i}, I4{i}] = decode_feature_vs_cluster(edir{i}, 4);
+    [P1{i}, E1{i}, I1{i}] = decode_feature_vs_cluster(edir{i}, 1);
+
     fprintf('\n');
     
 end
@@ -64,7 +65,7 @@ pS = signrank(er(:,1), er(:,2), .05, 'tail', 'left');
 
 fprintf('\t\tMEDIAN ERROR\n');
 fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
-title( sprintf('%d Channel Decoder Comparison', 4) );
+title( '4 Channels' );
 ylabel('Median Error(m)');
 
 P = P1; E = E1; I = I1;
@@ -91,7 +92,7 @@ pS = signrank(er(:,1), er(:,2), .05, 'tail', 'left');
 
 fprintf('\t\tMEDIAN ERROR\n');
 fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
-title( sprintf('%d Channel Decoder Comparison', 1) );
+title( '1 Channel' );
 ylabel('Median Error(m)');
 
-plot2svg('/data/amplitude_decoding/NEW_FIGURES/feature_vs_identity.svg', gcf)
+% plot2svg('/data/amplitude_decoding/NEW_FIGURES/feature_vs_identity.svg', gcf)

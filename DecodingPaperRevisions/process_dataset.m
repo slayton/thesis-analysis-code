@@ -4,16 +4,21 @@ if ~ischar(baseDir) || ~exist(baseDir, 'dir')
     error('baseDir must be a string and valid directory');
 end
 
-if nargin < 2 || isempty(MIN_VEL)
-    MIN_VEL = .1;   % 10 cm/sec
-end
-if nargin < 3 || isempty(MIN_AMP)
-    MIN_AMP = 75;   % 75 uVolts
-end
-if nargin < 4 || isempty(MIN_WIDTH)
-    MIN_WIDTH = 12; % 12 Samples
+if ~isscalar(nChan) || ~isnumeric(nChan) || ~ismember(nChan, [1 4]);
+    error('nChan must be a numeric scalar equal to either 1 or 4');
 end
 
+if ~isscalar(MIN_VEL) || ~isnumeric(MIN_VEL)
+    error('MIN_VEL must be a numeric scalar');
+end
+
+if ~isscalar(MIN_AMP) || ~isnumeric(MIN_AMP)
+    error('MIN_AMP must be a numeric scalar');
+end
+
+if ~isscalar(MIN_WIDTH) || ~isnumeric(MIN_WIDTH)
+    error('MIN_WIDTH must be a numeric scalar');
+end
 %% Start processing
 
 klustDir = fullfile(baseDir, 'kKlust');
@@ -28,7 +33,7 @@ if ~exist( fullfile(klustDir, 'dataset_4ch.mat'), 'file') || ...
   ~exist( fullfile(klustDir, 'dataset_1ch.mat'), 'file')
 
     % load the waveform files from disk
-    [ts, wf, ttList] = load_all_tt_waveforms( baseDir );
+    [ts, wf, ttList] = load_all_tt_waveforms_prefilter( baseDir, MIN_VEL, MIN_AMP, MIN_WIDTH );
  
     %Save dataset files
     create_dataset_file(baseDir, 4, ts, wf, ttList, MIN_VEL, MIN_AMP, MIN_WIDTH);

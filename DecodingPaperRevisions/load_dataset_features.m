@@ -15,11 +15,11 @@ pc = in.pc;
 
 a = {};
 for i = 1:numel(ts)
-   
-    data = [amp{i}, ts{i}, lp{i}, lv{i}, w{i}(:)];
-    a{end+1} = data;
-end
     
+    data = [amp{i}, ts{i}, lp{i}, lv{i}, w{i}];
+    a{end+1} = data;
+    
+end
 
 
 end

@@ -20,16 +20,6 @@ if ~iscell(ttList)
     error('ttList must be a cell array of strings');
 end
 
-if nargin < 7 || isempty(MIN_VEL)
-    MIN_VEL = .05;
-end
-if nargin < 8 || isempty(MIN_AMP)
-    MIN_AMP = 75;
-end
-if nargin < 9 || isempty(MIN_WIDTH)
-    MIN_WIDTH = 12;
-end
-
 if ~isscalar(MIN_VEL) || ~isnumeric(MIN_VEL)
     error('MIN_VEL must be a numeric scalar');
 end
@@ -53,7 +43,7 @@ if ~exist(dsetFile, 'file')
     
     ep = 'amprun';
 
-    p = load_exp_pos(baseDir, ep);
+    p = load_linear_position(baseDir);
     
     nTT = numel(ttList);
 

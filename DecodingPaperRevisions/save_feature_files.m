@@ -35,36 +35,44 @@ sprintf('SpikeAmp size[%d %d], nChan %d\n', size( spikeAmp{1},1), size( spikeAmp
 
 fprintf('Saving feature files:\n');
 
-ampFormat = repmat( '%3.4f\t', [1, nChan]);
-ampFormat(end) = 'n'; % replace last tab with newline
+% Uncomment to create spike amplitude feature files
+% 
+% ampFormat = repmat( '%3.4f\t', [1, nChan]);
+% ampFormat(end) = 'n'; % replace last tab with newline
+%
+% for iTetrode = 1:numel(spikeAmp)
+%        
+%     ampFeatFile = sprintf('%s/amp.%dch.fet.%d', klustDir, nChan, iTetrode);
+%     
+%     fprintf('\t%s', ampFeatFile);
+%     sa = spikeAmp{iTetrode};    
+%
+%     if isempty(sa) || numel(sa) == 0  
+%       [s, w] = unix( sprintf('touch %s', ampFeatFile) );
+%     end
+% 
+%     % Write the AMP feature file
+%     fid = fopen(ampFeatFile, 'w+');    
+%     fprintf(fid, '%d\n', nChan); 
+%     fprintf(fid, ampFormat, sa);
+%     fclose(fid); 
+% end
+
 
 pcaFormat = repmat( '%3.4f\t', [1, nPcaFeat]);
 pcaFormat(end) = 'n'; % replace last tab with newline
 
 for iTetrode = 1:numel(spikeAmp)
-       
-    ampFeatFile = sprintf('%s/amp.%dch.fet.%d', klustDir, nChan, iTetrode);
+
     pcaFeatFile = sprintf('%s/pca.%dch.fet.%d', klustDir, nChan, iTetrode);
-    
-    fprintf('\t%s', ampFeatFile);
     fprintf('\t%s\n', pcaFeatFile);
+  
+    pc = prinComp{iTetrode}; 
 
-    sa = spikeAmp{iTetrode};
-    pc = prinComp{iTetrode};
-    
-    if isempty(sa) || numel(sa) == 0 || isempty(pc) || numel(pc) == 0
-%         [s, w] = unix( sprintf('touch %s', ampFeatFile) );
-        [s, w] = unix( sprintf('touch %s', pcaFeatFile) );
+    if isempty(pc) || numel(pc) == 0
+        [~, ~] = unix( sprintf('touch %s', pcaFeatFile) );
         continue;
-    
     else
-
-% Uncomment to create spike amplitude feature files
-%     % Write the AMP feature file
-%     fid = fopen(ampFeatFile, 'w+');    
-%     fprintf(fid, '%d\n', nChan); 
-%     fprintf(fid, ampFormat, sa);
-%     fclose(fid);
 
     % Write the PCA feature file
     fid = fopen(pcaFeatFile, 'w+');
@@ -73,7 +81,7 @@ for iTetrode = 1:numel(spikeAmp)
     fclose(fid);
         
     end
-    
+ 
 end
 fprintf('\n');
 

@@ -10,7 +10,7 @@ end
 args.idx = [];
 args.time_range = [];
 args.anti_idx = 0;
-args = parseArgsLite(varargin,args);
+args = parseArgs(varargin,args);
 
 fields = {'waveform', 'timestamp'};
   

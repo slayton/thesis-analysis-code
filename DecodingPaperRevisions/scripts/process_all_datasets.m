@@ -13,7 +13,7 @@ edir{10}= '/data/greg/esm/day02';
 edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
-MIN_VEL = .1;
+MIN_VEL = .15;
 MIN_AMP = 75;
 MIN_WIDTH = 12;
 

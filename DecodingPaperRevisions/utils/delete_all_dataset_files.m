@@ -36,8 +36,8 @@ for iExp = 1:nExp
    
     kDir = fullfile(edir{iExp}, 'kKlust');
     
-    cmd = sprintf('rm %s/*', kDir);
-    [s,w] = unix(cmd);
+    cmd = sprintf('rm -rf %s/*', kDir);
+    unix(cmd);
     
 end
 

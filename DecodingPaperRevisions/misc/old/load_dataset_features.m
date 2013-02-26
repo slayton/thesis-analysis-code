@@ -1,4 +1,4 @@
-function [amp, lp, lv, pc, ts, ttList] = load_dataset_features(baseDir, nChan)
+function [amp, lp, lv, ts, pc, ttList] = load_dataset_features(baseDir, nChan)
 
 if ~ischar(baseDir) || ~exist(baseDir, 'dir')
     error('baseDir must be a string and valid directory');
