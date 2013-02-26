@@ -1,4 +1,4 @@
-function [T, WF, ttList] = load_all_waveforms(baseDir)
+function [T, WF, ttList] = load_all_tt_waveforms(baseDir)
 
 if ~ischar(baseDir) || ~exist(baseDir, 'dir')
     error('baseDir must be a string and valid directory');

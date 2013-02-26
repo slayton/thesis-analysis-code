@@ -1,4 +1,4 @@
-function et = load_epochs_times(baseDir)
+function et = load_epoch_times(baseDir)
 
 
 [en, et] = load_epochs(baseDir);

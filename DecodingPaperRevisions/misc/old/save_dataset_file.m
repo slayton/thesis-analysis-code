@@ -26,7 +26,7 @@ if ~exist(dsetFile, 'file')
 
     p = load_exp_pos(baseDir, ep);
     
-    [ts, waveform, ttList] = load_dataset_waveforms(baseDir, ep); %#ok ttList saved below
+    [ts, waveform, ttList] = load_all_tt_waveforms(baseDir, ep); %#ok ttList saved below
 
     [amp, width, lp, lv, pc] = deal( repmat({}, numel(ts), 1) );
     

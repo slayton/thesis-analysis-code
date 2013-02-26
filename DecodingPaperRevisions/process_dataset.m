@@ -22,10 +22,13 @@ if ~exist(klustDir, 'dir');
     mkdir(klustDir);
 end
 
+% If the dataset files don't exist then load the waveforms from the tt
+% files, process the waveforms and then save the dataset files
 if ~exist( fullfile(klustDir, 'dataset_4ch.mat'), 'file') || ...
   ~exist( fullfile(klustDir, 'dataset_1ch.mat'), 'file')
+
     % load the waveform files from disk
-    [ts, wf, ttList] = load_all_waveforms( baseDir );
+    [ts, wf, ttList] = load_all_tt_waveforms( baseDir );
  
     %Save dataset files
     create_dataset_file(baseDir, 4, ts, wf, ttList, MIN_VEL, MIN_AMP, MIN_WIDTH);
@@ -33,12 +36,13 @@ if ~exist( fullfile(klustDir, 'dataset_4ch.mat'), 'file') || ...
     
 end
 
+%Read the dataset files and save feature files
 save_feature_files(baseDir, 4);
 save_feature_files(baseDir, 1);
 
+%Cluster the feature files
 cluster_feature_files(baseDir, 'pca', 4);
 cluster_feature_files(baseDir, 'pca', 1);
-% cluster_feature_files(baseDir, 'amp', 4);
-% cluster_feature_files(baseDir, 'amp', 1);
+% cluster_feature_files(baseDir, 'amp', 4); %<--- Can cluster on AMPlitude TOO!
 
 end

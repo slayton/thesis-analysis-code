@@ -12,5 +12,4 @@ calc_frame_trig_frame;
 %%
 calc_frame_d_start_dist;
 %%
-
 calc_frame_trig_mu_rate_corr;

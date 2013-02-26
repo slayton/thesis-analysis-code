@@ -6,7 +6,7 @@ function pos = load_linear_position(baseDir)
     
     ep = 'amprun';
 
-    lin_pos_path = fullfile(baseDir, [ep,'.lin_pos.p']);
+    lin_pos_path = sprintf('%s/amprun.lin_pos.p', baseDir);
     f = mwlopen(lin_pos_path);
 
     l = load(f);    
@@ -15,5 +15,6 @@ function pos = load_linear_position(baseDir)
     pos.lv = l.lv;
     pos.xp = l.xp;
     pos.yp = l.yp;
+    
     
 end

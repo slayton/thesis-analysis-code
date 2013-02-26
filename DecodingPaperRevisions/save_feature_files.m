@@ -53,17 +53,18 @@ for iTetrode = 1:numel(spikeAmp)
     pc = prinComp{iTetrode};
     
     if isempty(sa) || numel(sa) == 0 || isempty(pc) || numel(pc) == 0
-        [s, w] = unix( sprintf('touch %s', ampFeatFile) );
+%         [s, w] = unix( sprintf('touch %s', ampFeatFile) );
         [s, w] = unix( sprintf('touch %s', pcaFeatFile) );
         continue;
     
     else
-        
-    % Write the amplitude feature file
-    fid = fopen(ampFeatFile, 'w+');    
-    fprintf(fid, '%d\n', nChan); 
-    fprintf(fid, ampFormat, sa);
-    fclose(fid);
+
+% Uncomment to create spike amplitude feature files
+%     % Write the AMP feature file
+%     fid = fopen(ampFeatFile, 'w+');    
+%     fprintf(fid, '%d\n', nChan); 
+%     fprintf(fid, ampFormat, sa);
+%     fclose(fid);
 
     % Write the PCA feature file
     fid = fopen(pcaFeatFile, 'w+');
