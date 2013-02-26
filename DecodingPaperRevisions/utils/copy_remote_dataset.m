@@ -36,7 +36,7 @@ for iExp = 1:nExp
         [s,w] = unix(cmd);
     end
     
-    cmd = sprintf('scp %s@%s:%s/* %s', user, host, kDir, kDir);
+    cmd = sprintf('scp -r %s@%s:%s/* %s', user, host, kDir, kDir);
     fprintf('Executing cmd:%s\n', cmd);
     [s, w] = unix(cmd);
 end
