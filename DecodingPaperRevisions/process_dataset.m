@@ -4,10 +4,6 @@ if ~ischar(baseDir) || ~exist(baseDir, 'dir')
     error('baseDir must be a string and valid directory');
 end
 
-if ~isscalar(nChan) || ~isnumeric(nChan) || ~ismember(nChan, [1 4]);
-    error('nChan must be a numeric scalar equal to either 1 or 4');
-end
-
 if ~isscalar(MIN_VEL) || ~isnumeric(MIN_VEL)
     error('MIN_VEL must be a numeric scalar');
 end
