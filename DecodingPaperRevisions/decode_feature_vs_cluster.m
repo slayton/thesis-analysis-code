@@ -106,6 +106,8 @@ switch timeSplit
         error('Invalid timeSplit, must by 0 or 1');
 end
 
+input.encoding_segments = encodingSegments;
+input.decoding_segments = decodingSegments;
 %% - Decode the position estimate
 
 P = {};
