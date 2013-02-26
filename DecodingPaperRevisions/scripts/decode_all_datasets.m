@@ -34,8 +34,9 @@ for i = 1:nDset
     
 end
 
-% save( '/data/amplitude_decoding/NEW_FIGURES/decodingResults.mat', 'PR', 'ER', 'IN');
+%%
 
+save( '/data/amplitude_decoding/NEW_FIGURES/decode_all_results.mat', 'P1', 'P4', 'E1', 'E4', 'I1', 'I4');
 
 %%
 P = P4; E = E4; I = I4;
@@ -51,7 +52,7 @@ M = I{1}.method;
 
 close all;
 f = figure;
-subplot(121);
+ax(1) = subplot(121);
 set(gca,'FontSize', 14);
 
 boxplot( er ); hold on;
@@ -78,8 +79,8 @@ er = [e.summary_error];
 er = reshape(er, [n, numel(E)])';
 
 
-subplot(122);
-set(gca,'FontSize', 14);
+ax(2) = subplot(122);
+set(ax(2),'FontSize', 14);
 
 boxplot( er ); hold on;
 plot(1:2, er, 'color', [.7 .7 .7]);
@@ -95,4 +96,6 @@ fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
 title( '1 Channel' );
 ylabel('Median Error(m)');
 
-% plot2svg('/data/amplitude_decoding/NEW_FIGURES/feature_vs_identity.svg', gcf)
+
+set(ax,'YLim', [0, 1])
+plot2svg('/data/amplitude_decoding/NEW_FIGURES/feature_vs_identity.svg', gcf)

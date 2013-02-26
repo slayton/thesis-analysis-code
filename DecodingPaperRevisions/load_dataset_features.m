@@ -16,6 +16,12 @@ pc = in.pc;
 a = {};
 for i = 1:numel(ts)
     
+    % A few datasets have mis-oriented width vectors, convert any row
+    % vectors to column vectors
+    if isrow(w{i}) 
+        w{i} = w{i}';
+    end
+    
     data = [amp{i}, ts{i}, lp{i}, lv{i}, w{i}];
     a{end+1} = data;
     
