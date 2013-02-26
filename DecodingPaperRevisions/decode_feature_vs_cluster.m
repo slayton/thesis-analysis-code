@@ -53,31 +53,14 @@ statsPca = computeClusterStats(clId, pc);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%% All Spikes grouped by tetrode
-% amp = amp; % <--- Not required but AMP is the first input
-fprintf('Preparing data for: Feature-All Spikes\n');
-
-%%%%%%%%%%%%%%%%%%%%% PCA Clustered spikes
-fprintf('Preparing data for:Identity Pca Sorted+/- Hash\n');
 
 cl = {};  % Clustered on PCA space + HASH
 
-
-for iTT = 1:numel(clId)
-    
-%     nullIdx = true( size(amp{iTT}, 1), 1); 
-    
-    for iCl = 1:max(clId{iTT}) % clId 1 is the noise cluster
-        
-            idx = iCl == clId{iTT};
-            cl{end+1} = amp{iTT}(idx,:);
-%              nullIdx (idx) = false;
-%         end
+for iTT = 1:numel(clId)    
+    for iCl = 1:max(clId{iTT})
+        cl{end+1} = amp{iTT}( iCl == clId{iTT}, : );
     end
-%     if nnz(nullIdx) > 0
-%         cl{end+1} = amp{iTT}(nullIdx,:);
-%     end
 end
-
 
 input.data{1} = amp;             % <- Feature decoding all spikes
 input.data{2} = cl;       % <- Cluster decoding PCA4 Sorted + Hash
@@ -97,11 +80,11 @@ stimTimestamp = pos.ts(isMovingIdx);
 stimulus = pos.lp(isMovingIdx);
 stimulus = stimulus(:);
 
-badIdx = isnan(stimulus);
+badIdx = isnan( stimulus );
 stimulus = stimulus(~badIdx);
 stimTimestamp = stimTimestamp(~badIdx);
 
-tbins = (input.et(1):decodeDT:input.et(2)-decodeDT);
+tbins = input.et(1) : decodeDT : input.et(2)-decodeDT;
 tbins = tbins( tbins >= stimTimestamp(1) & tbins <=stimTimestamp(end)-decodeDT);
 
 tbins = [tbins', tbins'+decodeDT];

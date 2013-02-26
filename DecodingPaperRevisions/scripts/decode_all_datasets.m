@@ -94,4 +94,4 @@ fprintf('tTest:%3.5g\tranksum:%3.5g\tsignrank:%3.5g\n', pT, pR, pS);
 title( sprintf('%d Channel Decoder Comparison', 1) );
 ylabel('Median Error(m)');
 
-plot2svg('/data/amplidute_decoding/NEW_FIGURES/feature_vs_identity.svg', gcf)
+plot2svg('/data/amplitude_decoding/NEW_FIGURES/feature_vs_identity.svg', gcf)
