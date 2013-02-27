@@ -38,7 +38,7 @@ end
 
 save( '/data/amplitude_decoding/REVISIONS/decode_all_results.mat', 'P1', 'P4', 'E1', 'E4', 'I1', 'I4');
 
-% 
+% The below functionality was moved to utils/save_new_decoding_figures.m
 % %% Write the results to a table
 % % load /data/amplitude_decoding/REVISIONS/decode_all_results.mat
 % 
