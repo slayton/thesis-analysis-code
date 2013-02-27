@@ -1,4 +1,4 @@
-function process_all_datasets
+function save_all_feature_files
 
 edir{1} = '/data/spl11/day13';
 edir{2} = '/data/spl11/day14';
@@ -13,19 +13,13 @@ edir{10}= '/data/greg/esm/day02';
 edir{11}= '/data/greg/saturn/day02';
 edir{12}= '/data/fabian/fk11/day08';
 
-MIN_VEL = .15;
-MIN_AMP = 100;
-MIN_WIDTH = 12;
-
-% Load the raw data from the .tt files and create dataset files
+%Create feature files from the dataset files
 for i = 1:numel(edir)
     baseDir = edir{i}; 
-    fprintf('\n---------------------- %s ----------------------\n', baseDir);
-    process_dataset(edir{i}, MIN_VEL, MIN_AMP, MIN_WIDTH);
+    
+    save_feature_files(baseDir, 4);
+    save_feature_files(baseDir, 1);
 end
 
-save_all_feature_files;
-%Cluster the feature files
-cluster_all_datasets;
 
 end
