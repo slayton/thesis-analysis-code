@@ -37,13 +37,4 @@ if ~exist( fullfile(klustDir, 'dataset_4ch.mat'), 'file') || ...
     
 end
 
-%Read the dataset files and save feature files
-save_feature_files(baseDir, 4);
-save_feature_files(baseDir, 1);
-
-%Cluster the feature files
-cluster_feature_files(baseDir, 'pca', 4);
-cluster_feature_files(baseDir, 'pca', 1);
-% cluster_feature_files(baseDir, 'amp', 4); %<--- Can cluster on AMPlitude TOO!
-
 end

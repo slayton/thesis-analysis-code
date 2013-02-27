@@ -29,6 +29,8 @@ for i = 1:numel(epList)
     save( fName, 'mu');
     fprintf('%s SAVED!\n', fName);
 end
+
+return;
 %%
 
 debuf_eeg(animal, day)

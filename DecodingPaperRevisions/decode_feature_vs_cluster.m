@@ -14,7 +14,7 @@ input.description = baseDir;
 input.methods = nChan;
 
 %%%%%%%%%%%% DECODING PARAMETERS %%%%%%%%%%%%
-pcaMaxLR = inf;    % used to ignore clusters with poor lratio
+pcaMaxLR = Inf;    % used to ignore clusters with poor lratio
 decodeDT = .25;     % time bin width for decoder
 decodeDP = .1;      % position bin width for decoding
 minVelocity = .15;  % minimun velocity for spikes to be used for encoding
@@ -34,18 +34,30 @@ clId = load_dataset_clusters(baseDir, 'pca', nChan);
 
 clStats = compute_cluster_stats(clId, pc);  % <- Not used
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %                   SETUP INPUTS FOR THE DECODER
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % Group Spikes by cluster
 cl = {}; 
-
 for iTT = 1:numel(clId)    
+    
+    nullIdx = true( size(clId{iTT}) );
+    
     for iCl = 1:max(clId{iTT})
+
         if clStats(iTT).lRatio(iCl) <= pcaMaxLR
-            cl{end+1} = amp{iTT}( iCl == clId{iTT}, : );
+            
+            clIdx = iCl == clId{iTT};
+            cl{end+1} = amp{iTT}( clIdx, : ); %#ok
+
+            nullIdx(clIdx) = false;
         end
+    end
+    
+    if nnz(nullIdx)>0
+        cl{end+1} = amp{iTT}( nullIdx,:); %#ok
     end
 end
 
