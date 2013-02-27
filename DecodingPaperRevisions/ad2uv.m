@@ -17,7 +17,7 @@ function mv = ad2uv(waveform, gain)
     waveform(is_zero)=0;
     gain(is_zero)=Inf;
    
-    tmp = squeeze( double(waveform(:,:,i))./4096 .* 10 .* 1e6 );
+    tmp = squeeze( double(waveform(:,:,i))./2048 .* 10 .* 1e6 );
     
     mv(:,:,i) = bsxfun(@rdivide, tmp, gain);
  end
