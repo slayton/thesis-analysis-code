@@ -29,7 +29,7 @@ mwlf = mwlopen(file);
 if ~isempty(args.idx)
     f = load(mwlf, fields, args.idx);
 else
-    f = loadrange(mwlf,fields, args.time_range*10000, 'timestamp');
+    f = loadrange(mwlf, fields, args.time_range*10000, 'timestamp');
 end
 
 waveforms = double(f.waveform);
