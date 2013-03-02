@@ -6,8 +6,7 @@ function [l, f, ax] = plotAverages(varargin)
     nVar = numel(varargin);
 
     if mod(numel(varargin), 2) ~= 0
-        error('Invalid number of inputs');
-        
+        error('Invalid number of inputs'); 
     end
     
     f = figure; 
@@ -22,7 +21,6 @@ function [l, f, ax] = plotAverages(varargin)
         
         x = varargin{i};
         y = varargin{i+1};
-        
         yRange = minmax(y);
         
         y = y - min(y);

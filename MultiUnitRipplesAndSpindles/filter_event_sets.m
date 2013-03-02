@@ -1,4 +1,4 @@
-function [longSet, shortSet] = filter_event_sets(ts, N, win)
+function [longSet, shortSet, setLen] = filter_event_sets(ts, N, win)
 
 if ~isvector(ts)
     error('Specified timestamps must be a vector');
@@ -18,15 +18,25 @@ isi = [nan; diff(ts)];
 
 longSet = nan(size(isi));
 shortSet = nan(size(isi));
+setLen = nan(size(isi));
 N = N-1;
 
 for j = 1:numel(isi) - N
     if  isi(j) > win(1)
         
-        if all( isi(j+1 : j+N) < win(2) )
-            longSet(j) = j;
         
+        if all( isi(j+1 : j+N) < win(2) )
+        
+            longSet(j) = j;
+            
+            len = find( isi(j+1 : end) > win(2), 1, 'first' );
+            if isempty(len)
+                len = numel(isi) - j;
+            end
+            setLen(j) = len;
+            
         elseif isi(j+1) > win(3)
+         
             shortSet(j) = j;
         
         end
@@ -35,4 +45,4 @@ end
 
 shortSet = shortSet(isfinite(shortSet));
 longSet = longSet(isfinite(longSet));
-
+setLen = setLen(isfinite(setLen));
