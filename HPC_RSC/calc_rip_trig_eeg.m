@@ -1,71 +1,53 @@
-clearvars -except MultiUnit LFP
+clearvars -except MU CTX HPC
 
-win = [-.25 .75];
+win = [-.15 .35];
 
-N = numel(MultiUnit);
-Fs = timestamp2fs(LFP{1}.ts);
+N = numel(CTX);
 
-[hpcAll, hpcTrip, hpcSolo, ctxAll,  ctxTrip, ctxSolo] = deal( nan(N, 201) );
-
+[hpcSamp1, hpcSamp2, ctxSamp1, ctxSamp2] = deal({});
+Fs = timestamp2fs( HPC(1).ts);
 for i = 1 : N
+     
+    [ripIdx, ripWin] = detectRipples(HPC(i).ripple, HPC(i).rippleEnv, Fs);
     
-    fprintf('%d ', i);
-    mu = MultiUnit{i};
-    eeg = LFP{i};
-    
-    [ripIdx, ripWin] = detectRipples(eeg.ripple, eeg.rippleEnv, Fs);
-    
-    ripTs = eeg.ts(ripIdx);
+    ripTs = HPC(i).ts(ripIdx);
       
-    [setIdx, soloIdx] = filter_event_sets(ripTs, 3, [1 .2 1]);
+    [setIdx, soloIdx] = filter_event_sets(ripTs, 2, [1 .2 1]);
     
-    fprintf(' %d\t->\t%d\t:\t%d\n', numel(ripTs), numel(setIdx), numel(soloIdx));
+    fprintf('%d %d\t->\t%d\t:\t%d\n', i, numel(ripTs), numel(setIdx), numel(soloIdx));
     
     setTs = ripTs(setIdx);
     soloTs = ripTs(soloIdx);
     
-    [hpcTrip(i,:), ts] = meanTriggeredSignal(setTs, e, mu.hpc, win);
-    [hpcSolo(i,:), ts] = meanTriggeredSignal(soloTs, mu.ts, mu.hpc, win);
+    [~, ts, hpcSamp1{i}] = meanTriggeredSignal(setTs,  HPC(i).ts, HPC(i).lfp, win);
+    [~, ts, hpcSamp2{i}] = meanTriggeredSignal(soloTs, HPC(i).ts, HPC(i).lfp, win);
     
-    [ctxTrip(i,:), ts] = meanTriggeredSignal(setTs, mu.ts, mu.ctx, win);
-    [ctxSolo(i,:), ts] = meanTriggeredSignal(soloTs, mu.ts, mu.ctx, win);
+    [~, ts, ctxSamp1{i}] = meanTriggeredSignal(setTs,  CTX(i).ts, CTX(i).lfp, win);
+    [~, ts, ctxSamp2{i}] = meanTriggeredSignal(soloTs, CTX(i).ts, CTX(i).lfp, win);
     
 end
 fprintf('\n');
 
 %%
-
-figure('Position', [100 260 560 420]);
-ax(1) = subplot(211);
-ax(2) = subplot(212);
-set(ax,'FontSize', 14);
-
-line(ts, mean(hpcTrip), 'color', 'r', 'Parent', ax(1));
-line(ts, mean(hpcSolo), 'color', 'k', 'Parent', ax(1));
-title(ax(1), 'Ripple Triggered HPC MU Rate');
-legend(ax(1), 'Sets', 'Solo');
-
-line(ts, mean(ctxTrip), 'color', 'r', 'Parent', ax(2));
-line(ts, mean(ctxSolo), 'color', 'k', 'Parent', ax(2));
-title(ax(2), 'Ripple Triggered CTX MU Rate');
-
-
-set(ax,'XLim', win);
-plot2svg('/data/HPC_RSC/ripple_triggered_mu_rate.svg',gcf);
-% 
-% figure('Position', [150 210 560 420]);
-% ax(1) = subplot(211);
-% ax(2) = subplot(212);
-% set(ax,'FontSize', 14);
-% 
-% line(ts, mean(hpcTrip) ./ max( mean(hpcTrip)), 'color', 'r', 'Parent', ax(1));
-% line(ts, mean(ctxTrip) ./ max( mean(ctxTrip)), 'color', 'k', 'Parent', ax(1));
-% title(ax(1),'Ripple-Set Triggered MU Rate');
-% legend(ax(1), 'HPC', 'CTX');
-% 
-% line(ts, mean(hpcSolo) ./ max( mean(hpcSolo)) , 'color', 'r', 'Parent', ax(2));
-% line(ts, mean(ctxSolo) ./ max( mean(ctxSolo)) , 'color', 'k', 'Parent', ax(2));
-% title(ax(2),'Solo-Ripple Triggered MU Rate');
-% 
-% 
-% set(ax,'XLim', win);
+R = { {hpcSamp1, hpcSamp2}, {ctxSamp1, ctxSamp2} };
+T = ts * 1000;
+n = 0;
+figure('Position', [500 175 600 875]);
+ax = [];
+c = [.7  1 .7; .7 .7 1];
+for ii = 1:2
+    ax(ii) = subplot(2,1,ii);
+    for jj = [2 1]
+                
+        r = cell2mat(R{ii}{jj}');
+        m = nanmean(r);
+        e = nanstd(r) * 1.96 ./sqrt(size(r,1));
+        
+        [p, l] = error_area_plot(T, m, e, 'Parent', ax(ii));    
+        set(p,'FaceColor', c(jj,:), 'edgecolor','none');
+        set(l,'Color', 'k');
+    end
+end
+set(ax,'XLim', win * 1000);
+fname = '/data/HPC_RSC/FIGURES/rip_trig_lfp.svg';
+plot2svg(fname, gcf);

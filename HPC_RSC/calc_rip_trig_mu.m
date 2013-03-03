@@ -1,7 +1,6 @@
-clearvars -except MultiUnit LFP
+clearvars -except MU CTX HPC
 
 win = [-.25 .75];
-
 N = numel(MultiUnit);
 Fs = timestamp2fs(LFP{1}.ts);
 

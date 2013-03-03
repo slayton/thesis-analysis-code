@@ -1,6 +1,6 @@
-clearvars -except MU HPC CTX
-
-win = [-.5 .5];
+clearvars -except MU CTX HPC;
+   
+win = [-.25 .25];
 
 N = numel(MU);
 
@@ -36,7 +36,6 @@ for i = 1 : N
             triggerSignal = mu.ctx;           
     end
     
-    
     events = durationFilter(events, eventLenThold);
     nEvent(i) = size(events,1);
     
@@ -48,18 +47,17 @@ for i = 1 : N
     pks = pks( k == 1); % select the first peak in each event
     trigTs = mu.ts(pks);
 
-    [~, ts, ~, hpcSamp{i}] = meanTriggeredSignal(trigTs, mu.ts, mu.hpc, win);
-    [~, ts, ~, ctxSamp{i}] = meanTriggeredSignal(trigTs, mu.ts, mu.ctx, win);
+    [~, ~, fr, hpcSamp{i}] = meanTriggeredSpectrum(trigTs, HPC(i).ts, HPC(i).lfp, win);
+    [~, ~, fr, ctxSamp{i}] = meanTriggeredSpectrum(trigTs, CTX(i).ts, CTX(i).lfp, win);
 
 end
 fprintf('DONE!\n');
 %%
 r = {};
-T = ts * 1000;
 r{1} = cell2mat(hpcSamp');
 r{2} = cell2mat(ctxSamp');
 
-figure;
+figure('Position', [500 165 365 720]);
 ax = [];
 S = {'hpc', 'ctx'};
 for ii = 1:numel(r);
@@ -73,29 +71,15 @@ for ii = 1:numel(r);
     set(p,'FaceColor', [.7 .7 .9], 'edgecolor','none');
     set(l,'Color', 'k');
 
-    [~, idx] = findpeaks(m);
-    pkTs = T(idx);
-    pkTs = pkTs(pkTs > -150 & pkTs<200);
-
-    for i = 1:numel(pkTs)
-        line( pkTs(i) * [1 1], minmax(m), 'Color', 'k');
-    end
     
-    set( ax(ii), 'XTick', unique([-500 250 0 250 500, pkTs]));
-    set( ax(ii), 'YLim', [min(m-e), max(m+e)]);
     title( sprintf('Trig:%s %s:MUA EventDur:[%d - %d]', upper(TRIG), upper(S{ii}), round( eventLenThold*1000)));
 
 end
 
-lim = [-500, 500];
-text(lim(1), min(m)*1.02, sprintf('%d, ', nEvent), 'parent', ax(1) );
+lim = win * 1000;
+% text(lim(1), min(m)*1.02, sprintf('%d, ', nEvent), 'parent', ax(1) );
 set(ax,'Xlim', lim);
+fname = sprintf('/data/HPC_RSC/FIGURES/frame_%s_trig_lfp_spec%d_%d.svg', lower(TRIG), round(eventLenThold * 1000) );
+plot2svg(fname, gcf);
 
-
-
-tmp = round(eventLenThold*1000);
-drawnow;
-
-fname = sprintf('/data/HPC_RSC/FIGURES/frame_%s_trig_mu_%d_%d.svg', lower(TRIG), round(eventLenThold * 1000) );
-plot2svg( fname, gcf);
 

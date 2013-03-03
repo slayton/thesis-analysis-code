@@ -1,4 +1,4 @@
-function [mu, eeg] = load_HPC_RSC_data()
+function [mu, HPC, CTX] = load_HPC_RSC_data(skip)
 
 %{'spl11', 'spl11', 'spl11'}, [15 12 11], [2 1 2];
 base = {'gh-rsc1', 'gh-rsc2', 'spl11'};
@@ -8,24 +8,39 @@ ep = [3, 1, 1, 2, 3, 3, 3, 3, 3];
 
 
 fprintf('\nLOADING THE RAW DATA\n');
-mu = {};
-eeg = {};
 
-for E = 1:numel(bId);
+if nargin == 0
+    skip = 1;
+end
+
+for i = 1:numel(bId);
     
     % LOAD THE DATA
-    epoch = sprintf('sleep%d', ep(E));
-    edir = sprintf('/data/%s/day%d', base{bId(E)}, day(E));
+    epoch = sprintf('sleep%d', ep(i));
+    edir = sprintf('/data/%s/day%d', base{bId(i)}, day(i));
     fName = sprintf('MU_HPC_RSC_%s.mat', upper(epoch));
-    fprintf('%s %d %s', base{bId(E)}, day(E), fName );
+    fprintf('%s %d %s', base{bId(i)}, day(i), fName );
     tmp = load( fullfile(edir, fName) );
-    mu{E} = tmp.mu;
+    mu(i) = tmp.mu;
     
     if nargout>1
         fName = sprintf('EEG_HPC_1500_%s.mat', epoch);
         fprintf(', %s', fName );
         tmp = load( fullfile(edir, fName) );
-        eeg{E} = tmp.hpc;
+        
+        if ~skip
+            HPC(i) = orderfields(tmp.hpc);
+        else
+            HPC(i).ts = tmp.hpc.ts;
+            HPC(i).lfp = tmp.hpc.lfp;
+        end
+    end
+    if nargout>2
+        fName = sprintf('EEG_CTX_1500_%s.mat', epoch);
+        fprintf(', %s', fName );
+        tmp = load( fullfile(edir, fName) );
+        CTX(i).ts = tmp.ctx.ts;
+        CTX(i).lfp = tmp.ctx.data;
     end
     fprintf('\n');
 end

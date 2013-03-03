@@ -30,10 +30,9 @@ for i = 1:numel(epList)
     fprintf('%s SAVED!\n', fName);
 end
 
-return;
 %%
 
-debuf_eeg(animal, day)
+% debuf_eeg( animal, day)
 % gh-rsc1
 dayList =[18 22 23 24 28];
 eegList = 'kkkkk';

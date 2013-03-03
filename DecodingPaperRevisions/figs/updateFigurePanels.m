@@ -43,7 +43,7 @@ plot2svg( sprintf('%s/Fig2B.svg', outDir), gcf);
 imwrite(img(:,idx,:), sprintf('%s/Fig2B-image.png', outDir), 'png');
 
 
-%% F3 - C
+%% F2 - C
 
 figure('Position', [580 778 450 420]); 
 ax = axes('Position', [.09 .11 .9 .84]);
