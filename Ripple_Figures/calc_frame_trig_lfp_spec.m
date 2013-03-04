@@ -1,58 +1,70 @@
 clearvars -except MU CTX HPC;
-   
-win = [-.25 .25];
-
+clc;
 N = numel(MU);
 
-[hpcSamp, ctxSamp] = deal({});
+[hpcSamp, ctxSamp, hpcAnti, ctxAnti] = deal({});
+[nEvent, nAntiE] = deal([]);
+% ============ PARAMETERS ==============
+eventLenThold = [.25 1]; 
+TRIG = 'both';
 
-% ============ PARAMETERS ==============
-eventLenThold = [.2 inf]; 
-TRIG = 'both-hpc';
-% ============ PARAMETERS ==============
-nEvent = [];
 for i = 1 : N
-    
     mu = MU(i);
-    
     switch TRIG
         case 'hpc'
-            events = find_mua_bursts(mu);
-            triggerSignal = mu.hpc;
+            events = find_mua_bursts(MU(i));
         case 'ctx'
-            events = find_ctx_frames(mu);
-            triggerSignal = mu.ctx;
-        case 'both-hpc'
-            events = seg_and( find_mua_bursts(mu), find_ctx_frames(mu) );
-            triggerSignal = mu.hpc;
-        case 'both-ctx'
-            events = seg_and( find_mua_bursts(mu), find_ctx_frames(mu) );
-            triggerSignal = mu.ctx;
-        case 'only-hpc'
-            events = seg_excl( find_mua_bursts(mu), find_ctx_frames(mu) );
-            triggerSignal = mu.hpc;
-        case 'only-ctx'
-            events = seg_excl( find_ctx_frames(mu), find_mua_bursts(mu) );
-            triggerSignal = mu.ctx;           
+            events = find_ctx_frames(MU(i));
+        case 'both'
+            events = seg_and( find_mua_bursts(MU(i)), find_ctx_frames(MU(i)) );
     end
     
+    antiEv = logical2seg(MU(i).ts, ~seg2binary(find_mua_bursts(MU(i)), MU(i).ts));
+    antiEv = durationFilter(antiEv, [3 4]);
+  
     events = durationFilter(events, eventLenThold);
     nEvent(i) = size(events,1);
+    nAntiE(i) = size(antiEv,1);
     
-    fprintf('%d - detected %d events\n', i, nEvent(i));
+    fprintf('\n\nDataSet:%d ', i);
+    fprintf('detected %d & %d \n', nEvent(i), nAntiE(i));
     trigIdx = [];
-   
-    [~, pks] = findpeaks( triggerSignal ); % find all peaks
-    [~, ~, k] = inseg( events, mu.ts(pks) ); % find peaks during events
-    pks = pks( k == 1); % select the first peak in each event
-    trigTs = mu.ts(pks);
-
-    [~, ~, fr, hpcSamp{i}] = meanTriggeredSpectrum(trigTs, HPC(i).ts, HPC(i).lfp, win);
-    [~, ~, fr, ctxSamp{i}] = meanTriggeredSpectrum(trigTs, CTX(i).ts, CTX(i).lfp, win);
+    
+    fprintf('HPC:Real ');
+    [~, ~, ~ , hpcSamp{i}] = meanTriggeredSpectrum(events, HPC(i).ts, HPC(i).lfp);
+    fprintf('HPC:Anti ');
+    [~, ~, ~ , hpcAnti{i}] = meanTriggeredSpectrum(antiEv, HPC(i).ts, HPC(i).lfp);
+    fprintf('CTX:Real ');
+    [~, ~, ~ , ctxSamp{i}] = meanTriggeredSpectrum(events, CTX(i).ts, CTX(i).lfp);
+    fprintf('CTX:Anti ');
+    [~, ~, fr, ctxAnti{i}] = meanTriggeredSpectrum(antiEv, CTX(i).ts, CTX(i).lfp);
 
 end
-fprintf('DONE!\n');
+fprintf('\nDONE!\n');
 %%
+
+HE = cell2mat(hpcSamp');
+CE = cell2mat(ctxSamp');
+HA = cell2mat(hpcAnti');
+CA = cell2mat(ctxAnti');
+
+he = nanmean(HE);
+ha = nanmean(HA);
+ce = nanmean(CE);
+ca = nanmean(CA);
+
+close all;
+figure;
+line(fr, log(he ./ ha) ,'color', 'r');
+% line(fr, log(ha),'color', 'c');
+line(fr, log(ce ./ ca),'color', 'k');
+
+xlabel('Frequency');
+ylabel('Ratio');
+legend('Hippocampus', 'RS Cortex');
+set(gca,'Xlim', [0 300]);
+%%
+
 r = {};
 r{1} = cell2mat(hpcSamp');
 r{2} = cell2mat(ctxSamp');
