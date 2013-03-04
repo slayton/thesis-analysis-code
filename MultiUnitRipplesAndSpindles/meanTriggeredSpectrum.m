@@ -15,10 +15,10 @@ nTrigger = min(50,nTrigger);
 for iTrig = 1:nTrigger;
     
     fprintf('%d ', iTrig);
-    if mod(iTrig, 25) == 0  && iTrig ~= nTrigger
+    if mod(iTrig, 40) == 0  && iTrig ~= nTrigger
         fprintf('\n\t');
     end
-    idx = ts>= trigWin(iTrig,1) & ts <= trigWin(iTrig,2); 
+    idx = ts >= trigWin(iTrig,1) & ts <= trigWin(iTrig,2); 
     
     hs = spectrum.mtm(nTapers);
     s = psd(hs, signal(idx), 'Fs', Fs, 'FreqPoints', 'User Defined', 'FrequencyVector', freqs, 'SpectrumType', 'twosided');
