@@ -3,14 +3,29 @@ function [peakIdx, winIdx] = detectRipples(ripBand, ripHilbert, Fs, varargin)
     args.high_thold = 4;
     args.low_thold =  3;
     args.min_burst_len = .025;
-   
+    args.pos_struct = [];
+    args.ts = [];
+    
     args = parseArgs(varargin, args);
 
     nSamp = numel(ripBand);
     ind = 1:nSamp;
+    
+    
+    if ~isempty(args.pos_struct)
+        p = args.pos_struct;
+        isMoving = interp1(p.ts, abs(p.lv), args.ts, 'nearest') > .05;
+    else
+        isMoving = logical(false .* ind);
+    end
+    
+    tHigh = args.high_thold .* nanstd( ripHilbert(~isMoving) );
+    tLow = args.low_thold .* nanstd( ripHilbert(~isMoving) ); 
+    
+    ripHilbert(isMoving) = 0;
 
-    high_seg = logical2seg( ind, ripHilbert >= args.high_thold * nanstd(ripHilbert) );
-    low_seg = logical2seg( ind, ripHilbert >= args.low_thold * nanstd(ripHilbert) );
+    high_seg = logical2seg( ind, ripHilbert >= tHigh );
+    low_seg = logical2seg( ind, ripHilbert >= tLow );
 
     % which low segments contain high segments
     [~, n] = inseg(low_seg, high_seg);

@@ -1,151 +1,89 @@
-clearvars -except MultiUnit LFP
+function f = calc_frame_trig_mu_rate_corr(MU, fld)
+win = [-.5 .5];
 
-win = [-.25 .5];
+N = numel(MU);
 
-
-N = numel(MultiUnit);
-Fs = timestamp2fs(LFP{1}.ts);
-
-[hpcRateHighCorr, ctxRateHighCorr] = deal( nan(N, 151) );
-[hpcRateLowCorr, ctxRateLowCorr] = deal( nan(N, 151) );
-
-eventLenThold = [.15 inf ]; %<============
-corrThold = .35;
-
+[highCorr, lowCorr] = deal({});
+corrThold = [-.3 .3];
+% ============ PARAMETERS ==============
+eventLenThold = [.2 1]; 
+TRIG = 'both-hpc';
+% ============ PARAMETERS ==============
+nEvent = [];
 c = {};
-hSamp = {};
-lSamp = {};
-aSamp = {};
-xc = nan(201, N);
-tShift = nan(N,1);
+d = {};
 for i = 1 : N
     
-    mu = MultiUnit{i};
-    eeg = LFP{i};
+    events = seg_and( find_mua_bursts(MU(i)), find_ctx_frames(MU(i)) );
+    triggerSignal = MU(i).hpc;
     
-    [xc(:,i), lgs] = xcorr(mu.hpc, mu.ctx, 100);
-    [~, xcMaxIdx] = max( xc(:,i) );
-    tShift(i) = lgs(xcMaxIdx)+1;
-    
-    
-    % DETECT SWS, Ripples, and MU-Bursts
-    [sws, ripTs] = classify_sleep(eeg.ripple, eeg.rippleEnv, eeg.ts);
-    muBursts = find_mua_bursts(mu);
-    cFrames = find_ctx_frames(mu);
-     
-%     events = seg_and(muBursts, cFrames);
-    events = muBursts;
     events = durationFilter(events, eventLenThold);
-  
-    nEvent = size(events,1);
+    nEvent(i) = size(events,1);
     
-    %
-    if nEvent < 2
-        continue;
+    fprintf('%d - detected %d events\n', i, nEvent(i));
+    
+    c{i} = nan(1, nEvent(i));
+    d{i} = diff(events,[],2);
+    for j = 1:nEvent(i)
+        tsIdx = MU(i).ts >= events(j, 1) & MU(i).ts <= events(j,2);
+        c{i}(j) = corr( MU(i).hpc(tsIdx)', MU(i).ctx(tsIdx)');
     end
     
-    % Classify burst by SWS state
-    %     swsIdx = inseg(sws, muBursts, 'partial');
-    muPkIdxHC = [];
-    muPkIdxLC = [];
-    
-    trigHighCorr = [];
-    trigLowCorr = [];
-%     trigAll = [];
-    
-    c{i} = zeros(nEvent,1);
-    for iEvent = 1:nEvent
         
-        b = events(iEvent,:);
-        
-        startIdx = find( b(1) == mu.ts, 1, 'first');
-        
-        tmpIdx = mu.ts>=b(1) & mu.ts <= b(2);
-        r = mu.hpc( tmpIdx );
-        
-        [~, pk] = findpeaks(r); % <------- FIRST LOCAL MAX
-        
-        if numel(pk)<1
-            continue
-        end
-        pk = pk + startIdx -1;
-        
-%         c{i}(iEvent) = corr( mu.hpc( circshift(tmpIdx, [0, -tShift(i)]))', mu.ctx(tmpIdx)' );
-        c{i}(iEvent) = corr( diff( mu.hpc(tmpIdx)'), diff( mu.ctx(tmpIdx)') ); 
-%         c{i}(iEvent) = corr( mu.hpc( tmpIdx)', mu.ctx(tmpIdx)' );
-        
-%         trigAll = [trigAll, pk(1)];
-        if c{i}(iEvent) <= -1 * corrThold
-            
-            trigLowCorr = [trigLowCorr, pk(1)];
-        
-        elseif c{i}(iEvent) >= corrThold
-            
-            trigHighCorr = [trigHighCorr, pk(1)];
-        end
-                    
-    end
-     
-    
-    fprintf('%d - H:%d L:%d\n', i, numel(trigHighCorr), numel(trigLowCorr) );
-    
-    [~, ts, ~, hSamp{i}] = meanTriggeredSignal( mu.ts( trigHighCorr ), mu.ts, mu.hpc, win);
-    [~,  ~, ~, lSamp{i}] = meanTriggeredSignal( mu.ts( trigLowCorr ), mu.ts, mu.hpc, win);
-%     [~,  ~, ~, aSamp{i}] = meanTriggeredSignal( mu.ts( trigAll), mu.ts, mu.hpc, win);
-    
+    [~, pks] = findpeaks( triggerSignal ); % find all peaks
+    [~, ~, k] = inseg( events, MU(i).ts(pks) ); % find peaks during events
+    pks = pks( k == 1); % select the first peak in each event
+    trigTs = MU(i).ts(pks);
+
+    [~, ts, ~, highCorr{i}] = meanTriggeredSignal(trigTs( c{i} > corrThold(2) ), MU(i).ts, MU(i).(fld), win);
+    [~, ts, ~, lowCorr{i}]  = meanTriggeredSignal(trigTs( c{i} > corrThold(1) ), MU(i).ts, MU(i).(fld), win);
+
 end
 fprintf('DONE!\n');
-
 %%
-H = cell2mat(hSamp');
-L = cell2mat(lSamp');
-% A = cell2mat(aSamp');
 
-mH = mean(H);
-mL = mean(L);
-% mA = mean(A);
+r = {};
+T = ts * 1000;
+r{1} = cell2mat(highCorr');
+r{2} = cell2mat(lowCorr');
 
-sH = std(H);
-sL = std(L);
-% sA = std(A);
-
-nH = size(H,1);
-nL = size(L,1);
-% nA = size(A,1);
-
-f = figure('Position', [360 450 630 400]);
+f = figure;
 ax = [];
+S = {'Corr', 'Anti'};
+for ii = 1:numel(r);
+    ax(ii) = subplot(3,1,ii);
+    
+    m = mean(r{ii});
+    e = std(r{ii}) * 1.96 / sqrt( size(r{ii},1) );
 
-ax(1) = axes('FontSize', 14);%subplot(211);
+    [p, l] = error_area_plot(T, m, e, 'Parent', ax(ii));
+    
+    set(p,'FaceColor', [.7 .7 .9], 'edgecolor','none');
+    set(l,'Color', 'k');
 
-[p(1), l(1)] = error_area_plot(ts, mH, sH * 1.96 / sqrt(nH), 'Parent', ax(1));
-[p(2), l(2)] = error_area_plot(ts, mL, sL * 1.96 / sqrt(nL), 'Parent', ax(1));
-% [p(3), l(3)] = error_area_plot(ts, mA, sA * 1.96 / sqrt(nA), 'Parent', ax(1));
+    [~, idx] = findpeaks(m);
+    pkTs = T(idx);
+    pkTs = pkTs(pkTs > -150 & pkTs<200);
 
+    for i = 1:numel(pkTs)
+        line( pkTs(i) * [1 1], minmax(m), 'Color', 'k');
+    end
+    
+    set( ax(ii), 'XTick', unique([-500 250 0 250 500, pkTs]));
+    set( ax(ii), 'YLim', [min(m-e), max(m+e)]);
+    title( sprintf('%s MUR - %s -  EventDur:[%d - %d]', upper(fld), upper(S{ii}), round( eventLenThold*1000)));
 
-set(p(1),'FaceColor', [.9 .3 .3]);
-set(p(2),'FaceColor', [.3 .9 .3]);
-set(p,'EdgeColor', 'none');
+    
+end
 
-set(l(1), 'Color', [.3 0 0]);
-set(l(2), 'Color', [0 .3 0]);
-% set(p(3),'FaceColor', [.3 .3 .9]);
+lim = [-500, 500];
+text(lim(1), min(m)*1.02, sprintf('%d, ', nEvent), 'parent', ax(1) );
+set(ax,'Xlim', lim);
 
+c = cell2mat(c);
+d = cell2mat(d');
 
-
-
-legend(p, {'High Corr', 'Low Corr'});
-title('HPC Frame Triggered HPC MU Rate ');
-
-
-% ax(2) = subplot(212);
-% line(ts, nanmean(ctxRateHighCorr), 'color', 'r', 'linewidth', 2);
-% line(ts, nanmean(ctxRateLowCorr), 'color', 'k', 'linewidth', 2);
-% 
-% legend('High Corr', 'Low Corr');
-% title('HPC Frame Triggered CTX MU Rate ');
-
-
-set(ax,'XLim', [-.25 .5]);
-% plot2svg('/data/HPC_RSC/hpc_frame_trig_mu_rate_w_corr.svg',gcf);
-
+subplot(325);
+plot( c, d, '.');
+title( sprintf('Corr: %4.4f', corr(c', d) ) );
+end
