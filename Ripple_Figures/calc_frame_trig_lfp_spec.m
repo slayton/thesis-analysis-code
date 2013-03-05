@@ -81,11 +81,10 @@ patch([fr, fliplr(fr)], [ciH(1,:), fliplr(ciH(2,:))], 'r');
 patch([fr, fliplr(fr)], [ciC(1,:), fliplr(ciC(2,:))], 'b');
 
 set(gca,'Xlim', [1, 275], 'Ylim', [-1.1 3.75]);
-set(gca,'XScale', 'log');
 %%
 line( [1, 350], [1 1], 'color', 'k');
-line( [11, 11], [-2, 3], 'color', 'k');
-line( [26, 26], [-2, 3], 'color', 'k');
+line( [10, 10], [-2, 3], 'color', 'k');
+line( [18, 18], [-2, 3], 'color', 'k');
 set(gca,'Xlim', [1, 50], 'Ylim', [-1.1 3.75]);
 
 
