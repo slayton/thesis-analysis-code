@@ -30,9 +30,11 @@ for j = 1:numel(isi) - N
             longSet(j) = j;
             
             len = find( isi(j+1 : end) > win(2), 1, 'first' );
+            
             if isempty(len)
                 len = numel(isi) - j;
             end
+            
             setLen(j) = len;
             
         elseif isi(j+1) > win(3)
