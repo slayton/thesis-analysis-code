@@ -35,21 +35,23 @@ for a = 1:numel(anat)
         continue;
     end
     
-    ind = ismember(loc,anat(a));
+    ind = strcmp(loc, anat{a});
     
     fprintf('Loading MU from: %s on %d tetrodes\n', anat{a}, nnz(ind));
-    wave = load_mu(edir, epoch, 'ignore_tetrode', tt(~ind));
+    [muRate, spikeTimes]= load_mu(edir, epoch, 'ignore_tetrode', tt(~ind) );
 
-    wave = histc(wave,tbins);
+    muRate = histc(muRate,tbins);
     mu.ts = tbins;
 
-    if ~isempty(wave)
+    if ~isempty(muRate)
         %wave( wave>(mean(wave)+10*std(wave)))=mean(wave);
-        mu.(anat{a}) = wave;
+        mu.(anat{a}) = muRate;
     else
         mu.(anat{a}) = nan;
     end
     
+    fld = sprintf('st_%s', anat{a});
+    mu.(fld) = spikeTimes;
     mu.fs = muDt^-1;
 end
 
@@ -68,6 +70,7 @@ end
 
 
 
+
 if isfield(mu,'hpc')
     mu.hpc = smoothn(mu.hpc, standardArgs.smooth_dt, standardArgs.dt) .* mu.fs;
 end
@@ -76,16 +79,19 @@ if isfield(mu,'ctx')
     mu.ctx = smoothn(mu.ctx, standardArgs.smooth_dt, standardArgs.dt) .* mu.fs;
 end
 
+
+mu = orderfields(mu);
+
 end
 
-function mu = load_mu(edir, ep, varargin)
+function [mu spikeTimes] = load_mu(edir, ep, varargin)
 % load_exp_multiunit(edir, ep, varargin)
 % loads the timestamps of all threshold crossing from all tt files
 % contained in edir/extracted_data
 %
 % tetrodes can be flagged as ignored by using the following key value pair:
 % 'ignore_tetrode', {'t01', 't02', 't##'}
-args.threshold = 65;
+args.threshold = 0;
 args.ignore_tetrode = {'none'};
 args = parseArgsLite(varargin, args);
 
@@ -106,6 +112,7 @@ multi_unit = [];
 ignored = 0;
 
 
+spikeTimes = {};
 for i =1:length(t)
     if ~any( strcmp(loc{i}, {'lCA1', 'rCA1', 'RSC'}) )
 %         fprintf('Skipping tetrode in:%s\n', loc{i});
@@ -116,7 +123,7 @@ for i =1:length(t)
         file = fullfile(edir, t{i}, [t{i},'.tt']);        
 
         times = get_spike_times(file, args.threshold);
-       
+        spikeTimes{i} = times;
         
         multi_unit = [multi_unit, times];
         
@@ -161,7 +168,7 @@ function times = get_spike_times(file, thold)
         maxes = max(f.waveform, [], 2);
         maxes = reshape(maxes, 4, length(maxes), 1);
         gains = repmat(gains, length(maxes),1);
-        nano_volts = max(double(maxes)/4096.0 * 10 ./gains' * 1e6);
+        nano_volts = max(double(maxes)/4096.0 * 20 ./gains' * 1e6);
 
         %min(nano_volts)
         times = double(f.timestamp(nano_volts>=thold))/10000;    

@@ -27,6 +27,7 @@ try
 catch
     % Keep the default 90ppi
 end
+drawnow;
 if nargout==1
     varargout={0};
 end

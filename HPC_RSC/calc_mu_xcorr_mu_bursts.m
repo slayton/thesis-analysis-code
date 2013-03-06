@@ -1,5 +1,6 @@
+function f = calc_mu_xcorr_frames(MU, method)
 %%
-
+end
 clearvars -except MultiUnit LFP
 
 N = numel(MultiUnit);

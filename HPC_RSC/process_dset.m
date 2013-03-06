@@ -1,4 +1,4 @@
-function process_dset(animal, day)
+function process_dset(animal, day, ep)
 
 if nargin>32000
     animal = 'gh-rsc1'; 
@@ -12,24 +12,26 @@ if ~exist(baseDir, 'dir')
     return;
 end
 
-[epList, epTime] = load_epochs(baseDir);
+% [epList, epTime] = load_epochs(baseDir);
 
-for i = 1:numel(epList)
+% for i = 1:numel(epList)
     
-    ep = epList{i};
+%     ep = epList{i};
     fName = fullfile(baseDir, sprintf('MU_HPC_RSC_%s.mat', upper(ep)));
     
     if exist(fName, 'file')
         fprintf('%s already exists, skipping it!\n', fName);
-        continue;
+       
+    else
+        mu = dset_exp_load_mu_all(baseDir, ep);
+    
+        save( fName, 'mu');
+        fprintf('%s SAVED!\n', fName);      
     end
     
-    mu = dset_exp_load_mu_all(baseDir, ep);
-    
-    save( fName, 'mu');
-    fprintf('%s SAVED!\n', fName);
-end
+% end
 
+return;
 %%
 
 % debuf_eeg( animal, day)
