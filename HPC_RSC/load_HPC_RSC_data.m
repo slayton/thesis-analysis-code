@@ -18,10 +18,17 @@ for i = 1:nLoad
     % LOAD THE DATA
     epoch = sprintf('sleep%d', ep(i));
     edir = sprintf('/data/%s/day%d', base{bId(i)}, day(i));
+    
+    [~, anat] = load_exp_tt_anatomy(edir);
+    nHPC = nnz(strcmp('rCA1', anat));
+    nCTX = nnz(strcmp('RSC', anat));
+    
     fName = sprintf('MU_HPC_RSC_%s.mat', upper(epoch));
     fprintf('%s %d %s', base{bId(i)}, day(i), fName );
     tmp = load( fullfile(edir, fName) );
     mu(i) = tmp.mu;
+    mu(i).hpc = mu(i).hpc / nHPC;
+    mu(i).ctx = mu(i).ctx / nCTX;
     
     if nargout>1
         fName = sprintf('EEG_HPC_1500_%s.mat', epoch);

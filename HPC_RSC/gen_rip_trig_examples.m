@@ -4,7 +4,7 @@ N = numel(MU);
 eegFs = timestamp2fs( HPC(1).ts );
 muFs = timestamp2fs( MU(1).ts);
 
-win  = [-.25 .75];
+win  = [-.15 .35];
 muWin = round( win(1)*muFs : win(2)*muFs );
 eegWin = round( win(1)*eegFs : win(2)*eegFs );
 
@@ -36,10 +36,10 @@ for i = 1:N
 
     eegSamps{i} = HPC(i).lfp( bsxfun(@plus, evIdx', eegWin) );
     
-%     evIdx = interp1(MU(i).ts, 1:numel(MU(i).ts), evTs, 'nearest');
-%     
-%     hpcSamps{i} = MU(i).hpc( bsxfun(@plus, evIdx', muWin) );
-%     ctxSamps{i} = MU(i).ctx( bsxfun(@plus, evIdx', muWin) );
+    evIdx = interp1(MU(i).ts, 1:numel(MU(i).ts), evTs, 'nearest');
+     
+    hpcSamps{i} = MU(i).hpc( bsxfun(@plus, evIdx', muWin) );
+    ctxSamps{i} = MU(i).ctx( bsxfun(@plus, evIdx', muWin) );
 
     st = MU(i).st_RSC;
     st = st(~cellfun(@isempty, st));

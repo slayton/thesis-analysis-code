@@ -1,4 +1,4 @@
-function [meanWave, sampTs, stdWave, waveSamples, sampIdx] = ...
+function [waveSamples, sampTs, sampIdx] = ...
     meanTriggeredSignal(triggerTimes, ts, wave, win)
 
 % either provide triggerSamples and Signal
@@ -52,8 +52,6 @@ badSamps = any( sampIdx < 1, 2) | any( sampIdx > numel(ts),2) | any(isnan(sampId
 sampIdx = sampIdx(~badSamps, :);
 
 waveSamples = wave(sampIdx);
-meanWave = mean(waveSamples);
-stdWave = std(waveSamples);
 
 sampTs = win / fs;
 

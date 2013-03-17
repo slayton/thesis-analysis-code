@@ -5,7 +5,7 @@ args = dset_get_standard_args;
 args = args.mua_burst;
 args.min_burst_len = .05;
 args.low_threshold = .5;
-args.high_threshold = 3;
+args.high_threshold = 3.5;
 args.fld = 'hpc';
 
 args = parseArgs(varargin, args);

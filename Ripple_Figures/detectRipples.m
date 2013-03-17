@@ -1,6 +1,6 @@
 function [peakIdx, winIdx] = detectRipples(ripBand, ripHilbert, Fs, varargin)
     
-    args.high_thold = 4;
+    args.high_thold = 5;
     args.low_thold =  3;
     args.min_burst_len = .025;
     args.pos_struct = [];
