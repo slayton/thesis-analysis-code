@@ -58,7 +58,7 @@ for i = 1:4
    
     img = fDist{i};
     
-    img = smoothn(img,.75);
+%     img = smoothn(img,.75);
     img = img - min(img(:));
     img = img ./ max(img(:));
     
@@ -80,6 +80,8 @@ set(ax, 'YDir', 'normal');
 
 figName = 'Fig2_BilateralFreqDist';
 save_bilat_figure(figName, f1);
+
+return;
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -320,6 +322,7 @@ set(ax, 'YDir', 'normal');
 figName = 'Fig2_BilateralSharpWaveAmpDist';
 save_bilat_figure(figName, f1);
 
+return;
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %       E, F - Bilateral Ripple Peak Phase Distribution
@@ -417,65 +420,65 @@ figName = 'Ripple_freq_distribution_High_vs_Low_Amplitude';
 save_bilat_figure(figName, f);
 
 %%
+% 
+% close all;
+% 
+% % [F, X, U] = ksdensity(rAmp.S.trig);
+% 
+% A = rAmp.S.trig;
+% idxL = A < 200;
+% idxH = A > 150;
+% 
+% [m1, s1] = normfit(A(idxL));
+% [m2, s2] = normfit(A(idxH));
+% 
+% bins = 0:5:800;
+% 
+% f1 = normpdf(bins, m1, s1);
+% f2 = normpdf(bins, m2, s2);
+% 
+% f1C = sum(f1) / (sum(f1) + sum(f2));
+% f2C = sum(f2) / (sum(f1) + sum(f2));
+% 
+% 
+% 
+% [F, X] = ksdensity(A, bins, 'width',  20);
+% 
+% figure;
+% axes('NextPlot','add');
+% 
+% bar(X, F, 1, 'g');
+% line(bins, f1/3, 'color', 'r', 'linewidth', 2);
+% line(bins, f2/1.75, 'color', 'b', 'linewidth', 2);
 
-close all;
 
+% %
+% close all;
+% 
 % [F, X, U] = ksdensity(rAmp.S.trig);
-
-A = rAmp.S.trig;
-idxL = A < 200;
-idxH = A > 150;
-
-[m1, s1] = normfit(A(idxL));
-[m2, s2] = normfit(A(idxH));
-
-bins = 0:5:800;
-
-f1 = normpdf(bins, m1, s1);
-f2 = normpdf(bins, m2, s2);
-
-f1C = sum(f1) / (sum(f1) + sum(f2));
-f2C = sum(f2) / (sum(f1) + sum(f2));
-
-
-
-[F, X] = ksdensity(A, bins, 'width',  20);
-
-figure;
-axes('NextPlot','add');
-
-bar(X, F, 1, 'g');
-line(bins, f1/3, 'color', 'r', 'linewidth', 2);
-line(bins, f2/1.75, 'color', 'b', 'linewidth', 2);
-
-
-%%
-close all;
-
-% [F, X, U] = ksdensity(rAmp.S.trig);
-
-A = rAmp.S.ipsi;
-idxL = A < 200;
-idxH = A > 150;
-
-[m1, s1] = normfit(A(idxL));
-[m2, s2] = normfit(A(idxH));
-
-
-bins = 0:10:800;
-
-gmfit = gmdistribution.fit(A,2);
-f = pdf(gmfit, bins');
-
-[F, X] = ksdensity(A, bins, 'width', 2);
-
-close all;
-figure; axes('NextPlot', 'add')
-bar(X,F,1);
-line(bins, f, 'color', 'r', 'linewidth', 2);
-
-xlabel('Amplitude');
-
+% 
+% A = rAmp.S.ipsi;
+% idxL = A < 200;
+% idxH = A > 150;
+% 
+% [m1, s1] = normfit(A(idxL));
+% [m2, s2] = normfit(A(idxH));
+% 
+% 
+% bins = 0:10:800;
+% 
+% gmfit = gmdistribution.fit(A,2);
+% f = pdf(gmfit, bins');
+% 
+% [F, X] = ksdensity(A, bins, 'width', 2);
+% 
+% close all;
+% figure; axes('NextPlot', 'add')
+% bar(X,F,1);
+% line(bins, f, 'color', 'r', 'linewidth', 2);
+% 
+% xlabel('Amplitude');
+% 
 
 
 %%

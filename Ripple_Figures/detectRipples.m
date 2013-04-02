@@ -22,6 +22,7 @@ function [peakIdx, winIdx] = detectRipples(ripBand, ripHilbert, Fs, varargin)
     tHigh = args.high_thold .* nanstd( ripHilbert(~isMoving) );
     tLow = args.low_thold .* nanstd( ripHilbert(~isMoving) ); 
     
+    
     ripHilbert(isMoving) = 0;
 
     high_seg = logical2seg( ind, ripHilbert >= tHigh );

@@ -82,6 +82,7 @@ for i = 1:N
     idx = interp1(mu.timestamps, 1:numel(mu.timestamps), tStart, 'nearest');
     
     rate = mu.rate( idx:(idx+20) );
+    
      
     [~, pkIdx] = findpeaks(rate);
     pkIdx = idx + pkIdx(1)-1;
@@ -91,8 +92,10 @@ for i = 1:N
     peakTs = mu.timestamps(pkIdx);
     muTs = 1000 * ( mu.timestamps(muIdx) - peakTs );
     
-    rate = mu.rate(muIdx);
-    area(muTs, rate);
+    rateL = smoothn(mu.rateL(muIdx), 1,'correct', 1);
+    rateR = smoothn(mu.rateR(muIdx), 1, 'correct', 1);
+    line(muTs, rateL, 'color','r', 'linewidth', 4);
+    line(muTs, rateR, 'color','b', 'linewidth', 4);
     
     line((tStart - peakTs) * [1e3 1e3], [0 5000], 'Color', 'g', 'linewidth', 2, 'linestyle', '--');
     line((tEnd - peakTs) * [1e3 1e3], [0 5000], 'Color', 'r', 'linewidth', 2, 'linestyle', '--');

@@ -1,12 +1,13 @@
-function [st] = calc_bilateral_replay_corr(d, PLOT)
+function [st] = calc_bilateral_replay_corr(d, PLOT, N_SHUFFLE)
 %%
 
 if nargin==1
     PLOT = 0;
 end
 
-
-N_SHUFFLE = 250;
+if nargin<3
+    N_SHUFFLE = 250;
+end
 
 if isfield(d.description, 'isexp') && d.description.isexp==1
     dPBin = .1;
@@ -96,7 +97,6 @@ for i = 1:nBurst
     end
 end
 %%
-
 q = [.1 .25 .33 .5 .66 .75 .9];
 st.quantiles = q;
 st.realCorrQuantiles = quantile( eventCorr, q);

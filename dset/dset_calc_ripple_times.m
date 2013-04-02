@@ -1,8 +1,8 @@
 function [dset, peakIdx, winIdx] = dset_calc_ripple_times(dset, varargin)
     
-    args.high_thold = 7;
-    args.low_thold =  4;
-    args.min_burst_len = .01;
+    args.high_thold = 4;
+    args.low_thold =  2;
+    args.min_burst_len = .025;
    
     args = parseArgs(varargin, args);
    
@@ -34,6 +34,9 @@ function [dset, peakIdx, winIdx] = dset_calc_ripple_times(dset, varargin)
 
         % Get envelope of signal and find bursts
 
+        tHigh = args.high_thold .* nanstd( ripHilbert );
+        tLow = args.low_thold .* nanstd( ripHilbert);
+        
         high_seg = logical2seg( ind, ripHilbert >= args.high_thold * nanstd(ripHilbert) );
         low_seg = logical2seg( ind, ripHilbert >= args.low_thold * nanstd(ripHilbert) );
 
@@ -43,6 +46,9 @@ function [dset, peakIdx, winIdx] = dset_calc_ripple_times(dset, varargin)
         % define these low segments as the bursts
         winIdx = low_seg( logical(n), :);
 
+        winIdx = winIdx( diff(winIdx,[],2) >= args.min_burst_len * dset.eeg(1).fs, : );
+
+        
         % find the index of the peak of the rippleband lfp within the window
         findMaxEnvFunc = @(x,y) max( ripLfp(x:y) );
 
